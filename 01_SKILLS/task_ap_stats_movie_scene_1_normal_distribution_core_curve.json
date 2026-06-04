@@ -1,0 +1,8 @@
+{
+  "track_name": "ap_stats_movie",
+  "asset_name": "normal_distribution_core_curve",
+  "stage": "manim_render",
+  "quality_flag": "-ql",
+  "scene_name": "NormalCurveScene",
+  "output_movie": "/Users/nazeera/Documents/AI_PRODUCER/03_ASSETS/normal_curve_scene.mp4"
+}

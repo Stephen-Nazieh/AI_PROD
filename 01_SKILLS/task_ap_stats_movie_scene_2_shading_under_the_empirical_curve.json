@@ -1,0 +1,8 @@
+{
+  "track_name": "ap_stats_movie",
+  "asset_name": "shading_under_the_empirical_curve",
+  "stage": "manim_render",
+  "quality_flag": "-ql",
+  "scene_name": "EmpiricalRuleScene",
+  "output_movie": "/Users/nazeera/Documents/AI_PRODUCER/03_ASSETS/empirical_rule_scene.mp4"
+}

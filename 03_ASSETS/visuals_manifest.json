@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Solocorn Visuals Manifest",
+  "description": "Tracks automated media generation assets across scenes for ComfyUI, Motion, and Final Cut Pro pipeline integration.",
+  "type": "object",
+  "properties": {
+    "project_id": {
+      "type": "string",
+      "description": "Unique project identifier binding this manifest to a specific FCP timeline."
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 timestamp of manifest generation."
+    },
+    "scenes": {
+      "type": "array",
+      "description": "Ordered list of scenes requiring automated visual asset generation.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "scene_id": {
+            "type": "string",
+            "description": "Unique scene identifier (e.g., 's01e03_intro', 'act2_cli_demo')."
+          },
+          "timestamp_start": {
+            "type": "string",
+            "pattern": "^\\d{2}:\\d{2}:\\d{2}(:\\d{2})?$",
+            "description": "Scene start time on the FCP timeline (HH:MM:SS or HH:MM:SS:FF)."
+          },
+          "timestamp_end": {
+            "type": "string",
+            "pattern": "^\\d{2}:\\d{2}:\\d{2}(:\\d{2})?$",
+            "description": "Scene end time on the FCP timeline (HH:MM:SS or HH:MM:SS:FF)."
+          },
+          "comfyui_prompt_target": {
+            "type": "string",
+            "description": "Full prompt string dispatched to the local ComfyUI generation node for this scene's background or character frame."
+          },
+          "motion_template_id": {
+            "type": "string",
+            "description": "Reference to the Apple Motion template file used for this scene (e.g., 'TechSlide_v2', 'StatEquation_Anim')."
+          },
+          "fcp_layer_assignment": {
+            "type": "string",
+            "description": "Target FCP timeline layer name or index where the rendered asset is composited (e.g., 'L3_TextOverlays', 'spine/primary')."
+          }
+        },
+        "required": [
+          "scene_id",
+          "timestamp_start",
+          "timestamp_end",
+          "comfyui_prompt_target",
+          "motion_template_id",
+          "fcp_layer_assignment"
+        ]
+      }
+    }
+  },
+  "required": ["project_id", "generated_at", "scenes"]
+}

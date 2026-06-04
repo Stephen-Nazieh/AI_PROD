@@ -1,0 +1,16 @@
+{
+  "layout_name": "widescreen_16_9_blueprint",
+  "aspect_ratio": "16:9",
+  "resolution_width": 1920,
+  "resolution_height": 1080,
+  "model_sampling_target": "Flux-Dev-MLX",
+  "digital_twin_overlay_zone": "bottom_right_quadrant",
+  "typography_preset": "high_contrast_dev_terminal",
+  "channel_target": "Solocorn Dev & Cloud",
+  "frame_rate": 24,
+  "color_space": "Rec.709",
+  "safe_zones": {
+    "action_safe": 0.05,
+    "title_safe": 0.1
+  }
+}

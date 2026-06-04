@@ -1,0 +1,9 @@
+{
+  "track_name": "ap_stats_movie",
+  "asset_name": "shifting_sigma_v1",
+  "stage": "manim_render",
+  "skills_script_path": "01_SKILLS/render_scenes.py",
+  "scene_name": "ShiftingStandardDeviationScene",
+  "quality_flag": "-ql",
+  "output_movie": "03_ASSETS/shifting_sigma_v1.mp4"
+}

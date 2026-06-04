@@ -1,0 +1,9 @@
+# This file is used internally by FFMPEG.
+file 'file:/Users/nazeera/Documents/AI_PRODUCER/.manim_cache/videos/render_scenes/480p15/partial_movie_files/ShiftingStandardDeviationScene/1584795214_3827456818_223132457.mp4'
+file 'file:/Users/nazeera/Documents/AI_PRODUCER/.manim_cache/videos/render_scenes/480p15/partial_movie_files/ShiftingStandardDeviationScene/4072820271_3099623910_3791859824.mp4'
+file 'file:/Users/nazeera/Documents/AI_PRODUCER/.manim_cache/videos/render_scenes/480p15/partial_movie_files/ShiftingStandardDeviationScene/4072820271_2378305473_473147331.mp4'
+file 'file:/Users/nazeera/Documents/AI_PRODUCER/.manim_cache/videos/render_scenes/480p15/partial_movie_files/ShiftingStandardDeviationScene/4072820271_2574473371_59969824.mp4'
+file 'file:/Users/nazeera/Documents/AI_PRODUCER/.manim_cache/videos/render_scenes/480p15/partial_movie_files/ShiftingStandardDeviationScene/4072820271_1021455898_1489487545.mp4'
+file 'file:/Users/nazeera/Documents/AI_PRODUCER/.manim_cache/videos/render_scenes/480p15/partial_movie_files/ShiftingStandardDeviationScene/4072820271_2574473371_1693205468.mp4'
+file 'file:/Users/nazeera/Documents/AI_PRODUCER/.manim_cache/videos/render_scenes/480p15/partial_movie_files/ShiftingStandardDeviationScene/4072820271_2616795287_1157953978.mp4'
+file 'file:/Users/nazeera/Documents/AI_PRODUCER/.manim_cache/videos/render_scenes/480p15/partial_movie_files/ShiftingStandardDeviationScene/4072820271_2872842549_3853017933.mp4'

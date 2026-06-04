@@ -1,0 +1,18 @@
+{
+  "layout_name": "vertical_9_16_shorts",
+  "aspect_ratio": "9:16",
+  "resolution_width": 1080,
+  "resolution_height": 1920,
+  "model_sampling_target": "Flux-Dev-MLX",
+  "safe_zone_padding": "250_pixel_top_bottom_bound",
+  "typography_preset": "center_mass_bold",
+  "channel_target": "Shorts / Vertical Distribution",
+  "frame_rate": 30,
+  "color_space": "Rec.709",
+  "safe_zones": {
+    "action_safe": 0.08,
+    "title_safe": 0.12,
+    "platform_ui_buffer_top": 250,
+    "platform_ui_buffer_bottom": 250
+  }
+}

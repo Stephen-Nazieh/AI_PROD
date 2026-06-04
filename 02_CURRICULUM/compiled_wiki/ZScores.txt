@@ -1,0 +1,1 @@
+Z-Scores calculate the precise number of standard deviations a data element sits relative to the true mean population parameter.

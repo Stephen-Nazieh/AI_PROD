@@ -1,0 +1,9 @@
+# This file is used internally by FFMPEG.
+file 'file:/Users/nazeera/Documents/AI_PRODUCER/02_COMPANIES/02_AP_STATS_MEDIA/03_ASSETS/videos/render_scenes/480p15/partial_movie_files/ShiftingStandardDeviationScene/1584795214_429776787_223132457.mp4'
+file 'file:/Users/nazeera/Documents/AI_PRODUCER/02_COMPANIES/02_AP_STATS_MEDIA/03_ASSETS/videos/render_scenes/480p15/partial_movie_files/ShiftingStandardDeviationScene/4072820271_3099623910_1808916071.mp4'
+file 'file:/Users/nazeera/Documents/AI_PRODUCER/02_COMPANIES/02_AP_STATS_MEDIA/03_ASSETS/videos/render_scenes/480p15/partial_movie_files/ShiftingStandardDeviationScene/4072820271_3721265442_398873162.mp4'
+file 'file:/Users/nazeera/Documents/AI_PRODUCER/02_COMPANIES/02_AP_STATS_MEDIA/03_ASSETS/videos/render_scenes/480p15/partial_movie_files/ShiftingStandardDeviationScene/4072820271_1432596116_2279860819.mp4'
+file 'file:/Users/nazeera/Documents/AI_PRODUCER/02_COMPANIES/02_AP_STATS_MEDIA/03_ASSETS/videos/render_scenes/480p15/partial_movie_files/ShiftingStandardDeviationScene/4072820271_1670049166_961029793.mp4'
+file 'file:/Users/nazeera/Documents/AI_PRODUCER/02_COMPANIES/02_AP_STATS_MEDIA/03_ASSETS/videos/render_scenes/480p15/partial_movie_files/ShiftingStandardDeviationScene/4072820271_1432596116_1259681518.mp4'
+file 'file:/Users/nazeera/Documents/AI_PRODUCER/02_COMPANIES/02_AP_STATS_MEDIA/03_ASSETS/videos/render_scenes/480p15/partial_movie_files/ShiftingStandardDeviationScene/4072820271_2542386752_39726357.mp4'
+file 'file:/Users/nazeera/Documents/AI_PRODUCER/02_COMPANIES/02_AP_STATS_MEDIA/03_ASSETS/videos/render_scenes/480p15/partial_movie_files/ShiftingStandardDeviationScene/4072820271_2872842549_2102862117.mp4'

@@ -1,0 +1,1 @@
+Standard Deviation calculates the absolute variance boundaries of data distributions.

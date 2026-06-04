@@ -1,0 +1,17 @@
+{
+  "track_name": "ap_stats_movie",
+  "scenes": [
+    {
+      "scene_number": 1,
+      "scene_class": "TypeIErrorScene",
+      "narration": "In hypothesis testing, a Type I error occurs when we reject a null hypothesis that is actually true. This is often referred to as a 'false positive'. Understanding Type I error variance is crucial for making informed decisions in statistical analysis.",
+      "asset_output": "03_ASSETS/scene_1_voice.wav"
+    },
+    {
+      "scene_number": 2,
+      "scene_class": "TypeIIErrorScene",
+      "narration": "A Type II error happens when we fail to reject a null hypothesis that is false. This is known as a 'false negative'. Recognizing Type II error variance helps in designing studies that are more likely to detect true effects.",
+      "asset_output": "03_ASSETS/scene_2_voice.wav"
+    }
+  ]
+}

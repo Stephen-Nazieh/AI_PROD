@@ -1,0 +1,1 @@
+Normal Distribution charts the classical bell curve graph framework. It models complete probability densities centered around standard deviation sigma and mean mu parameters.

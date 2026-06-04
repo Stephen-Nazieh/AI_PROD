@@ -1,0 +1,1 @@
+Probability Matrices map all possible spatial outbounds within complex data configurations.

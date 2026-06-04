@@ -1,0 +1,1 @@
+Inverse Kinematics governs the movement of procedural bones. It depends on bone length and goal coordinates.

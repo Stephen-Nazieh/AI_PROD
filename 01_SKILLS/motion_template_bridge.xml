@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Solocorn Motion Template Bridge Specification
+  Purpose: Define how the Python media bridge looks up and modifies editable
+           text block strings inside Apple Motion (.motn) files via background XML updates.
+  Target Format: Apple Motion 5+ (.motn) XML structure
+-->
+<motion_bridge_spec version="1.0">
+
+  <metadata>
+    <bridge_name>solocorn_motion_text_injector</bridge_name>
+    <target_app>Apple Motion</target_app>
+    <target_extension>.motn</target_extension>
+    <update_mode>background_xml_patch</update_mode>
+  </metadata>
+
+  <!--
+    In a live .motn file, text blocks are stored as <media> elements of type="text"
+    under the <project>/<layer>/<group> hierarchy. Each text layer has a unique
+    <parameter id="{uuid}" name="Text"> child containing the displayed string.
+  -->
+
+  <text_block_mapping>
+
+    <!-- Example: Calculus Equation Overlay -->
+    <text_block block_id="calc_equation_main" description="Primary calculus equation display">
+      <xpath_lookup>
+        //project/layer/group/media[@type="text" and @name="CalcEquation"]/parameter[@name="Text"]
+      </xpath_lookup>
+      <editable_field>val</editable_field>
+      <default_value>∫ f(x) dx</default_value>
+      <bridge_injection_key>scene.{scene_id}.calculus.equation</bridge_injection_key>
+    </text_block>
+
+    <!-- Example: GCP Terminal Command Overlay -->
+    <text_block block_id="gcp_terminal_cmd" description="Google Cloud terminal command string">
+      <xpath_lookup>
+        //project/layer/group/media[@type="text" and @name="TerminalCommand"]/parameter[@name="Text"]
+      </xpath_lookup>
+      <editable_field>val</editable_field>
+      <default_value>gcloud functions deploy ...</default_value>
+      <bridge_injection_key>scene.{scene_id}.gcp.command</bridge_injection_key>
+    </text_block>
+
+    <!-- Example: Statistics Value Readout -->
+    <text_block block_id="stats_value_readout" description="Dynamic numeric output from regression">
+      <xpath_lookup>
+        //project/layer/group/media[@type="text" and @name="StatValue"]/parameter[@name="Text"]
+      </xpath_lookup>
+      <editable_field>val</editable_field>
+      <default_value>r² = 0.847</default_value>
+      <bridge_injection_key>scene.{scene_id}.stats.value</bridge_injection_key>
+    </text_block>
+
+    <!-- Example: Episode Title Card -->
+    <text_block block_id="episode_title" description="Main title text for episode intro">
+      <xpath_lookup>
+        //project/layer/group/media[@type="text" and @name="TitleCard"]/parameter[@name="Text"]
+      </xpath_lookup>
+      <editable_field>val</editable_field>
+      <default_value>Episode Title Placeholder</default_value>
+      <bridge_injection_key>project.episode_title</bridge_injection_key>
+    </text_block>
+
+  </text_block_mapping>
+
+  <!-- Python Bridge Update Protocol -->
+  <update_protocol>
+    <step order="1">Parse the source .motn file with xml.etree.ElementTree</step>
+    <step order="2">Resolve each xpath_lookup against the parsed DOM</step>
+    <step order="3">For each matched parameter element, locate the child &lt;val&gt; node</step>
+    <step order="4">Replace the text content of &lt;val&gt; with the injected string value</step>
+    <step order="5">Preserve all original XML namespaces, IDs, and sibling structure</step>
+    <step order="6">Write the patched DOM to a new .motn file at the designated render path</step>
+    <step order="7">Log the injection key, old value, and new value to the bridge stdout</step>
+  </update_protocol>
+
+  <!-- File Naming Convention for Rendered Outputs -->
+  <output_naming>
+    <pattern>{project_name}_{scene_id}_{motion_template_id}_patched.motn</pattern>
+    <destination_base>03_ASSETS/_HANDOFF_FCP_CAPCUT/visuals/</destination_base>
+  </output_naming>
+
+</motion_bridge_spec>

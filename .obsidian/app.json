@@ -1,0 +1,7 @@
+{
+  "userIgnoreFilters": [
+    "env/",
+    "03_ASSETS/",
+    ".docker/"
+  ]
+}

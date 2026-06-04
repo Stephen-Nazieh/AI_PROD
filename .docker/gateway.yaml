@@ -1,0 +1,58 @@
+gateway:
+  name: solocorn_local_gateway
+  version: "1.0"
+  description: Routing profile mapping internal container loops to host networking paths
+
+proxy_routes:
+  open_webui_cockpit:
+    internal_host: open_webui_cockpit
+    internal_port: 8080
+    external_host: 127.0.0.1
+    external_port: 3000
+    protocol: http
+    description: Maps Open WebUI container port 8080 to host loopback port 3000
+
+governance_dashboard:
+  paperclip_studio_governor:
+    path: "/governor"
+    target_destination: "http://127.0.0.1:3005"
+    description: "Authoritative local web dashboard connection routing to our Paperclip multi-agent organizational chart and token budgeting hub"
+    timeout_seconds: 60
+    retry_policy:
+      max_retries: 2
+      backoff_seconds: 1
+
+inference_pass_through:
+  omlx_native_engine:
+    target_url: http://127.0.0.1:8000/v1
+    container_accessible_url: http://host.docker.internal:8000/v1
+    description: Pass-through routing for oMLX inference engine native port 8000
+    timeout_seconds: 300
+    retry_policy:
+      max_retries: 3
+      backoff_seconds: 1
+
+network_isolation:
+  internal_subnet: 172.20.0.0/16
+  bridge_name: solocorn_bridge
+  dns:
+    - 8.8.8.8
+    - 8.8.4.4
+
+volume_mounts:
+  workspace:
+    host_path: ~/Documents/AI_PRODUCER
+    container_path: /app/vault
+    mode: rw
+  raw_sources:
+    host_path: ~/Documents/AI_PRODUCER/02_CURRICULUM/raw_sources
+    container_path: /app/ingest_sink
+    mode: rw
+  compiled_wiki:
+    host_path: ~/Documents/AI_PRODUCER/02_CURRICULUM/compiled_wiki
+    container_path: /app/backend/vault
+    mode: ro
+  webui_data:
+    host_path: /Volumes/YOUR_SSD_NAME/01_MODEL_CACHE/webui_data
+    container_path: /app/backend/data
+    mode: rw

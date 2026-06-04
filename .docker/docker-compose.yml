@@ -1,0 +1,63 @@
+services:
+  openclaw_daemon:
+    image: ghcr.io/openclaw/openclaw:latest
+    container_name: openclaw_core_watcher
+    restart: unless-stopped
+    ports:
+      - "18789:18789"
+    environment:
+      - WORKSPACE_DIR=/app/vault
+      - INFERENCE_ROUTER=http://host.docker.internal:8000/v1
+      - OPENCLAW_GATEWAY_TOKEN=***REMOVED-ROTATED-SEE-.docker/.env***
+    volumes:
+      - ~/Documents/AI_PRODUCER:/app/vault
+    command: ["openclaw", "gateway", "run", "--allow-unconfigured"] # 🛡️ FIX: Bypass setup checks
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  browser_scouter:
+    image: mcr.microsoft.com/playwright:v1.44.0-focal  # Verified stable build tag
+    container_name: scouter_browser_sandbox
+    restart: unless-stopped
+    ports:
+      - "30005:30005"
+    environment:
+      - SANDBOX_PROFILE_IDENTITY=isolated_studio_scout_mode
+    volumes:
+      - ~/Documents/AI_PRODUCER/02_CURRICULUM/raw_sources:/app/ingest_sink
+    command: npx playwright run-server --port 30005
+
+  open_webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open_webui_cockpit
+    ports:
+      - "3000:8080"
+    environment:
+      - WEBUI_AUTH=false
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - OPENAI_API_BASE_URL=http://host.docker.internal:8000/v1
+      - OPENAI_API_KEY=local_omlx_key_override
+    volumes:
+      - open_webui_data:/app/backend/data  # Safe local volumes mount fallback
+      - ~/Documents/AI_PRODUCER/02_CURRICULUM/compiled_wiki:/app/backend/vault:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  # Persistent Relational Storage Memory Layer for Graphify & Paperclip Corporate Logs
+  paperclip_db:
+    image: postgres:15-alpine
+    container_name: paperclip_studio_database
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=paperclip_admin
+      - POSTGRES_PASSWORD=***REMOVED***
+      - POSTGRES_DB=paperclip_governance
+    volumes:
+      - paperclip_db_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  open_webui_data:
+  paperclip_db_data:

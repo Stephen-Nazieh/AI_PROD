@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE fcpxml>
+<fcpxml version="1.9">
+  <resources>
+    <format id="r1" name="FFVideoFormat1080p24" frameDuration="100/2400s"/>
+    <asset id="r2" name="scene_1_voice.wav" start="0s" duration="11300/2400s" hasVideo="0" hasAudio="1" format="r1">
+      <media-rep kind="original-media" src="file:///Users/nazeera/Documents/AI_PRODUCER/03_ASSETS/scene_1_voice.wav"/>
+    </asset>
+    <asset id="r3" name="scene_1_render.mp4" start="0s" duration="14400/2400s" hasVideo="1" hasAudio="1" format="r1">
+      <media-rep kind="original-media" src="file:///Users/nazeera/Documents/AI_PRODUCER/03_ASSETS/scene_1_render.mp4"/>
+    </asset>
+    <asset id="r4" name="scene_2_voice.wav" start="0s" duration="10000/2400s" hasVideo="0" hasAudio="1" format="r1">
+      <media-rep kind="original-media" src="file:///Users/nazeera/Documents/AI_PRODUCER/03_ASSETS/scene_2_voice.wav"/>
+    </asset>
+    <asset id="r5" name="scene_2_render.mp4" start="0s" duration="14400/2400s" hasVideo="1" hasAudio="1" format="r1">
+      <media-rep kind="original-media" src="file:///Users/nazeera/Documents/AI_PRODUCER/03_ASSETS/scene_2_render.mp4"/>
+    </asset>
+  </resources>
+  <library>
+    <event name="Solocorn Automated Production">
+      <project name="Assembled_Lesson_Timeline">
+        <sequence duration="21300/2400s" format="r1" tcStart="0s">
+          <spine>
+            <asset-clip name="scene_1_render" ref="r3" offset="0/2400s" duration="11300/2400s" start="0s">
+              <asset-clip name="scene_1_voice" ref="r2" offset="0s" duration="11300/2400s" start="0s" lane="-1"/>
+            </asset-clip>
+            <asset-clip name="scene_2_render" ref="r5" offset="11300/2400s" duration="10000/2400s" start="0s">
+              <asset-clip name="scene_2_voice" ref="r4" offset="0s" duration="10000/2400s" start="0s" lane="-1"/>
+            </asset-clip>
+          </spine>
+        </sequence>
+      </project>
+    </event>
+  </library>
+</fcpxml>

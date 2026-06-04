@@ -1,0 +1,1 @@
+{"track_name": "ap_stats_movie", "asset_name": "scene_1_render", "stage": "manim_render", "skills_script_path": "01_SKILLS/render_scenes.py", "scene_name": "SamplingDistributionScene", "quality_flag": "-ql", "output_movie": "03_ASSETS/scene_1_render.mp4"}
