@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.so
+*.dylib
+
+# Virtual environment
+env/
+venv/
+.venv/
+
+# Environment variables
+.env
+.env.*
+*.env
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Docker / Postgres data
+.docker/postgres_staging_data/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Logs
+*.log
+logs/
+
+# Media / large binaries
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.wav
+*.mp3
+*.aiff
+*.psd
+*.ai
