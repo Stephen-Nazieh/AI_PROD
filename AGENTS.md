@@ -347,6 +347,20 @@ Production runs go inside a unit:
 > `business_units/<company>/<unit>/` so agents operate directly in the organized
 > home (the API does not expose this binding).
 
+### ⚠️ Stop the bridge before registry migrations
+
+The bridge's auto-provision poller (`:3101`) reads `00_CORE/business_units.yaml`
+and writes folders + registry entries every ~30s. **Before changing the registry
+schema, moving `business_units/` paths, or altering `provision_business_unit.py`'s
+registry contract, stop the bridge first** — otherwise the running (old-code)
+poller races the migration and writes stale entries/folders against the old shape:
+
+```bash
+pkill -f "runtime/agents/paperclip_bridge.py"     # stop; confirm with pgrep
+# … do the registry/layout migration + matching code change together, verify …
+nohup env/bin/python3 runtime/agents/paperclip_bridge.py > /tmp/bridge.log 2>&1 &
+```
+
 ---
 
 ## Testing Instructions
