@@ -80,6 +80,9 @@ class PaperclipClient:
     def get_issue(self, issue_id: str) -> dict | None:
         return self._request("GET", f"/api/issues/{issue_id}")
 
+    def get_agent(self, agent_id: str) -> dict | None:
+        return self._request("GET", f"/api/agents/{agent_id}")
+
     def update_issue(self, issue_id: str, **fields) -> dict | None:
         return self._request("PATCH", f"/api/issues/{issue_id}", fields)
 
@@ -160,14 +163,18 @@ AppleScript examples:
   tell application "System Events" to (name of processes) contains "Final Cut Pro"
 """
 
-    def __init__(self, binary: str = CLAUDE_BIN):
+    def __init__(self, binary: str = CLAUDE_BIN, persona: str | None = None):
         self.binary = binary
+        self.persona = persona          # per-agent persona (from library/agents/)
         self.total_input_tokens = 0
         self.total_output_tokens = 0
         self.calls_made = []
 
     def _system_prompt(self) -> str:
-        parts = [self.SYSTEM_PROMPT]
+        # Lead with the agent's own persona/charter so it acts AS that role,
+        # then the shared structured-output protocol.
+        parts = [self.persona] if self.persona else []
+        parts.append(self.SYSTEM_PROMPT)
         if MACOS_TOOLS_ENABLED:
             parts.append(self.MACOS_TOOLS_PROMPT)
         parts.append("""
@@ -504,11 +511,46 @@ def _tool_invoke_openclaw(task: str) -> dict:
 
 # ── Hybrid Runtime ──────────────────────────────────────────────────────────
 
+def load_agent_persona(name: str) -> str | None:
+    """
+    Resolve an agent's persona (charter body) from library/agents/ by matching
+    the Paperclip agent name against each definition's frontmatter `name:`.
+    Returns the markdown body after the frontmatter, or None if no match.
+    """
+    if not name:
+        return None
+    lib = WORKSPACE_ROOT / "library" / "agents"
+    if not lib.is_dir():
+        return None
+    target = name.strip().lower()
+    for d in sorted(lib.iterdir()):
+        md = d / "AGENTS.md"
+        if not md.is_file():
+            continue
+        try:
+            text = md.read_text(encoding="utf-8")
+        except Exception:
+            continue
+        m = re.search(r"^name:\s*(.+)$", text, re.MULTILINE)
+        if m and m.group(1).strip().lower() == target:
+            parts = text.split("---", 2)
+            return parts[2].strip() if len(parts) >= 3 else text.strip()
+    return None
+
+
 def run_hybrid(agent_id: str, issue_id: str, issue_title: str, issue_description: str,
                client: PaperclipClient) -> dict:
     """Run the hybrid THINK → PARSE → EXECUTE loop."""
 
-    claude = ClaudeClient()
+    # Load the agent's persona so it acts AS its role (e.g. Chief Content Officer)
+    persona = None
+    agent = client.get_agent(agent_id)
+    if agent:
+        persona = load_agent_persona(agent.get("name") or agent.get("title") or "")
+        print(f"  🎭 Persona: {'loaded for ' + str(agent.get('name')) if persona else 'none (generic)'}",
+              file=sys.stderr)
+
+    claude = ClaudeClient(persona=persona)
     task = f"{issue_title}\n\n{issue_description}".strip()
 
     all_actions = []
