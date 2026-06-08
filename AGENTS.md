@@ -1,4 +1,4 @@
-# AGENTS.md — Solocorn AI Producer Workspace
+# AGENTS.md — DeParadigm Media AI Producer Workspace
 
 > This file is the canonical briefing for any AI coding agent working inside this repository. Read it in full before modifying code, generating files, or dispatching pipelines. When instructions here conflict with generic assumptions, this file wins.
 
@@ -6,7 +6,7 @@
 
 ## Project Overview
 
-This repository is **Solocorn**, a local-first, solo-operated AI media production studio. The owner is a former high-school mathematics educator (AP Statistics, Calculus AB, Pre-Calculus) and CompTIA Security+ professional based in China, producing educational video content across four monetization channels:
+This repository is **DeParadigm Media**, a local-first, solo-operated AI media production studio. The owner is a former high-school mathematics educator (AP Statistics, Calculus AB, Pre-Calculus) and CompTIA Security+ professional based in China, producing educational video content across four monetization channels:
 
 1. **Developer/Cloud EdTech** — Serverless GCP architectures, AWS transitions, Security+ compliance.
 2. **AP Statistics Movie Series** — Cinematic, story-driven multi-episode seasons mapped to the official College Board AP Stats syllabus.
@@ -274,12 +274,12 @@ they are regenerated from the canonical `library/` via `sync_company.py`
 python3 07_PAPERCLIP/scripts/sync_company.py --company solocorn-studios --all
 
 # 2. Import the freshly-synced package into Paperclip
-npx paperclipai company import --yes /Users/nazeera/Documents/AI_PRODUCER/07_PAPERCLIP/companies/solocorn-studios
+npx paperclipai company import --yes /Users/nazeera/Documents/AI_PRODUCER/07_PAPERCLIP/companies/deparadigm-media
 ```
 
 > ⚠️ **`company import` is NOT idempotent — it creates a brand-new company every
 > time, it does not update the existing one.** Re-importing without cleanup
-> accumulates duplicate companies (e.g. multiple "Solocorn Studios"), and the
+> accumulates duplicate companies (e.g. multiple "DeParadigm Media"), and the
 > bridge keeps targeting the original `PAPERCLIP_COMPANY_ID` (`15041ee2-…`), so
 > the new copy is dead weight. Prefer editing agents/skills **in place** via the
 > Paperclip UI/API and reserve `import` for first-time setup. If you must
@@ -463,7 +463,7 @@ PRODUCTION_DB_HOST=127.0.0.1
 PRODUCTION_DB_PORT=5432
 ```
 
-> **History note:** `***REMOVED***` was committed in earlier history. Moving it to `.env` removes it going forward but does **not** scrub it from past commits. If the GitHub remote (`Stephen-Nazieh/AI_PROD`) is or ever was public, treat that password as compromised: rotate it on the running container and scrub history with `git filter-repo`.
+> **History note:** `***DB-PASSWORD-REDACTED***` was committed in earlier history. Moving it to `.env` removes it going forward but does **not** scrub it from past commits. If the GitHub remote (`Stephen-Nazieh/AI_PROD`) is or ever was public, treat that password as compromised: rotate it on the running container and scrub history with `git filter-repo`.
 
 ### API Keys
 
@@ -530,9 +530,9 @@ All rendered frames, intermediate textures, geometry caches, and final delivery 
 ## Common Pitfalls for Agents
 
 1. **Guessing business units**: Content is organized by **business unit** (channel) — see "Business Units (Channels)" above and the registry `00_CORE/business_units.yaml`. The legacy curriculum-track paths are now **compatibility symlinks** that redirect into business-unit `knowledge/` folders, so existing references keep working:
-   - `02_CURRICULUM/01_SOLOCORN_EDTECH/` → `business_units/solocorn-studios/edtech/knowledge/`
-   - `02_CURRICULUM/03_DEVOPS_CONTROL/` → `business_units/solocorn-studios/edtech/knowledge/` (Dev & Cloud)
-   - `02_CURRICULUM/02_AP_STATS_MOVIE/` → `business_units/solocorn-studios/ap-stats/knowledge/`
+   - `02_CURRICULUM/01_SOLOCORN_EDTECH/` → `business_units/deparadigm-media/edtech/knowledge/`
+   - `02_CURRICULUM/03_DEVOPS_CONTROL/` → `business_units/deparadigm-media/edtech/knowledge/` (Dev & Cloud)
+   - `02_CURRICULUM/02_AP_STATS_MOVIE/` → `business_units/deparadigm-media/ap-stats/knowledge/`
    - `04_VERTICAL_FARMING` is not a current channel (no business unit).
    If you cannot determine which unit a file belongs to, **pause and ask the user**.
 2. **Forgetting the local inference endpoint**: All LLM calls must route to `http://127.0.0.1:8000/v1`. Cloud APIs (OpenAI, Claude, etc.) are forbidden unless the user explicitly overrides.

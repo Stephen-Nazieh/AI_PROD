@@ -25,8 +25,8 @@
 - **Deduplication**: Obsidian markdown/bases/canvas skills from `obsidian-skills` were superseded by the superior `obsidian-power-user` skill; 3 duplicate files removed.
 - **New Integrations**:
   - **SaaS Stack**: `nextjs_developer.md` (Next.js v16.2.1), `stripe_developer.md` (payments), `supabase_developer.md` (database/auth), `vercel_developer.md` (deployment) — all adapted with local oMLX frontmatter.
-  - **YouTube Production Pipeline**: 6-agent pipeline (`youtube_research_agent.md`, `youtube_script_agent.md`, `youtube_seo_agent.md`, `youtube_visual_director.md`, `youtube_editor_brief.md`, `youtube_thumbnail_agent.md`) adapted for Solocorn's 4-channel monetization blueprint with channel-specific voice, visual identity, and output paths mapped to `03_ASSETS/_HANDOFF_FCP_CAPCUT/projects/`.
-- **Adaptations**: All `[Channel]`/`[Creator]` placeholders replaced with Solocorn identity. Blockchain/AI-generic language replaced with Solocorn domains (GCP, AP Statistics, XTTS v2, ambient loops). All file output paths mapped to local workspace lanes.
+  - **YouTube Production Pipeline**: 6-agent pipeline (`youtube_research_agent.md`, `youtube_script_agent.md`, `youtube_seo_agent.md`, `youtube_visual_director.md`, `youtube_editor_brief.md`, `youtube_thumbnail_agent.md`) adapted for DeParadigm Media's 4-channel monetization blueprint with channel-specific voice, visual identity, and output paths mapped to `03_ASSETS/_HANDOFF_FCP_CAPCUT/projects/`.
+- **Adaptations**: All `[Channel]`/`[Creator]` placeholders replaced with DeParadigm Media identity. Blockchain/AI-generic language replaced with DeParadigm Media domains (GCP, AP Statistics, XTTS v2, ambient loops). All file output paths mapped to local workspace lanes.
 - **Bridge Impact**: No Python utilities to merge (repo is markdown-only), but `skills.py` remains the active integration layer for all vault and pipeline operations.
 
 ### zotero-mcp-skill (GitHub: Stephen-Nazieh/zotero-mcp-skill)
@@ -43,7 +43,7 @@
   - **Engineering**: `engineering_devops_automator.md` (local CI/CD for content pipelines, Apple Silicon optimization), `engineering_sre.md` (SLOs for oMLX inference, 128GB memory monitoring, FCPXML validity tracking).
   - **China Marketing**: `marketing_bilibili_strategist.md` (danmaku engagement, 科技区/知识区 optimization), `marketing_xiaohongshu_specialist.md` (lifestyle brand building, study setup aesthetic), `marketing_china_localization.md` (7-platform trend intelligence, GTM phase gates), `marketing_short_video_coach.md` (CapCut/FCP/DaVinci/Motion pipeline for educational content).
 - **Handoff Template Integration**: Extracted NEXUS handoff metadata syntax from `strategy/coordination/handoff-templates.md` and merged generation logic into `solocorn_media_bridge.py` as two functions: `generate_agent_handoff()` (standard agent-to-agent handoff with metadata tables) and `generate_qa_verdict()` (PASS/FAIL verdict documents with retry tracking and escalation logic).
-- **Studio Launch Playbook**: Created `studio_launch_playbook.md` synthesizing all 7 NEXUS phase playbooks (0-6) into a Solocorn-specific production methodology governing how scriptwriter and asset generator agents validate curriculum data (`02_CURRICULUM/compiled_wiki/`) before initiating FCPXML compilation lines. Features the Script→Edit→Review loop, parallel build tracks, and 6 phase gates with GO/NO-GO/PIVOT decisions.
+- **Studio Launch Playbook**: Created `studio_launch_playbook.md` synthesizing all 7 NEXUS phase playbooks (0-6) into a DeParadigm Media-specific production methodology governing how scriptwriter and asset generator agents validate curriculum data (`02_CURRICULUM/compiled_wiki/`) before initiating FCPXML compilation lines. Features the Script→Edit→Review loop, parallel build tracks, and 6 phase gates with GO/NO-GO/PIVOT decisions.
 - **Adaptations**: All generic cloud references replaced with local paths. All external model endpoints routed to `http://127.0.0.1:8000/v1`. All file operations mapped to `02_CURRICULUM/compiled_wiki/` and `03_ASSETS/_HANDOFF_FCP_CAPCUT/`.
 - **Tracking**: Engineering agents monitor oMLX server health and pipeline reliability. Marketing agents track China-platform engagement metrics and trend signals.
 
@@ -67,11 +67,11 @@
 ### File Separation Guardrail
 Agents must strictly segment work by **company → business unit** (channel). Operational assets, startup logs, and creative screenplays must never be dumped loosely into the root directory. Content for a unit lives under `business_units/<company>/<unit>/` (`knowledge/` for source/curriculum, `production/<run>/` for pipeline output). The registry `00_CORE/business_units.yaml` (a `companies:` map) is the source of truth.
 
-The legacy `02_CURRICULUM/` track paths still work — they are **compatibility symlinks** redirecting into the Solocorn Studios units:
+The legacy `02_CURRICULUM/` track paths still work — they are **compatibility symlinks** redirecting into the DeParadigm Media units:
 
-- `02_CURRICULUM/01_SOLOCORN_EDTECH/` → `business_units/solocorn-studios/edtech/knowledge/` (Dev & Cloud)
-- `02_CURRICULUM/03_DEVOPS_CONTROL/` → `business_units/solocorn-studios/edtech/knowledge/` (Dev & Cloud infra/ops)
-- `02_CURRICULUM/02_AP_STATS_MOVIE/` → `business_units/solocorn-studios/ap-stats/knowledge/`
+- `02_CURRICULUM/01_SOLOCORN_EDTECH/` → `business_units/deparadigm-media/edtech/knowledge/` (Dev & Cloud)
+- `02_CURRICULUM/03_DEVOPS_CONTROL/` → `business_units/deparadigm-media/edtech/knowledge/` (Dev & Cloud infra/ops)
+- `02_CURRICULUM/02_AP_STATS_MOVIE/` → `business_units/deparadigm-media/ap-stats/knowledge/`
 - `02_CURRICULUM/compiled_wiki/` — shared cross-unit knowledge vault (unchanged)
 - (`04_VERTICAL_FARMING` is not a current channel.)
 
@@ -114,7 +114,7 @@ Heavy video timeline compilations and asset file optimization sweeps are restric
 
 ## Administrative Governance Shell
 
-Paperclip is deployed as the master administrative governance shell for the Solocorn AI Studio. It operates as a dedicated containerized dashboard (`paperclip_studio_governor`) on host port 3005, providing executive oversight across all active agent operations. Its primary responsibilities are:
+Paperclip is deployed as the master administrative governance shell for the DeParadigm Media. It operates as a dedicated containerized dashboard (`paperclip_studio_governor`) on host port 3005, providing executive oversight across all active agent operations. Its primary responsibilities are:
 
 - **Mission Tracking**: Monitors high-level company missions and strategic objectives across the four business subfolders (`01_SOLOCORN_EDTECH`, `02_AP_STATS_MOVIE`, `03_DEVOPS_CONTROL`, `04_VERTICAL_FARMING`).
 - **Token Expenditure Boundaries**: Enforces hard spending caps on inference tokens routed through the native oMLX endpoint, with alerts triggered when any business track exceeds its allocated budget.
