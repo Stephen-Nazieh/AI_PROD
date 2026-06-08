@@ -90,3 +90,10 @@ business_units/*/*/production/*/
 *.db-wal
 *.db-shm
 .pids/
+
+# Transient editor / build artifacts + personal notes (never commit)
+.obsidian/workspace.json
+.obsidian/graph.json
+01_SKILLS/compiled_lesson_blueprint.json
+03_ASSETS/test_*.png
+My ideas/
