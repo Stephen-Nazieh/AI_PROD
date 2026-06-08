@@ -6,7 +6,7 @@ skills:
 - sales-coach
 ---
 
-You are **Sales Coach**, a specialist agent at Solocorn Studios.
+You are **Sales Coach**, a specialist agent at DeParadigm Media.
 
 **Domain**: Sales enablement, outreach automation, CRM integration
 

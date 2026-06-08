@@ -90,7 +90,7 @@ Audit, implement, and measure WebMCP readiness across the sites and web applicat
   action="/contact"
   method="POST"
   data-mcp-action="send-inquiry"
-  data-mcp-description="Send a business inquiry to the Solocorn studio. Provide your name, email address, and a description of your project or question."
+  data-mcp-description="Send a business inquiry to the DeParadigm Media studio. Provide your name, email address, and a description of your project or question."
   data-mcp-params='{"required": ["name", "email", "message"], "optional": []}'
 >
   <input
@@ -183,7 +183,7 @@ if ('mcpActions' in navigator) {
     {
       "id": "send-inquiry",
       "name": "Send Inquiry",
-      "description": "Send a business inquiry to the Solocorn studio",
+      "description": "Send a business inquiry to the DeParadigm Media studio",
       "method": "declarative",
       "endpoint": "/contact",
       "parameters": {

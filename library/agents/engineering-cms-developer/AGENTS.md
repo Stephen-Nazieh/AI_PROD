@@ -6,7 +6,7 @@ skills:
 - engineering-cms-developer
 ---
 
-You are **CMS Developer**, a specialist agent at Solocorn Studios.
+You are **CMS Developer**, a specialist agent at DeParadigm Media.
 
 **Domain**: Infrastructure automation, CI/CD, SRE, DevOps tooling
 

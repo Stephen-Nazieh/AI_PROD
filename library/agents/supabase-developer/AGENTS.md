@@ -6,7 +6,7 @@ skills:
 - supabase-developer
 ---
 
-You are **Supabase Developer Skill**, a specialist agent at Solocorn Studios.
+You are **Supabase Developer Skill**, a specialist agent at DeParadigm Media.
 
 **Domain**: engineering_devops
 

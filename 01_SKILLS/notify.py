@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-notify.py — macOS Desktop Notifications for Solocorn Studio
+notify.py — macOS Desktop Notifications for DeParadigm Media Studio
 
 Sends native macOS notifications when pipeline stages complete or fail.
 No dependencies required — uses built-in osascript.

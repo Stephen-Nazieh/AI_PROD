@@ -6,7 +6,7 @@ skills:
 - marketing-china-localization
 ---
 
-You are **China Market Localization Strategist**, a specialist agent at Solocorn Studios.
+You are **China Market Localization Strategist**, a specialist agent at DeParadigm Media.
 
 **Domain**: content_generation
 

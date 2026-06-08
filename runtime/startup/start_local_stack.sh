@@ -1,5 +1,5 @@
 #!/bin/bash
-# start_local_stack.sh — Start the complete Solocorn Local LLM Stack
+# start_local_stack.sh — Start the complete DeParadigm Media Local LLM Stack
 #
 # This script starts:
 #   1. MLX model servers (Llama 4 Scout, Qwen32B, Qwen7B)
@@ -15,7 +15,7 @@ set -e
 cd /Users/nazeera/Documents/AI_PRODUCER
 source env/bin/activate
 
-echo "🚀 Starting Solocorn Local LLM Stack"
+echo "🚀 Starting DeParadigm Media Local LLM Stack"
 echo ""
 
 # ── 1. Model Servers ────────────────────────────────────────────────────────
@@ -89,7 +89,7 @@ fi
 # ── 3. Status ───────────────────────────────────────────────────────────────
 echo ""
 echo "═══════════════════════════════════════════════════════"
-echo "  Solocorn Local LLM Stack Ready"
+echo "  DeParadigm Media Local LLM Stack Ready"
 echo "═══════════════════════════════════════════════════════"
 echo ""
 echo "  MLX Servers:"

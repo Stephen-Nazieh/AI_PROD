@@ -19,7 +19,7 @@ import yaml
 
 WORKSPACE_ROOT = Path(__file__).resolve().parent.parent.parent
 MANIFEST_PATH = WORKSPACE_ROOT / "07_PAPERCLIP" / "scripts" / "skills_manifest.json"
-COMPANY_DIR = WORKSPACE_ROOT / "07_PAPERCLIP" / "solocorn-studios"
+COMPANY_DIR = WORKSPACE_ROOT / "07_PAPERCLIP" / "deparadigm-media"
 
 # ── Executive layer (manually curated) ──────────────────────────────────────
 EXECUTIVES = [
@@ -30,7 +30,7 @@ EXECUTIVES = [
         "reportsTo": None,
         "skills": ["nexus-strategy", "agents-orchestrator", "specialized-chief-of-staff"],
         "body": (
-            "You are the CEO of Solocorn Studios, a local-first AI media production company "
+            "You are the CEO of DeParadigm Media, a local-first AI media production company "
             "operating four monetization channels: Developer EdTech, AP Statistics Movie Series, "
             "Multi-Language Translation Factory, and Ambient Lo-Fi loops.\n\n"
             "Your mandate is strategic oversight, capital allocation, and cross-track alignment. "
@@ -46,7 +46,7 @@ EXECUTIVES = [
         "skills": ["engineering-ai-engineer", "engineering-git-workflow-master",
                     "engineering-minimal-change-engineer", "backend-architect-with-memory"],
         "body": (
-            "You are the CTO of Solocorn Studios. You own the technical architecture, "
+            "You are the CTO of DeParadigm Media. You own the technical architecture, "
             "the Python bridge ecosystem, local inference infrastructure, and all rendering pipelines.\n\n"
             "Key systems under your care:\n"
             "- orchestrator.py (production daemon)\n"
@@ -64,7 +64,7 @@ EXECUTIVES = [
         "skills": ["project-management-studio-operations", "project-management-studio-producer",
                     "support-infrastructure-maintainer"],
         "body": (
-            "You are the COO of Solocorn Studios. You own studio operations, content scheduling, "
+            "You are the COO of DeParadigm Media. You own studio operations, content scheduling, "
             "translation factory pipelines, and ambient loop production workflows.\n\n"
             "You manage the Translation Factory Lead and the Ambient Loops Lead. "
             "You also coordinate marketing, sales, and support agents across all tracks."
@@ -78,7 +78,7 @@ EXECUTIVES = [
         "skills": ["finance-financial-analyst", "finance-fpa-analyst",
                     "support-finance-tracker"],
         "body": (
-            "You are the CFO of Solocorn Studios. You own budgeting, runway analysis, "
+            "You are the CFO of DeParadigm Media. You own budgeting, runway analysis, "
             "and operational expense tracking.\n\n"
             "You interface with the legacy PaperclipEnterpriseGovernor on Postgres port 5433 "
             "and will eventually migrate its ledgers into Paperclip's native budget system.\n\n"
@@ -146,7 +146,7 @@ EXECUTIVES = [
         "skills": ["solocorn-vault-librarian", "engineering-sre",
                     "engineering-incident-response-commander"],
         "body": (
-            "You are the runtime bridge between Paperclip and the Solocorn Python ecosystem.\n\n"
+            "You are the runtime bridge between Paperclip and the DeParadigm Media Python ecosystem.\n\n"
             "You execute calls to:\n"
             "- orchestrator.py (ingestion & render pipeline)\n"
             "- solocorn_media_bridge.py (FCPXML, voiceover, manifests)\n"
@@ -336,7 +336,7 @@ def generate_agent_file(entry: dict, reports_to: str) -> None:
     }
 
     body = (
-        f"You are **{title}**, a specialist agent at Solocorn Studios.\n\n"
+        f"You are **{title}**, a specialist agent at DeParadigm Media.\n\n"
         f"**Domain**: {description}\n\n"
         f"**Primary Skill**: [{slug}](../skills/{slug}/SKILL.md)\n\n"
         f"**Reports To**: {reports_to}\n\n"
@@ -426,8 +426,8 @@ def generate_company_md() -> None:
     """Write the root COMPANY.md file."""
     out_file = COMPANY_DIR / "COMPANY.md"
     frontmatter = {
-        "name": "Solocorn Studios",
-        "slug": "solocorn-studios",
+        "name": "DeParadigm Media",
+        "slug": "deparadigm-media",
         "schema": "agentcompanies/v1",
         "version": "1.0.0",
         "license": "MIT",
@@ -439,7 +439,7 @@ def generate_company_md() -> None:
     }
     fm_yaml = yaml.dump(frontmatter, default_flow_style=False, allow_unicode=True, sort_keys=False)
     body = (
-        "# Solocorn Studios\n\n"
+        "# DeParadigm Media\n\n"
         "A local-first, solo-operated AI media production studio based in China.\n\n"
         "## Monetization Channels\n\n"
         "1. **Developer/Cloud EdTech** — Serverless GCP architectures, AWS transitions, Security+ compliance\n"
@@ -535,7 +535,7 @@ agents:
 
 
 def main() -> int:
-    print("🚀 Solocorn Org Chart Generator — Phase 2")
+    print("🚀 DeParadigm Media Org Chart Generator — Phase 2")
     print(f"   Manifest: {MANIFEST_PATH}")
     print(f"   Output:   {COMPANY_DIR}")
     print()

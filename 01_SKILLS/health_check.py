@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-health_check.py — Unified System Health Check for Solocorn Studio
+health_check.py — Unified System Health Check for DeParadigm Media Studio
 
 Verifies all critical services, model files, and dependencies are available
 before starting a production pipeline run.
@@ -185,7 +185,7 @@ def run_all_checks() -> dict:
 
 def print_report(results: dict):
     print("=" * 60)
-    print("🩺 Solocorn Studio Health Check")
+    print("🩺 DeParadigm Media Studio Health Check")
     print("=" * 60)
 
     print("\n🧠 MLX Inference Servers")
@@ -240,7 +240,7 @@ def print_report(results: dict):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Solocorn Studio Health Check")
+    parser = argparse.ArgumentParser(description="DeParadigm Media Studio Health Check")
     parser.add_argument("--json", action="store_true", help="Output raw JSON")
     args = parser.parse_args()
 

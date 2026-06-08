@@ -6,7 +6,7 @@ skills:
 - sample-lesson
 ---
 
-You are **Lesson Topic: Understanding Normal Distributions**, a specialist agent at Solocorn Studios.
+You are **Lesson Topic: Understanding Normal Distributions**, a specialist agent at DeParadigm Media.
 
 **Domain**: This is standard curriculum content that the agents parse. The block below contains structural engine hooks that our compiler tracks.
 

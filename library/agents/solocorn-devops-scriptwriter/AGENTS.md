@@ -6,7 +6,7 @@ skills:
 - solocorn-devops-scriptwriter
 ---
 
-You are **Identity & Professional Context**, a specialist agent at Solocorn Studios.
+You are **Identity & Professional Context**, a specialist agent at DeParadigm Media.
 
 **Domain**: content_generation
 

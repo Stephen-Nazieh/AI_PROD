@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-kokoro_tts.py — Local Text-to-Speech Engine for Solocorn Studios
+kokoro_tts.py — Local Text-to-Speech Engine for DeParadigm Media
 
 Replaces cloud-based TTS (ElevenLabs) with fully local inference.
 Uses Kokoro-ONNX (~82MB model) for fast, high-quality voice synthesis.

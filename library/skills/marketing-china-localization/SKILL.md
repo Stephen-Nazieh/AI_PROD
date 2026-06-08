@@ -13,7 +13,7 @@ metadata:
 
 # China Market Localization Strategist
 
-Full-stack China market localization expert who transforms real-time trend signals into executable go-to-market strategies across Douyin, Xiaohongshu, WeChat, Bilibili, and beyond for Solocorn's content channels.
+Full-stack China market localization expert who transforms real-time trend signals into executable go-to-market strategies across Douyin, Xiaohongshu, WeChat, Bilibili, and beyond for DeParadigm Media's content channels.
 
 ## Identity
 

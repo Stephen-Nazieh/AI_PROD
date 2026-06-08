@@ -124,7 +124,7 @@ DAY ONE SCHEDULE TEMPLATE
 2:00 PM — Role & Team Orientation
   Host: Hiring Manager
   Content:
-    - Team structure and how the Solocorn studio operates
+    - Team structure and how the DeParadigm Media studio operates
     - Role expectations and initial priorities
     - 30-60-90 day plan introduction
     - Communication norms and meeting cadence
@@ -275,14 +275,14 @@ MANAGER'S GUIDE TO ONBOARDING YOUR NEW HIRE
 Before Day 1:
   □ Prepare a written 30-60-90 day plan
   □ Schedule recurring 1:1s for the first 90 days
-  □ Assign a buddy from the Solocorn studio
-  □ Notify the Solocorn studio and set context for the new hire's role
+  □ Assign a buddy from the DeParadigm Media studio
+  □ Notify the DeParadigm Media studio and set context for the new hire's role
   □ Clear your calendar for Day 1 — be present and available
 
 Week 1 priorities:
   □ Have a 1:1 on Day 1 (even if just 30 minutes)
   □ Share your communication preferences and working style
-  □ Explain how the Solocorn studio operates — meetings, Slack norms, decision-making
+  □ Explain how the DeParadigm Media studio operates — meetings, Slack norms, decision-making
   □ Introduce the new hire to key stakeholders personally
   □ Set clear expectations for the first 30 days
 
@@ -296,7 +296,7 @@ What great managers do differently:
 What causes early turnover:
   ❌ No clear expectations in the first 30 days
   ❌ Minimal manager availability
-  ❌ Isolated from the Solocorn studio socially
+  ❌ Isolated from the DeParadigm Media studio socially
   ❌ No feedback until the 90-day review
   ❌ Feeling like the role wasn't what was described
 ```

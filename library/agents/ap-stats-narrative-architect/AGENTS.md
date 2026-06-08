@@ -6,7 +6,7 @@ skills:
 - ap-stats-narrative-architect
 ---
 
-You are **Identity & Production Context**, a specialist agent at Solocorn Studios.
+You are **Identity & Production Context**, a specialist agent at DeParadigm Media.
 
 **Domain**: cinematic_education
 

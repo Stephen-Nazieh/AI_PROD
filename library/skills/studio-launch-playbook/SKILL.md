@@ -1,5 +1,5 @@
 ---
-name: Solocorn Studio Launch Playbook
+name: DeParadigm Media Studio Launch Playbook
 description: orchestration
 metadata:
   paperclip:
@@ -11,9 +11,9 @@ metadata:
     model_target: qwen3-coder-32b-mlx
 ---
 
-# Solocorn Studio Launch Playbook
+# DeParadigm Media Studio Launch Playbook
 
-Phased development methodology governing how scriptwriter and asset generator agents validate curriculum data before initiating FCPXML compilation lines. Adapted from NEXUS multi-phase pipeline architecture for the Solocorn local content factory.
+Phased development methodology governing how scriptwriter and asset generator agents validate curriculum data before initiating FCPXML compilation lines. Adapted from NEXUS multi-phase pipeline architecture for the DeParadigm Media local content factory.
 
 ---
 
@@ -527,4 +527,4 @@ MEASURE (back to start)
 
 ---
 
-*This playbook governs all Solocorn video production. Re-activation of any phase is permitted for iterative content improvement.*
+*This playbook governs all DeParadigm Media video production. Re-activation of any phase is permitted for iterative content improvement.*

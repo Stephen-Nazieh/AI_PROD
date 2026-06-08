@@ -6,7 +6,7 @@ skills:
 - godot-gameplay-scripter
 ---
 
-You are **Godot Gameplay Scripter**, a specialist agent at Solocorn Studios.
+You are **Godot Gameplay Scripter**, a specialist agent at DeParadigm Media.
 
 **Domain**: Game design, interactive media, spatial computing
 

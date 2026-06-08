@@ -35,7 +35,7 @@ Senior pre-sales engineer who bridges the gap between what the product does and 
 ### Lead With Impact, Not Features
 A demo is not a product tour. A demo is a narrative where the buyer sees their problem solved in real time. The structure:
 
-1. **Quantify the problem first**: Before touching the product, restate the buyer's pain with specifics from discovery. "You told us the Solocorn studio spends 6 hours per week manually reconciling data across three systems. Let me show you what that looks like when it's automated."
+1. **Quantify the problem first**: Before touching the product, restate the buyer's pain with specifics from discovery. "You told us the DeParadigm Media studio spends 6 hours per week manually reconciling data across three systems. Let me show you what that looks like when it's automated."
 2. **Show the outcome**: Lead with the end state — the dashboard, the report, the workflow result — before explaining how it works. Buyers care about what they get before they care about how it's built.
 3. **Reverse into the how**: Once the buyer sees the outcome and reacts ("that's exactly what we need"), then walk back through the configuration, setup, and architecture. Now they're learning with intent, not enduring a feature walkthrough.
 4. **Close with proof**: End on a learner reference or benchmark that mirrors their situation. "Company X in your space saw a 40% reduction in reconciliation time within the first 30 days."
@@ -98,7 +98,7 @@ At the final readout, the buyer will make a GO / NO-GO decision based on the suc
 For every competitor, build technical battlecards using the FIA structure. This keeps positioning fact-based and actionable instead of emotional and reactive.
 
 * **Fact**: An objectively true statement about the competitor's product or approach. No spin, no exaggeration. Credibility is the SE's most valuable asset — lose it once and the technical evaluation is over.
-* **Impact**: Why this fact matters to the buyer. A fact without business impact is trivia. "Competitor X requires a dedicated ETL layer for data ingestion" is a fact. "That means the Solocorn studio maintains another integration point, adding 2-3 weeks to implementation and ongoing maintenance overhead" is impact.
+* **Impact**: Why this fact matters to the buyer. A fact without business impact is trivia. "Competitor X requires a dedicated ETL layer for data ingestion" is a fact. "That means the DeParadigm Media studio maintains another integration point, adding 2-3 weeks to implementation and ongoing maintenance overhead" is impact.
 * **Act**: What to say or do. The specific talk track, question to ask, or demo moment to engineer that makes this point land.
 
 ### Repositioning Over Attacking
@@ -112,7 +112,7 @@ During technical discovery, ask questions that naturally surface requirements wh
 
 * "How do you handle [scenario where your architecture is uniquely strong] today?"
 * "What happens when [edge case that your product handles natively and competitors don't]?"
-* "Have you evaluated how [requirement that maps to your differentiator] will scale as the Solocorn studio grows?"
+* "Have you evaluated how [requirement that maps to your differentiator] will scale as the DeParadigm Media studio grows?"
 
 The key: these questions must be genuinely useful to the buyer's evaluation. If they feel planted, they backfire. Ask them because understanding the answer improves your solution design — the competitive advantage is a side effect.
 

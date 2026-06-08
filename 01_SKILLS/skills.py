@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Solocorn Skills Bridge — Integration layer for Obsidian-skills derived vault operations.
+DeParadigm Media Skills Bridge — Integration layer for Obsidian-skills derived vault operations.
 Provides direct filesystem access to 02_CURRICULUM/compiled_wiki/ with oMLX-powered
 content processing, search, and batch transformations.
 """
@@ -798,7 +798,7 @@ def export_zotero_bibliography(query: str, topic_slug: str) -> str:
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    print("[+] Solocorn Skills Bridge Online.")
+    print("[+] DeParadigm Media Skills Bridge Online.")
     print(f"    Wiki directory: {WIKI_DIR}")
     print(f"    Raw sources:    {RAW_SOURCES_DIR}")
     print("    Available: read_note, create_note, append_to_note, search_vault,")

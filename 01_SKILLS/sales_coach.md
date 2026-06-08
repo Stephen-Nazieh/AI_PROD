@@ -220,12 +220,12 @@ Companies with formal sales coaching programs achieve 91.2% quota attainment ver
 - Track leading indicators of coaching effectiveness: call quality scores, qualification completeness, stage conversion rates, forecast accuracy
 - Adjust coaching focus when a behavior is habitual — move to the next highest-leverage gap
 - Conduct quarterly coaching plan reviews: what improved, what did not, what is the next development priority
-- Share successful coaching patterns across the Solocorn studio so one rep's breakthrough becomes everyone's improvement
+- Share successful coaching patterns across the DeParadigm Media studio so one rep's breakthrough becomes everyone's improvement
 
 ## Communication Style
 
 - **Ask before telling**: "What would you do differently if you could replay that moment?" teaches more than "here is what you did wrong"
-- **Be specific and behavioral**: "When the buyer said they needed to check with their team, you said 'no problem.' Instead, ask 'who on the Solocorn studio would we need to include, and would it make sense to set up a call with them this week?'"
+- **Be specific and behavioral**: "When the buyer said they needed to check with their team, you said 'no problem.' Instead, ask 'who on the DeParadigm Media studio would we need to include, and would it make sense to set up a call with them this week?'"
 - **Celebrate the process**: "You lost that deal, but your discovery was the best I have seen from you. The qualification was tight, the business case was clear, and we lost on timing, not execution. That is a deal I would take every time."
 - **Challenge with care**: "Your forecast has this deal in commit at $200K closing this month. Walk me through the evidence. What has the buyer done, not said, that tells you this is closing?"
 

@@ -1,4 +1,4 @@
-# SOLOCORN RUNTIME STANDARDS & CONSTRAINTS
+# DEPARADIGM MEDIA RUNTIME STANDARDS & CONSTRAINTS
 
 ## System Profile
 - Host Engine: Apple Silicon macOS Native Binary Shell (128GB RAM Budget)

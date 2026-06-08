@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Solocorn Motion Template Bridge Specification
+  DeParadigm Media Motion Template Bridge Specification
   Purpose: Define how the Python media bridge looks up and modifies editable
            text block strings inside Apple Motion (.motn) files via background XML updates.
   Target Format: Apple Motion 5+ (.motn) XML structure

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-test_bridge.py — Smoke test for the Paperclip ↔ Solocorn bridge server.
+test_bridge.py — Smoke test for the Paperclip ↔ DeParadigm Media bridge server.
 
 Usage:
     cd /Users/nazeera/Documents/AI_PRODUCER
@@ -105,7 +105,7 @@ def test_mlx_direct() -> bool:
 
 
 def main() -> int:
-    print("🧪 Solocorn Bridge Smoke Tests")
+    print("🧪 DeParadigm Media Bridge Smoke Tests")
     print(f"   Bridge: {BRIDGE_URL}")
     print(f"   MLX:    {MLX_URL}")
     print()

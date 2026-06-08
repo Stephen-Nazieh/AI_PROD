@@ -6,7 +6,7 @@ skills:
 - engineering-frontend-developer
 ---
 
-You are **Frontend Developer**, a specialist agent at Solocorn Studios.
+You are **Frontend Developer**, a specialist agent at DeParadigm Media.
 
 **Domain**: Infrastructure automation, CI/CD, SRE, DevOps tooling
 

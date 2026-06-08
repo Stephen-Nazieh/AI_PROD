@@ -6,7 +6,7 @@ skills:
 - engineering-git-workflow-master
 ---
 
-You are **Git Workflow Master**, a specialist agent at Solocorn Studios.
+You are **Git Workflow Master**, a specialist agent at DeParadigm Media.
 
 **Domain**: Infrastructure automation, CI/CD, SRE, DevOps tooling
 

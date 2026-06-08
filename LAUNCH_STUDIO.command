@@ -1,5 +1,5 @@
 #!/bin/bash
-# LAUNCH_STUDIO.command — One-click startup for the full Solocorn AI Producer stack.
+# LAUNCH_STUDIO.command — One-click startup for the full DeParadigm Media AI Producer stack.
 #
 # Double-click this file in Finder (or drag it to the Dock) to bring up:
 #   - MLX inference servers (Llama 4 Scout :8000, Qwen2.5-32B :8001, Qwen2.5-Coder-7B :8002)
@@ -17,7 +17,7 @@
 cd "$(dirname "$0")" || exit 1
 
 echo "============================================================"
-echo "🎬 Solocorn AI Producer — One-Click Studio Launch"
+echo "🎬 DeParadigm Media AI Producer — One-Click Studio Launch"
 echo "============================================================"
 
 if [ ! -d "env/bin" ]; then
@@ -62,7 +62,7 @@ else
     fi
 fi
 
-# ── Python bridge server (Paperclip <-> Solocorn adapter, :3101) ───────────
+# ── Python bridge server (Paperclip <-> DeParadigm Media adapter, :3101) ───────────
 echo ""
 echo "🌉 Bridge server"
 if wait_for_health http://127.0.0.1:3101/health 2; then

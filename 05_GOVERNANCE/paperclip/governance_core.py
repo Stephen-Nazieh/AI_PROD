@@ -160,8 +160,8 @@ if __name__ == "__main__":
     governor.initialize_governance_ledger()
     
     # 1. Seed corporate identity mapping parameters
-    governor.materialize_new_company("Solocorn LLC", inc_type="LLC")
+    governor.materialize_new_company("DeParadigm Media LLC", inc_type="LLC")
     
     # 2. Simulate multi-pass computational resource logging checks
-    governor.record_operational_expense("Solocorn LLC", resource_type="local_inference_tokens", units_consumed=8500, unit_cost_usd=0.00002)
-    governor.record_operational_expense("Solocorn LLC", resource_type="manim_gpu_compute_hours", units_consumed=2.5, unit_cost_usd=0.12)
+    governor.record_operational_expense("DeParadigm Media LLC", resource_type="local_inference_tokens", units_consumed=8500, unit_cost_usd=0.00002)
+    governor.record_operational_expense("DeParadigm Media LLC", resource_type="manim_gpu_compute_hours", units_consumed=2.5, unit_cost_usd=0.12)

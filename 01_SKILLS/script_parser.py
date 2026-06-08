@@ -4,7 +4,7 @@ script_parser.py — Screenplay Parser: Fountain + Markdown → Structured Scene
 
 Supports two input formats:
   1. Fountain (.fountain) — Industry-standard plain text screenplay format
-  2. Markdown (.md) — Custom Solocorn pedagogical script format
+  2. Markdown (.md) — Custom DeParadigm Media pedagogical script format
 
 Outputs:
   - shot-list.json: Structured scene/shot breakdown with camera directions
@@ -233,10 +233,10 @@ class FountainParser:
         return scenes
 
 
-# ── Markdown Parser (Legacy Solocorn Format) ────────────────────────────────
+# ── Markdown Parser (Legacy DeParadigm Media Format) ────────────────────────────────
 
 class MarkdownParser:
-    """Parse custom Solocorn markdown scripts into scene manifests."""
+    """Parse custom DeParadigm Media markdown scripts into scene manifests."""
 
     def parse(self, text: str, track_name: str = "default") -> list[dict]:
         lines = text.splitlines()

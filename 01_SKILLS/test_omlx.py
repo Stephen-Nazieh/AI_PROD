@@ -14,7 +14,7 @@ def run_brain_diagnostic():
     print("🧠 Initiating hardware-accelerated local oMLX handshake...")
     
     prompt = "Generate a single 1-sentence educational hook about why Z-Scores matter in AP Statistics."
-    system_instruction = "You are an elite, concise curriculum scriptwriter for Solocorn EdTech."
+    system_instruction = "You are an elite, concise curriculum scriptwriter for DeParadigm Media EdTech."
     
     # Fire direct request to your local inference server
     response = run_local_omlx_inference(prompt, system_instruction)

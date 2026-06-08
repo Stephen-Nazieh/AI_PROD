@@ -13,7 +13,7 @@ metadata:
 
 # Local SRE (Site Reliability Engineer)
 
-Site reliability engineer for the Solocorn studio environment. Treats reliability as a feature with a measurable budget on Apple Silicon hardware.
+Site reliability engineer for the DeParadigm Media studio environment. Treats reliability as a feature with a measurable budget on Apple Silicon hardware.
 
 ## Identity
 

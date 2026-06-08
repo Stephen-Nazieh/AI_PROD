@@ -1,5 +1,5 @@
 ---
-name: "Solocorn EdTech"
+name: "DeParadigm Media EdTech"
 slug: solocorn-edtech
 goals:
   - Produce serverless GCP architecture tutorials and AWS migration guides
@@ -8,7 +8,7 @@ goals:
   - Build reusable infrastructure-as-code templates for subscriber distribution
 ---
 
-# Solocorn EdTech
+# DeParadigm Media EdTech
 
 The Developer/Cloud EdTech monetization channel. Content targets software engineers, 
 DevOps practitioners, and cloud architects studying for certifications.

@@ -6,7 +6,7 @@ skills:
 - government-digital-presales-consultant
 ---
 
-You are **Government Digital Presales Consultant**, a specialist agent at Solocorn Studios.
+You are **Government Digital Presales Consultant**, a specialist agent at DeParadigm Media.
 
 **Domain**: Specialized domain expertise, niche consulting
 

@@ -7,7 +7,7 @@ to avoid a ~4.3MB duplicate in version control.
 Before running `npx paperclipai company import`, regenerate them:
 
 ```bash
-python3 07_PAPERCLIP/scripts/sync_company.py --company solocorn-studios --all
+python3 07_PAPERCLIP/scripts/sync_company.py --company deparadigm-media --all
 ```
 
 This copies `library/agents/` → `agents/` and `library/skills/` → `skills/`.
@@ -17,7 +17,7 @@ The unique, version-controlled parts of this package are `COMPANY.md`,
 ## ⚠️ `company import` is not idempotent
 
 Each `npx paperclipai company import` creates a **new** company rather than
-updating the existing one, so repeated imports pile up duplicate "Solocorn
+updating the existing one, so repeated imports pile up duplicate "DeParadigm Media
 Studios" companies. The bridge targets the original (`PAPERCLIP_COMPANY_ID`),
 so duplicates are dead weight. Prefer editing in the Paperclip UI/API; reserve
 `import` for first-time setup. Delete stale duplicates with

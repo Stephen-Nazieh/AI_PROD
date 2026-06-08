@@ -90,7 +90,7 @@ def run_action(action: str, project: str = "", **kwargs) -> dict:
 def main():
     parser = argparse.ArgumentParser(
         prog="solocorn",
-        description="Solocorn Studios Production CLI",
+        description="DeParadigm Media Production CLI",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:

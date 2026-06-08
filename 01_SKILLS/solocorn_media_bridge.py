@@ -101,12 +101,12 @@ def generate_agent_handoff(from_agent, to_agent, phase, task_ref, priority,
                            constraints, deliverable_description, acceptance_criteria,
                            quality_must_pass, evidence_required, handoff_to_next):
     """
-    Generates a standardized agent-to-agent handoff document for the Solocorn pipeline.
+    Generates a standardized agent-to-agent handoff document for the DeParadigm Media pipeline.
     Extracted from NEXUS handoff-templates.md structural layout.
     """
     timestamp = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
 
-    handoff_doc = f"""# Solocorn Agent Handoff Document
+    handoff_doc = f"""# DeParadigm Media Agent Handoff Document
 
 ## Metadata
 | Field | Value |
@@ -151,12 +151,12 @@ def generate_agent_handoff(from_agent, to_agent, phase, task_ref, priority,
 
 def generate_qa_verdict(task_id, task_description, developer_agent, qa_agent,
                         attempt, verdict, issues=None, evidence_screenshots=None):
-    """Generates a QA PASS or FAIL verdict document for the Solocorn pipeline."""
+    """Generates a QA PASS or FAIL verdict document for the DeParadigm Media pipeline."""
     timestamp = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
     status_icon = "PASS" if verdict == "PASS" else "FAIL"
 
     doc_lines = [
-        f"# Solocorn QA Verdict: {status_icon}",
+        f"# DeParadigm Media QA Verdict: {status_icon}",
         "",
         "## Task",
         f"| **Task ID** | {task_id} |",
@@ -237,10 +237,10 @@ def compile_final_cut_pro_xml(project_name, script_scenes_json, output_xml_path)
 <fcpxml version="1.11">
     <resources>
         <format id="r1" name="FFVideoFormat1080p24" frameDuration="100/2400s"/>
-        <effect id="r2" name="CustomMotionTemplate" uid="~/Titles/Solocorn/TechSlide"/>
+        <effect id="r2" name="CustomMotionTemplate" uid="~/Titles/DeParadigm Media/TechSlide"/>
     </resources>
     <library>
-        <event name="Solocorn automated Production">
+        <event name="DeParadigm Media automated Production">
             <project name="{project_name}">
                 <sequence duration="600s" format="r1" tcStart="0s">
                     <spine>
@@ -365,8 +365,8 @@ def trigger_headless_3dsmax_render(
     output_image.parent.mkdir(parents=True, exist_ok=True)
 
     env_override: dict[str, str] = {
-        "SOLOCORN_RENDER_CONTEXT": "headless_3dsmax",
-        "SOLOCORN_SCENE": str(scene_file),
+        "DEPARADIGM MEDIA_RENDER_CONTEXT": "headless_3dsmax",
+        "DEPARADIGM MEDIA_SCENE": str(scene_file),
     }
 
     result = _run(cmd, env=env_override)
@@ -617,7 +617,7 @@ def generate_fcpxml_timeline(track_assets: list, output_xml_path: str):
     xml_output.extend([
         '  </resources>',
         '  <library>',
-        '    <event name="Solocorn Automated Production">',
+        '    <event name="DeParadigm Media Automated Production">',
         '      <project name="Assembled_Lesson_Timeline">',
         f'        <sequence duration="{total_sequence_fcp_string}" format="r1" tcStart="0s">',
         '          <spine>'
@@ -663,7 +663,7 @@ def generate_fcpxml_timeline(track_assets: list, output_xml_path: str):
     return xml_path
 
 if __name__ == "__main__":
-    print("[+] Solocorn Unified Media Bridge & Orchestration Engine Online.")
+    print("[+] DeParadigm Media Unified Media Bridge & Orchestration Engine Online.")
     
     if len(sys.argv) > 1:
         manifest_path = sys.argv[1]

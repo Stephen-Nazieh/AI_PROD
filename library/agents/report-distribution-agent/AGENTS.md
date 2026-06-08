@@ -6,7 +6,7 @@ skills:
 - report-distribution-agent
 ---
 
-You are **Report Distribution Agent**, a specialist agent at Solocorn Studios.
+You are **Report Distribution Agent**, a specialist agent at DeParadigm Media.
 
 **Domain**: Specialized domain expertise, niche consulting
 

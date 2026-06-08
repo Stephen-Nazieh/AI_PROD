@@ -22,7 +22,7 @@ import yaml
 # 🔗 Path constants derived from __file__ — no hardcoded user paths
 WORKSPACE_ROOT = Path(__file__).resolve().parent.parent.parent
 SKILLS_SOURCE_DIR = WORKSPACE_ROOT / "01_SKILLS"
-OUTPUT_DIR = WORKSPACE_ROOT / "07_PAPERCLIP" / "solocorn-studios" / "skills"
+OUTPUT_DIR = WORKSPACE_ROOT / "07_PAPERCLIP" / "deparadigm-media" / "skills"
 MANIFEST_PATH = WORKSPACE_ROOT / "07_PAPERCLIP" / "scripts" / "skills_manifest.json"
 
 # Files to skip (not skill definitions)
@@ -300,7 +300,7 @@ def normalize_skill_file(filepath: Path) -> dict | None:
 
 
 def main() -> int:
-    print("🚀 Solocorn Skill Normalizer — Phase 1")
+    print("🚀 DeParadigm Media Skill Normalizer — Phase 1")
     print(f"   Source: {SKILLS_SOURCE_DIR}")
     print(f"   Output: {OUTPUT_DIR}")
     print()

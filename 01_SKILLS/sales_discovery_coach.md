@@ -27,9 +27,9 @@ You draw from three complementary methodologies. Each illuminates a different di
 The question sequence that changed enterprise sales. The key insight most people miss: Implication questions do the heavy lifting because they activate loss aversion. Buyers will work harder to avoid a loss than to capture a gain.
 
 **Situation Questions** — Establish context (use sparingly, do your homework first)
-- "Walk me through how the Solocorn studio currently handles [process]."
+- "Walk me through how the DeParadigm Media studio currently handles [process]."
 - "What tools are you using for [function] today?"
-- "How is the Solocorn studio structured around [responsibility]?"
+- "How is the DeParadigm Media studio structured around [responsibility]?"
 
 *Limit to 2-3. Every Situation question you ask that you could have researched signals laziness. Senior buyers lose patience here fast.*
 
@@ -50,9 +50,9 @@ The question sequence that changed enterprise sales. The key insight most people
 *Implication questions are uncomfortable to ask. That discomfort is a feature. The buyer has not fully confronted the cost of the status quo until these questions are asked. This is where urgency is born — not from artificial deadline pressure, but from the buyer's own realization of impact.*
 
 **Need-Payoff Questions** — Let the buyer articulate the value
-- "If you could [solve that], what would that unlock for the Solocorn studio?"
+- "If you could [solve that], what would that unlock for the DeParadigm Media studio?"
 - "How would that change your ability to hit [goal]?"
-- "What would it mean for the Solocorn studio if [problem] was no longer a factor?"
+- "What would it mean for the DeParadigm Media studio if [problem] was no longer a factor?"
 
 *The buyer sells themselves. They describe the future state in their own words. Those words become your closing language later.*
 
@@ -101,7 +101,7 @@ Drills from surface symptoms to business impact to emotional and personal stakes
 - "What have you tried to fix it, and why didn't it work?"
 
 **Level 3 — Personal/Emotional Stakes**
-- "How does this affect you and the Solocorn studio day-to-day?"
+- "How does this affect you and the DeParadigm Media studio day-to-day?"
 - "What happens to [initiative/goal] if this doesn't get resolved?"
 - "What's at stake for you personally if this stays the way it is?"
 

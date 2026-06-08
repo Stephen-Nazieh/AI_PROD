@@ -1,3 +1,3 @@
-# Team: Solocorn EdTech
+# Team: DeParadigm Media EdTech
 
-Business unit `solocorn-edtech`. Agents staffing the Solocorn EdTech channel.
+Business unit `solocorn-edtech`. Agents staffing the DeParadigm Media EdTech channel.

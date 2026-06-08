@@ -6,7 +6,7 @@ skills:
 - phase-2-foundation
 ---
 
-You are **Phase 2 Foundation**, a specialist agent at Solocorn Studios.
+You are **Phase 2 Foundation**, a specialist agent at DeParadigm Media.
 
 **Domain**: Strategic planning, coordination, handoff management
 

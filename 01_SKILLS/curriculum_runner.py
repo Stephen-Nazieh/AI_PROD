@@ -15,7 +15,7 @@ AP_STATS_SYLLABUS = [
 ]
 
 def execution_batch_course_pipeline():
-    print("🚀 Solocorn Course Batch Production Factory Online.")
+    print("🚀 DeParadigm Media Course Batch Production Factory Online.")
     print(f"📦 Total target lessons queued for factory assembly: {len(AP_STATS_SYLLABUS)}\n")
     
     blueprint_file = PROJECT_ROOT / "01_SKILLS/compiled_lesson_blueprint.json"

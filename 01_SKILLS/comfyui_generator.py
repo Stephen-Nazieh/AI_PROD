@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-comfyui_generator.py — ComfyUI API Wrapper for Solocorn Studios
+comfyui_generator.py — ComfyUI API Wrapper for DeParadigm Media
 
 Generate images via ComfyUI's REST API using SDXL Base or Flux-dev.
 Handles workflow construction, queue submission, and result polling.

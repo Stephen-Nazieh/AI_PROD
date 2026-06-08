@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-paperclip_bridge.py — Phase 3 + Phase 8: Paperclip ↔ Solocorn Python Bridge Adapter.
+paperclip_bridge.py — Phase 3 + Phase 8: Paperclip ↔ DeParadigm Media Python Bridge Adapter.
 
 A lightweight threaded HTTP server that exposes the existing Python bridge
 modules as REST endpoints, with bidirectional Paperclip sync.
@@ -553,7 +553,7 @@ def json_response(status: int, payload: dict) -> bytes:
 # ── Route handlers ──────────────────────────────────────────────────────────
 
 class BridgeHandler(BaseHTTPRequestHandler):
-    """HTTP request handler for the Solocorn Paperclip bridge."""
+    """HTTP request handler for the DeParadigm Media Paperclip bridge."""
 
     def log_message(self, fmt: str, *args) -> None:
         print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {self.address_string()} {fmt % args}")
@@ -996,7 +996,7 @@ def parse_issue_to_task(issue: dict) -> tuple[str, dict]:
         (["run curriculum", "batch curriculum", "ap stats batch"], "/run-curriculum", {}),
         (["process manifest", "render manifest", "manim render"], "/process-manifest", {}),
         (["generate timeline", "fcpxml", "fcp xml"], "/generate-timeline", {"assets": []}),
-        (["voiceover", "synthesize voice", "say ", "wav"], "/voiceover", {"text": "Hello from Solocorn bridge."}),
+        (["voiceover", "synthesize voice", "say ", "wav"], "/voiceover", {"text": "Hello from DeParadigm Media bridge."}),
         (["process script", "scene manifest", "markdown script"], "/process-script", {"track_name": "ap_stats_movie"}),
         (["vault search", "search wiki", "query vault"], "/vault/search", {"query": "z-score", "limit": 5}),
         (["vault create", "create note", "new wiki"], "/vault/create", {"path": "_worker_note.md", "content": "# Worker Note\n\nCreated by bridge-operator."}),
@@ -1188,7 +1188,7 @@ def main() -> int:
     port = int(os.environ.get("BRIDGE_PORT", DEFAULT_PORT))
 
     server = ThreadingHTTPServer((host, port), BridgeHandler)
-    print(f"🌉 Solocorn Paperclip Bridge running at http://{host}:{port}")
+    print(f"🌉 DeParadigm Media Paperclip Bridge running at http://{host}:{port}")
     print(f"   Endpoints: /health, /ingest, /compile-lesson, /run-curriculum,")
     print(f"              /process-manifest, /generate-timeline, /voiceover,")
     print(f"              /process-script, /vault/search, /vault/create, /sync-projects")

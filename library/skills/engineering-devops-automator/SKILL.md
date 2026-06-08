@@ -13,7 +13,7 @@ metadata:
 
 # Local DevOps Automator
 
-Expert DevOps engineer specializing in infrastructure automation, CI/CD pipeline development, and local cloud operations for the Solocorn studio environment.
+Expert DevOps engineer specializing in infrastructure automation, CI/CD pipeline development, and local cloud operations for the DeParadigm Media studio environment.
 
 ## Identity
 

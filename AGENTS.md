@@ -60,7 +60,7 @@ AI_PRODUCER/
 │   └── vtuber_twin/            # UDP spatial streaming, IK viewport, telemetry canvas
 ├── 07_PAPERCLIP/               # Paperclip company package + bridge adapter
 │   ├── companies/
-│   │   └── solocorn-studios/   # agentcompanies/v1 company (agents, skills, projects, teams)
+│   │   └── deparadigm-media/   # agentcompanies/v1 company (agents, skills, projects, teams)
 │   └── scripts/                # normalize_skills.py, create_org_chart.py, paperclip_bridge.py
 ├── .docker/                    # Docker Compose + gateway routing + nginx staging configs
 ├── env/                        # Python 3.14 virtual environment (committed historically)
@@ -271,7 +271,7 @@ they are regenerated from the canonical `library/` via `sync_company.py`
 
 ```bash
 # 1. Regenerate agents/ and skills/ from library/ into the package
-python3 07_PAPERCLIP/scripts/sync_company.py --company solocorn-studios --all
+python3 07_PAPERCLIP/scripts/sync_company.py --company deparadigm-media --all
 
 # 2. Import the freshly-synced package into Paperclip
 npx paperclipai company import --yes /Users/nazeera/Documents/AI_PRODUCER/07_PAPERCLIP/companies/deparadigm-media
@@ -318,7 +318,7 @@ projects) into a single multi-company model:
   - `production/` — container of runs; each run is a subfolder with the
     `01-scripts … 09-deliver` pipeline tree (gitignored — heavy/regenerable)
   - `assets/` — rendered media (gitignored)
-- **Current companies:** `solocorn-studios` (units: edtech, ap-stats,
+- **Current companies:** `deparadigm-media` (units: edtech, ap-stats,
   translation, ambient), `deparadigm-media`, `nazeera-multimedia`.
 
 ### Create / sync companies and units (as needed)
@@ -330,8 +330,8 @@ python3 01_SKILLS/provision_business_unit.py add-company acme --name "Acme Co"
 # Create/sync a business unit under a company:
 python3 01_SKILLS/provision_business_unit.py provision acme shorts \
     --name "Acme Shorts" --domain "..."
-python3 01_SKILLS/provision_business_unit.py provision solocorn-studios ap-stats  # re-sync
-python3 01_SKILLS/provision_business_unit.py list [--company solocorn-studios]
+python3 01_SKILLS/provision_business_unit.py provision deparadigm-media ap-stats  # re-sync
+python3 01_SKILLS/provision_business_unit.py list [--company deparadigm-media]
 ```
 
 Provisioning scaffolds the folder, ensures the Paperclip Project + Team, sets the

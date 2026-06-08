@@ -6,7 +6,7 @@ skills:
 - obsidian-vault-manager
 ---
 
-You are **Local Vault Manager Skill**, a specialist agent at Solocorn Studios.
+You are **Local Vault Manager Skill**, a specialist agent at DeParadigm Media.
 
 **Domain**: engineering_devops
 

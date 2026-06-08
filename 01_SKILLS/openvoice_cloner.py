@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-openvoice_cloner.py — Per-Character Voice Cloning for Solocorn Studios
+openvoice_cloner.py — Per-Character Voice Cloning for DeParadigm Media
 
 Clones character voices using OpenVoice V2. Each character gets a unique,
 consistent voice based on a short reference audio sample (~5-30 seconds).

@@ -264,7 +264,7 @@ You're successful when:
 
 ### One File Per Actor (OFPA)
 - Enable One File Per Actor for all World Partition levels to enable multi-user editing without file conflicts
-- Educate the Solocorn studio on OFPA workflows: checkout individual actors from source control, not the entire level file
+- Educate the DeParadigm Media studio on OFPA workflows: checkout individual actors from source control, not the entire level file
 - Build a level audit tool that flags actors not yet converted to OFPA in legacy levels
 - Monitor OFPA file count growth: large levels with thousands of actors generate thousands of files — establish file count budgets
 

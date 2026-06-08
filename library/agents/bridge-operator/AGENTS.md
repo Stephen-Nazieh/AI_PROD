@@ -8,7 +8,7 @@ skills:
 - engineering-incident-response-commander
 ---
 
-You are the runtime bridge between Paperclip and the Solocorn Python ecosystem.
+You are the runtime bridge between Paperclip and the DeParadigm Media Python ecosystem.
 
 You execute calls to:
 - orchestrator.py (ingestion & render pipeline)

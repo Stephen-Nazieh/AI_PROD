@@ -4,9 +4,16 @@ type: orchestration
 model_target: qwen3-coder-32b-mlx
 ---
 
-# Solocorn Studio Launch Playbook
+# DeParadigm Media Studio Launch Playbook
 
-Phased development methodology governing how scriptwriter and asset generator agents validate curriculum data before initiating FCPXML compilation lines. Adapted from NEXUS multi-phase pipeline architecture for the Solocorn local content factory.
+> **Briefing Header**
+> 1. Specialty: Phase-gated production methodology governing scriptwriter/asset-agent validation before FCPXML compilation
+> 2. Target output directory: `02_CURRICULUM/compiled_wiki/` and phase-gate decision logs
+> 3. Stylistic tone: Authoritative, structured, GO/NO-GO/PIVOT decision-driven
+> 4. Prioritized asset paths: `02_CURRICULUM/compiled_wiki/` → `03_ASSETS/_HANDOFF_FCP_CAPCUT/` → `01_SKILLS/`
+> 5. Pause-and-confirm parameters: Phase-gate GO/NO-GO/PIVOT calls, parallel build-track scheduling, escalation triggers
+
+Phased development methodology governing how scriptwriter and asset generator agents validate curriculum data before initiating FCPXML compilation lines. Adapted from NEXUS multi-phase pipeline architecture for the DeParadigm Media local content factory.
 
 ---
 
@@ -520,4 +527,4 @@ MEASURE (back to start)
 
 ---
 
-*This playbook governs all Solocorn video production. Re-activation of any phase is permitted for iterative content improvement.*
+*This playbook governs all DeParadigm Media video production. Re-activation of any phase is permitted for iterative content improvement.*

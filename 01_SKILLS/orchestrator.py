@@ -12,14 +12,14 @@ from gtts import gTTS
 # Establish absolute machines paths
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.append(str(PROJECT_ROOT / "01_SKILLS"))
-sys.path.append(str(PROJECT_ROOT / "05_SYSTEMICS"))
+sys.path.append(str(PROJECT_ROOT / "05_GOVERNANCE"))
 sys.path.append(str(PROJECT_ROOT / "06_SPATIAL"))
 
 from understand_anything.parser_core import UnderstandAnythingParser
 from graphify.knowledge_graph import GraphifyEngine
 from paperclip.governance_core import PaperclipEnterpriseGovernor
 from understand_anything.claude_interface import ClaudeCodeAutomationBridge
-from vtuber_twin.twin_bridge import SolocornSpatialBridge
+from vtuber_twin.twin_bridge import DeParadigm MediaSpatialBridge
 
 print("🪐 [Orchestrator V9.1] Sovereign Multi-Part Curriculum Engine Online.")
 print("🎙️ [Neural Transformer Voice Active] 📚 [Syllabus Splitter Engaged]")
@@ -83,7 +83,7 @@ def process_incoming_vault_stream():
     graph_engine = GraphifyEngine()
     governor = PaperclipEnterpriseGovernor()
     claude_bridge = ClaudeCodeAutomationBridge()
-    spatial_bridge = SolocornSpatialBridge()
+    spatial_bridge = DeParadigm MediaSpatialBridge()
     manim_path = shutil.which("manim")
     ffmpeg_path = shutil.which("ffmpeg")
     
@@ -104,7 +104,7 @@ def process_incoming_vault_stream():
             print(f"\n🎬 [Playlist Queue] Executing production run for module {lesson['index']}: '{lesson_title}'")
 
             # Phase 1: Ledger Accounting Audit
-            governor.record_operational_expense("Solocorn LLC", "multi_part_pipeline_tick", 1, 0.25)
+            governor.record_operational_expense("DeParadigm Media LLC", "multi_part_pipeline_tick", 1, 0.25)
             
             # Phase 2: Knowledge Graph Indexing
             graph_engine.map_extracted_manifest({"title": lesson_title, "summary": lesson_summary, "elements": []})

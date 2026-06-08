@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-render_queue.py — Async Render Queue for Solocorn Studios Media Production
+render_queue.py — Async Render Queue for DeParadigm Media Media Production
 
 Provides SQLite-backed job queueing with parallel workers for:
   - Blender headless renders
@@ -383,7 +383,7 @@ class RenderWorker:
 # ── CLI ─────────────────────────────────────────────────────────────────────
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Solocorn Render Queue")
+    parser = argparse.ArgumentParser(description="DeParadigm Media Render Queue")
     subparsers = parser.add_subparsers(dest="command", help="Commands")
 
     # enqueue

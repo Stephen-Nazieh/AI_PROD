@@ -15,7 +15,7 @@ class SpatialTelemetryCanvas:
         
         # Initialize an elegant local desktop window interface
         self.root = tk.Tk()
-        self.root.title("🪐 Solocorn Spatial Twin Telemetry Control Plane")
+        self.root.title("🪐 DeParadigm Media Spatial Twin Telemetry Control Plane")
         self.root.geometry("400x450")
         self.root.configure(bg="#111116")
 

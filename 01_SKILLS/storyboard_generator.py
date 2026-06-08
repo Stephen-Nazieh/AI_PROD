@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-storyboard_generator.py — Autonomous Storyboard Generator for Solocorn Studios
+storyboard_generator.py — Autonomous Storyboard Generator for DeParadigm Media
 
 Generates concept art storyboards from a parsed screenplay shot list.
 Fully autonomous: reads shot metadata, crafts prompts, batch-generates images,

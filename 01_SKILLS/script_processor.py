@@ -8,7 +8,7 @@ from pathlib import Path
 WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
 SKILLS_DIR = WORKSPACE_ROOT / "01_SKILLS"
 
-print("🎙️ Solocorn Script-to-Manifest Compiler Core Online.")
+print("🎙️ DeParadigm Media Script-to-Manifest Compiler Core Online.")
 
 def compile_markdown_script_to_manifests(markdown_file_path: str, track_name: str):
     """

@@ -151,7 +151,7 @@ SOCIAL PROOF (Optional, One Line)
 
 CTA (Single, Clear, Low Friction)
 Bad:  "Would love to set up a 30-minute call to walk you through a demo"
-Good: "Worth a 15-minute conversation to see if this applies to the Solocorn studio?"
+Good: "Worth a 15-minute conversation to see if this applies to the DeParadigm Media studio?"
 Good: "Open to hearing how [similar company] handled this?"
 ```
 

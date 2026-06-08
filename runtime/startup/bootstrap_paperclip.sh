@@ -7,7 +7,7 @@
 
 set -e
 
-echo "🚀 Solocorn Paperclip Bootstrap"
+echo "🚀 DeParadigm Media Paperclip Bootstrap"
 echo "================================"
 
 # ── Verify prerequisites ────────────────────────────────────────────────────
@@ -87,7 +87,7 @@ fi
 # ── Summary ─────────────────────────────────────────────────────────────────
 echo ""
 echo "================================"
-echo "🎉 Solocorn stack is live!"
+echo "🎉 DeParadigm Media stack is live!"
 echo ""
 echo "   Paperclip UI:    http://localhost:3100"
 echo "   Bridge API:      http://localhost:3101"
@@ -95,7 +95,7 @@ echo "   MLX Inference:   http://localhost:8000/v1"
 echo "   OpenClaw:        ws://localhost:18789"
 echo "   PostgreSQL:      localhost:5432 (production), localhost:5433 (governance)"
 echo ""
-echo "   Company:         Solocorn Studios (SOL)"
+echo "   Company:         DeParadigm Media (SOL)"
 echo "   Agents:          245"
 echo "   Projects:        4"
 echo "   Skills:          235"

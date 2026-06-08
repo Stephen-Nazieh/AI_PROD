@@ -17,7 +17,7 @@ except ImportError as e:
     print(f"❌ Core import map failed. Details: {str(e)}")
     sys.exit(1)
 
-print("🔄 Initializing Solocorn Content Pipeline Ingestion Run...")
+print("🔄 Initializing DeParadigm Media Content Pipeline Ingestion Run...")
 
 # 4. Execute the sweeping clean and compile sequence via the local mlx-lm model
 try:

@@ -26,7 +26,7 @@ class AdvancedIK3DViewport:
         self.time_elapsed = 0.0
 
         # Initialize Hardware Window Layout Canvas
-        self.window = pyglet.window.Window(600, 600, "🪐 Solocorn Advanced 3D Spatial Twin Engine")
+        self.window = pyglet.window.Window(600, 600, "🪐 DeParadigm Media Advanced 3D Spatial Twin Engine")
         self.batch = pyglet.graphics.Batch()
 
         # 🟢 THE RIGGED MESH STRUCTURE

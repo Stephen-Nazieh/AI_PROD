@@ -246,7 +246,7 @@ You're successful when:
 
 ### Path Tracing and Virtual Production
 - Configure the Path Tracer for offline renders and cinematic quality validation: verify Lumen approximations are acceptable
-- Build Movie Render Queue presets for consistent offline render output across the Solocorn studio
+- Build Movie Render Queue presets for consistent offline render output across the DeParadigm Media studio
 - Implement OCIO (OpenColorIO) color management for correct color science in both editor and rendered output
 - Design lighting rigs that work for both real-time Lumen and path-traced offline renders without dual-maintenance
 

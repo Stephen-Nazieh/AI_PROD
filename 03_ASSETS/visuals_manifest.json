@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Solocorn Visuals Manifest",
+  "title": "DeParadigm Media Visuals Manifest",
   "description": "Tracks automated media generation assets across scenes for ComfyUI, Motion, and Final Cut Pro pipeline integration.",
   "type": "object",
   "properties": {

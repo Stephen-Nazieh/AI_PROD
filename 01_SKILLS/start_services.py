@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-start_services.py — Launch All Solocorn Production Services
+start_services.py — Launch All DeParadigm Media Production Services
 
 Starts MLX inference servers, ComfyUI, the render queue worker pool,
 Docker stack, and verifies health before declaring the studio ready.
@@ -247,7 +247,7 @@ def show_status():
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Start Solocorn Production Services")
+    parser = argparse.ArgumentParser(description="Start DeParadigm Media Production Services")
     parser.add_argument("--mlx-only", action="store_true", help="Start only MLX servers")
     parser.add_argument("--comfyui-only", action="store_true", help="Start only ComfyUI")
     parser.add_argument("--docker-only", action="store_true", help="Start only Docker stack")
@@ -275,7 +275,7 @@ def main():
     start_render_worker = not (args.mlx_only or args.comfyui_only or args.docker_only)
 
     print("=" * 60)
-    print("🎬 Solocorn Studio Service Launcher")
+    print("🎬 DeParadigm Media Studio Service Launcher")
     print("=" * 60)
 
     if start_mlx:

@@ -1,4 +1,4 @@
-# 🪐 Solocorn Sovereign Operations: Heartbeat Control Plane
+# 🪐 DeParadigm Media Sovereign Operations: Heartbeat Control Plane
 
 ## 🚀 Active Corporate Systems Task Ledger
 - [x] Boot unified Docker cluster stack containers

@@ -397,7 +397,7 @@ contract FlashLoanOracleExploitTest is Test {
 ### Step 5: Report & Remediation
 - Write detailed findings with severity, description, impact, PoC, and recommendation
 - Provide Foundry test cases that reproduce each vulnerability
-- Review the Solocorn studio's fixes to verify they actually resolve the issue without introducing new bugs
+- Review the DeParadigm Media studio's fixes to verify they actually resolve the issue without introducing new bugs
 - Document residual risks and areas outside audit scope that need monitoring
 
 ## 💭 Your Communication Style

@@ -8,7 +8,7 @@
 
 set -e
 
-echo "🚀 Starting Solocorn Local LLM Servers"
+echo "🚀 Starting DeParadigm Media Local LLM Servers"
 echo ""
 
 # Kill existing servers and proxy

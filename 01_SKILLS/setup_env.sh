@@ -1,5 +1,5 @@
 #!/bin/bash
-# Solocorn Environment Setup Script
+# DeParadigm Media Environment Setup Script
 # Initializes a local Python virtual environment and installs verified
 # local-first dependencies for the skills.py background platform.
 # Designed to run fully separated from native macOS system libraries.
@@ -10,7 +10,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 VENV_DIR="$PROJECT_ROOT/.venv"
 
-echo "[+] Solocorn Environment Setup"
+echo "[+] DeParadigm Media Environment Setup"
 echo "    Project root: $PROJECT_ROOT"
 echo "    Venv target:  $VENV_DIR"
 

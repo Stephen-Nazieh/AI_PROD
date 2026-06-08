@@ -17,7 +17,7 @@
     </asset>
   </resources>
   <library>
-    <event name="Solocorn Automated Production">
+    <event name="DeParadigm Media Automated Production">
       <project name="Assembled_Lesson_Timeline">
         <sequence duration="65900/2400s" format="r1" tcStart="0s">
           <spine>
