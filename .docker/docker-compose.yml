@@ -44,6 +44,16 @@ services:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
 
+  # NOTE: The "production tracking" Postgres on port 5432 (consumed by
+  # init_database.py / solocorn_media_bridge.py, creds postgres/postgres/postgres)
+  # already runs as a standalone container named `solocorn_db` started outside
+  # this compose project (`docker ps` shows it bound to 0.0.0.0:5432->5432/tcp
+  # with populated `production_tracks`/`media_assets` tables). Do not define a
+  # second postgres service here — it will conflict on the port. If you ever
+  # need to recreate it: `docker run -d --name solocorn_db -p 5432:5432
+  # -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=postgres
+  # -v solocorn_db_data:/var/lib/postgresql/data postgres:15-alpine`
+
   # Persistent Relational Storage Memory Layer for Graphify & Paperclip Corporate Logs
   paperclip_db:
     image: postgres:15-alpine
@@ -51,9 +61,9 @@ services:
     ports:
       - "5433:5432"
     environment:
-      - POSTGRES_USER=paperclip_admin
-      - POSTGRES_PASSWORD=***REMOVED***
-      - POSTGRES_DB=paperclip_governance
+      - POSTGRES_USER=${PAPERCLIP_DB_USER:?set PAPERCLIP_DB_USER in .docker/.env}
+      - POSTGRES_PASSWORD=${PAPERCLIP_DB_PASSWORD:?set PAPERCLIP_DB_PASSWORD in .docker/.env}
+      - POSTGRES_DB=${PAPERCLIP_DB_NAME:?set PAPERCLIP_DB_NAME in .docker/.env}
     volumes:
       - paperclip_db_data:/var/lib/postgresql/data
     restart: unless-stopped

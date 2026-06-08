@@ -20,6 +20,25 @@ SKILLS_DIR = WORKSPACE_ROOT / "01_SKILLS"
 WIKI_DIR = WORKSPACE_ROOT / "02_CURRICULUM" / "compiled_wiki"
 HANDOFF_DIR = WORKSPACE_ROOT / "03_ASSETS" / "_HANDOFF_FCP_CAPCUT"
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv(WORKSPACE_ROOT / ".env")
+except ImportError:
+    pass  # dotenv optional; falls back to the already-exported environment
+
+
+def production_db_params(**overrides: Any) -> dict[str, Any]:
+    """Port 5432 production-tracking DB params, sourced from PRODUCTION_DB_* env vars."""
+    params: dict[str, Any] = {
+        "dbname": os.environ.get("PRODUCTION_DB_NAME", "postgres"),
+        "user": os.environ.get("PRODUCTION_DB_USER", "postgres"),
+        "password": os.environ.get("PRODUCTION_DB_PASSWORD", "postgres"),
+        "host": os.environ.get("PRODUCTION_DB_HOST", "127.0.0.1"),
+        "port": os.environ.get("PRODUCTION_DB_PORT", "5432"),
+    }
+    params.update(overrides)
+    return params
+
 # Business-tier curriculum coordinates for programmatic media assembly
 CURRICULUM_ROOT = WORKSPACE_ROOT / "02_CURRICULUM"
 BUSINESS_TRACKS = {
@@ -265,7 +284,7 @@ def trigger_video_pipeline(source_sequence: Path, output_movie: Path, codec: str
 
 def trigger_manim_render(scene_name: str, skills_script_path: str = "01_SKILLS/skills.py", quality_flag: str = "-ql") -> dict[str, Any]:
     """Pilots the Manim math vector engine headlessly via path parameters."""
-    output_dir = WORKSPACE_ROOT / "02_COMPANIES" / "02_AP_STATS_MEDIA" / "03_ASSETS"
+    output_dir = WORKSPACE_ROOT / "02_CURRICULUM" / "02_AP_STATS_MOVIE" / "assets"
     cmd = [
         sys.executable, "-m", "manim",
         quality_flag,
@@ -436,7 +455,7 @@ def process_incoming_manifest(manifest_json_path: str):
         destination_path = manifest.get("output_image") or manifest.get("output_movie") or f"03_ASSETS/rendered_{asset_name}.mov"
         
         # 4. Log the Successful Asset Directly onto the PostgreSQL Ledger
-        db_params = {"dbname": "postgres", "user": "postgres", "password": "postgres", "host": "127.0.0.1", "port": "5432"}
+        db_params = production_db_params()
         conn = psycopg2.connect(**db_params)
         cursor = conn.cursor()
         
@@ -504,14 +523,7 @@ def register_asset_state_to_ledger(track_name: str, asset_name: str, file_path: 
     Establishes an accurate handshake with your initialized local PostgreSQL instance.
     Logs metadata transformations cleanly into the 'media_assets' relational table.
     """
-    DB_PARAMS = {
-        "dbname": "postgres",
-        "user": "postgres",
-        "password": "postgres",
-        "host": "127.0.0.1",
-        "port": "5432",
-        "connect_timeout": 3
-    }
+    DB_PARAMS = production_db_params(connect_timeout=3)
     try:
         conn = connect(**DB_PARAMS)
         cursor = conn.cursor()

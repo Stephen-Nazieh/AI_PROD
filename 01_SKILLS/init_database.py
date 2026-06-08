@@ -1,15 +1,23 @@
 #!/usr/bin/env python3
+import os
 import sys
 import json
+from pathlib import Path
 from psycopg2 import connect, OperationalError
 
-# Local container staging parameters with explicit authentication overrides
+try:
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+except ImportError:
+    pass  # dotenv optional; falls back to the already-exported environment
+
+# Local container staging parameters, sourced from PRODUCTION_DB_* env vars (.env at repo root)
 DB_PARAMS = {
-    "dbname": "postgres",
-    "user": "postgres",
-    "password": "postgres",  # Matches your container password exactly
-    "host": "127.0.0.1",
-    "port": "5432",
+    "dbname": os.environ.get("PRODUCTION_DB_NAME", "postgres"),
+    "user": os.environ.get("PRODUCTION_DB_USER", "postgres"),
+    "password": os.environ.get("PRODUCTION_DB_PASSWORD", "postgres"),
+    "host": os.environ.get("PRODUCTION_DB_HOST", "127.0.0.1"),
+    "port": os.environ.get("PRODUCTION_DB_PORT", "5432"),
     "connect_timeout": 5,
     #"options": "-c gssencmode=disable"  # Force-disables the macOS GSSAPI security warning
 }

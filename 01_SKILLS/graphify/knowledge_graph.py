@@ -1,7 +1,15 @@
 #!/usr/bin/env python3
+import os
 import json
 import psycopg2
+from pathlib import Path
 from psycopg2 import connect
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).resolve().parents[2] / ".env")
+except ImportError:
+    pass  # dotenv optional; falls back to the already-exported environment
 
 class GraphifyEngine:
     """
@@ -9,14 +17,13 @@ class GraphifyEngine:
     straight to the central persistent postgres memory layer.
     """
     def __init__(self):
-        # Explicitly targets your active container parameters
-        # Target your active, running solocorn_db container parameters
+        # Credentials sourced from environment (.env at repo root); see AGENTS.md.
         self.db_params = {
-            "dbname": "paperclip_governance",
-            "user": "paperclip_admin",
-            "password": "***REMOVED***",
-            "host": "127.0.0.1",
-            "port": "5433"
+            "dbname": os.environ.get("PAPERCLIP_DB_NAME", "paperclip_governance"),
+            "user": os.environ.get("PAPERCLIP_DB_USER", "paperclip_admin"),
+            "password": os.environ.get("PAPERCLIP_DB_PASSWORD", ""),
+            "host": os.environ.get("PAPERCLIP_DB_HOST", "127.0.0.1"),
+            "port": os.environ.get("PAPERCLIP_DB_PORT", "5433"),
         }
 
     def initialize_graph_tables(self):
