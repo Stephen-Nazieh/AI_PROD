@@ -7,6 +7,10 @@
 #   - The .docker peripheral stack (Postgres, etc.)
 #   - Paperclip governor (:3100) and the Python bridge server (:3101)
 #
+# The bridge runs a background poller that auto-scaffolds a 05_PROJECTS/<slug>/
+# folder for every Paperclip project (every 30s). It queries :3100, so the
+# Paperclip governor is brought up and confirmed ready before the bridge starts.
+#
 # Safe to double-click again later — every step checks whether its service
 # is already healthy before starting a new one.
 
@@ -24,38 +28,52 @@ fi
 
 source env/bin/activate
 
+# Poll a /health-style endpoint until it reports "status":"ok" or timeout (seconds).
+# Returns 0 as soon as it's healthy, 1 if the timeout elapses. The per-request
+# timeout is 10s — the bridge's /health runs live subchecks and can take ~5s.
+wait_for_health() {
+    local url="$1" timeout="${2:-60}" elapsed=0
+    while [ "$elapsed" -lt "$timeout" ]; do
+        if curl -s -m 10 "$url" 2>/dev/null | grep -q '"status": *"ok"'; then
+            return 0
+        fi
+        sleep 2
+        elapsed=$((elapsed + 2))
+    done
+    return 1
+}
+
 # ── Core stack: MLX inference, ComfyUI, render worker, Docker peripherals ──
 python3 01_SKILLS/start_services.py
 
 # ── Paperclip governor (executive dashboard, :3100) ────────────────────────
 echo ""
 echo "📎 Paperclip governor"
-if curl -s http://127.0.0.1:3100/api/health | grep -q '"status": *"ok"'; then
+if wait_for_health http://127.0.0.1:3100/api/health 2; then
     echo "  ✅ already running on :3100"
 else
     PAPERCLIP_TELEMETRY_DISABLED=1 nohup npx paperclipai run > /tmp/paperclip.log 2>&1 &
     echo "  🚀 starting (pid $!)... log: /tmp/paperclip.log"
-    sleep 5
-    if curl -s http://127.0.0.1:3100/api/health | grep -q '"status": *"ok"'; then
+    echo "  ⏳ waiting for :3100 (embedded Postgres boot can take a while)..."
+    if wait_for_health http://127.0.0.1:3100/api/health 90; then
         echo "  ✅ online"
     else
-        echo "  ⚠️  still starting — check /tmp/paperclip.log if it doesn't come up"
+        echo "  ⚠️  not healthy after 90s — check /tmp/paperclip.log"
     fi
 fi
 
 # ── Python bridge server (Paperclip <-> Solocorn adapter, :3101) ───────────
 echo ""
 echo "🌉 Bridge server"
-if curl -s http://127.0.0.1:3101/health | grep -q '"status": *"ok"'; then
+if wait_for_health http://127.0.0.1:3101/health 2; then
     echo "  ✅ already running on :3101"
 else
     nohup env/bin/python3 runtime/agents/paperclip_bridge.py > /tmp/bridge.log 2>&1 &
     echo "  🚀 starting (pid $!)... log: /tmp/bridge.log"
-    sleep 3
-    if curl -s http://127.0.0.1:3101/health | grep -q '"status": *"ok"'; then
-        echo "  ✅ online"
+    if wait_for_health http://127.0.0.1:3101/health 45; then
+        echo "  ✅ online (auto-scaffold poller active)"
     else
-        echo "  ⚠️  still starting — check /tmp/bridge.log if it doesn't come up"
+        echo "  ⚠️  not healthy after 45s — check /tmp/bridge.log"
     fi
 fi
 
