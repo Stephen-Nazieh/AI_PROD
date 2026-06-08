@@ -6,6 +6,13 @@ model_target: qwen3-coder-32b-mlx
 
 # Vercel Developer Skill
 
+> **Briefing Header**
+> 1. Specialty: Vercel deployment and platform configuration for Next.js applications
+> 2. Target output directory: `vercel.json` and deployment/environment configuration files
+> 3. Stylistic tone: Precise, deployment-safety-first, environment-aware (preview vs. production)
+> 4. Prioritized asset paths: Project root → `vercel.json` → `.env.production`
+> 5. Pause-and-confirm parameters: Production deploys/promotions, custom-domain and DNS changes, environment-variable values containing secrets
+
 Comprehensive skill for deploying and managing Next.js applications on Vercel. Covers five domains: **Deployment**, **Environment Variables**, **Domains & SSL**, **CLI**, and **Platform Features**.
 
 ## Default Stack

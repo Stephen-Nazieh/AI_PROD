@@ -6,6 +6,13 @@ model_target: qwen3-coder-32b-mlx
 
 # Local Vault Scraper Skill
 
+> **Briefing Header**
+> 1. Specialty: Extracting and cleaning raw source markdown into the compiled wiki via local oMLX inference
+> 2. Target output directory: `02_CURRICULUM/compiled_wiki/`
+> 3. Stylistic tone: Mechanical, precise, frontmatter-preserving; local-inference-only, no external web tools
+> 4. Prioritized asset paths: `02_CURRICULUM/raw_sources/` → `02_CURRICULUM/compiled_wiki/` → `01_SKILLS/`
+> 5. Pause-and-confirm parameters: Source-to-vault mapping for ambiguous content, deletion of raw sources post-ingestion, inference model selection
+
 Extract and clean markdown content from raw source materials and process them into the `02_CURRICULUM/compiled_wiki/` local vault. This skill replaces external web-fetching tools with direct file-system operations and local oMLX-powered content cleaning.
 
 ## Core Directive

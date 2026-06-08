@@ -6,6 +6,13 @@ model_target: qwen3-coder-32b-mlx
 
 # Next.js Developer Skill (v16.2.1)
 
+> **Briefing Header**
+> 1. Specialty: Next.js 16.2.1 frontend and server-side application development for the SaaS stack
+> 2. Target output directory: Project-specific `app/`, `components/`, and `lib/` trees (outside the media-render pipeline)
+> 3. Stylistic tone: Precise, version-pinned, code-first; explicit about App Router vs. Pages Router decisions
+> 4. Prioritized asset paths: Project root → `lib/` → `components/` → `public/`
+> 5. Pause-and-confirm parameters: Framework-version assumptions, deployment-target choice (Vercel vs. self-host), database/auth provider selection
+
 Expert Next.js developer skill for frontend and server-side logic. Handles writing, scaffolding, debugging, and explaining Next.js code. Default to **Next.js 16.2.1** unless the user's project indicates otherwise.
 
 ## Step 1: Detect Project Context

@@ -6,6 +6,13 @@ model_target: qwen3-coder-32b-mlx
 
 # Stripe Developer Skill
 
+> **Briefing Header**
+> 1. Specialty: Stripe payment integration for Next.js apps — checkout, subscriptions, webhooks, customer portal
+> 2. Target output directory: Project-specific `app/api/` and `lib/stripe/` trees
+> 3. Stylistic tone: Security-conscious, precise about live vs. test mode, PCI-aware
+> 4. Prioritized asset paths: Project root → `lib/stripe/` → `app/api/webhooks/`
+> 5. Pause-and-confirm parameters: Live API key usage, webhook secret values, pricing/product ID selection, refund or cancellation logic
+
 Comprehensive skill for building payment integrations in Next.js applications with Stripe. Covers five domains: **Checkout & Payments**, **Products & Pricing**, **Subscriptions & Billing**, **Webhooks**, and **Customer Portal**.
 
 ## Default Stack

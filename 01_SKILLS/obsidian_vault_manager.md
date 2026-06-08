@@ -6,6 +6,13 @@ model_target: qwen3-coder-32b-mlx
 
 # Local Vault Manager Skill
 
+> **Briefing Header**
+> 1. Specialty: Direct file-system CRUD operations on the compiled-wiki vault, replacing the Obsidian CLI
+> 2. Target output directory: `02_CURRICULUM/compiled_wiki/`
+> 3. Stylistic tone: Mechanical, precise, frontmatter-preserving; no running-Obsidian-instance dependency
+> 4. Prioritized asset paths: `02_CURRICULUM/compiled_wiki/` → `01_SKILLS/skills.py` → `02_CURRICULUM/raw_sources/`
+> 5. Pause-and-confirm parameters: Bulk rename/move/delete operations, frontmatter schema changes, link-graph restructuring
+
 Direct file-system operations for managing the `02_CURRICULUM/compiled_wiki/` local vault. This skill replaces the Obsidian CLI with Python-native file operations, enabling full vault automation without requiring a running Obsidian instance.
 
 ## Core Directive
