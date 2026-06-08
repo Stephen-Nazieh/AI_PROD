@@ -34,6 +34,7 @@ import re
 import socket
 import subprocess
 import sys
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -582,6 +583,8 @@ class BridgeHandler(BaseHTTPRequestHandler):
         path = self.path
         if path == "/health":
             self._handle_health()
+        elif path == "/sync-projects":
+            self._handle_sync_projects()
         else:
             self._send_json(404, {"error": f"Unknown endpoint: {path}"})
 
@@ -597,6 +600,7 @@ class BridgeHandler(BaseHTTPRequestHandler):
             "/process-script": self._handle_process_script,
             "/vault/search": self._handle_vault_search,
             "/vault/create": self._handle_vault_create,
+            "/sync-projects": self._handle_sync_projects,
         }
         handler = handler_map.get(path)
         if handler:
@@ -622,6 +626,14 @@ class BridgeHandler(BaseHTTPRequestHandler):
             },
             "elapsed_ms": round((time.time() - start) * 1000, 2),
         })
+
+    # ── GET|POST /sync-projects ──────────────────────────────────────────────
+
+    def _handle_sync_projects(self) -> None:
+        """Manually trigger a project-folder scaffold sweep (same logic as the poller)."""
+        result = scaffold_projects_once(PaperclipReporter())
+        code = 200 if result.get("status") == "ok" else 500
+        self._send_json(code, result)
 
     # ── POST /ingest ───────────────────────────────────────────────────────
 
@@ -1098,6 +1110,98 @@ def worker_mode() -> int:
     return 0 if status_code < 400 else 1
 
 
+# ── Project auto-scaffold (mirror Paperclip projects → 05_PROJECTS/<slug>/) ──
+#
+# Paperclip stores projects internally by UUID in ~/.paperclip/instances/.
+# It does NOT create folders in this repo on its own. This poller bridges that
+# gap: it watches the Paperclip projects API and runs init_project.py to scaffold
+# a 05_PROJECTS/<slug>/ folder for any project that doesn't have one yet — so a
+# project created in the Paperclip UI shows up as a real folder in the workspace.
+
+SCAFFOLD_STATE_PATH = WORKSPACE_ROOT / ".pids" / "scaffolded_projects.json"
+SCAFFOLD_POLL_INTERVAL = int(os.environ.get("PROJECT_SCAFFOLD_POLL_SECONDS", "30"))
+
+
+def _load_scaffold_state() -> dict:
+    """Return {project_id: folder_slug} for projects already scaffolded."""
+    try:
+        return json.loads(SCAFFOLD_STATE_PATH.read_text(encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+
+def _save_scaffold_state(state: dict) -> None:
+    SCAFFOLD_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    SCAFFOLD_STATE_PATH.write_text(
+        json.dumps(state, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
+
+
+def scaffold_projects_once(reporter: "PaperclipReporter") -> dict:
+    """
+    Fetch Paperclip projects and scaffold a 05_PROJECTS/<slug>/ folder for any
+    that aren't tracked yet. Returns a summary dict. Idempotent: a project is
+    recorded in the state file once handled, and existing folders are never
+    overwritten (init_project.py refuses to clobber).
+    """
+    projects = reporter._request(
+        "GET", f"/api/companies/{reporter.company_id}/projects"
+    )
+    if not isinstance(projects, list):
+        return {"status": "error", "error": "could not list projects", "scaffolded": []}
+
+    # init_project.create_project lives in 01_SKILLS (already on sys.path)
+    try:
+        from init_project import create_project
+    except ImportError as e:
+        return {"status": "error", "error": f"init_project import failed: {e}", "scaffolded": []}
+
+    state = _load_scaffold_state()
+    scaffolded: list[str] = []
+
+    for proj in projects:
+        pid = proj.get("id")
+        slug = proj.get("urlKey") or pid
+        if not pid or pid in state:
+            continue
+
+        project_dir = WORKSPACE_ROOT / "05_PROJECTS" / slug
+        if project_dir.exists():
+            # Already on disk (created manually or by an earlier run) — just record it.
+            state[pid] = slug
+            continue
+
+        result = create_project(
+            slug,
+            proj.get("name") or slug,
+            proj.get("description") or "",
+        )
+        if result.get("status") == "error":
+            print(f"⚠️  scaffold failed for {slug}: {result.get('message')}", file=sys.stderr)
+            continue
+
+        state[pid] = slug
+        scaffolded.append(slug)
+        print(f"🗂️  Scaffolded 05_PROJECTS/{slug}/ for Paperclip project '{proj.get('name')}'")
+
+    if scaffolded or state != _load_scaffold_state():
+        _save_scaffold_state(state)
+
+    return {"status": "ok", "checked": len(projects), "scaffolded": scaffolded}
+
+
+def project_scaffold_poller(interval: int = SCAFFOLD_POLL_INTERVAL) -> None:
+    """Background loop: periodically scaffold folders for new Paperclip projects."""
+    reporter = PaperclipReporter()
+    print(f"🛰️  Project auto-scaffold poller started (every {interval}s → 05_PROJECTS/)")
+    while True:
+        try:
+            scaffold_projects_once(reporter)
+        except Exception as e:  # never let the poller kill the thread
+            print(f"⚠️  project scaffold poll error: {e}", file=sys.stderr)
+        time.sleep(interval)
+
+
 # ── Server bootstrap ────────────────────────────────────────────────────────
 
 def main() -> int:
@@ -1125,8 +1229,12 @@ def main() -> int:
     print(f"🌉 Solocorn Paperclip Bridge running at http://{host}:{port}")
     print(f"   Endpoints: /health, /ingest, /compile-lesson, /run-curriculum,")
     print(f"              /process-manifest, /generate-timeline, /voiceover,")
-    print(f"              /process-script, /vault/search, /vault/create")
+    print(f"              /process-script, /vault/search, /vault/create, /sync-projects")
     print(f"   Bidirectional sync: ENABLED (reports to Paperclip on {PAPERCLIP_API_BASE})")
+
+    # Background poller: scaffold 05_PROJECTS/<slug>/ folders for new Paperclip projects.
+    if os.environ.get("PROJECT_SCAFFOLD_DISABLED") != "1":
+        threading.Thread(target=project_scaffold_poller, daemon=True).start()
     print(f"   CLI mode: --execute '<json_task>'")
     print(f"   Press Ctrl+C to stop.")
 
