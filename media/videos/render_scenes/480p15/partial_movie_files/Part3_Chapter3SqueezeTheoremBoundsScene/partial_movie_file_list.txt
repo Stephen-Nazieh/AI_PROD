@@ -1,7 +1,0 @@
-# This file is used internally by FFMPEG.
-file 'file:/Users/nazeera/Documents/AI_PRODUCER/media/videos/render_scenes/480p15/partial_movie_files/Part3_Chapter3SqueezeTheoremBoundsScene/1584795214_1016521383_223132457.mp4'
-file 'file:/Users/nazeera/Documents/AI_PRODUCER/media/videos/render_scenes/480p15/partial_movie_files/Part3_Chapter3SqueezeTheoremBoundsScene/4072820271_3489018196_1153285415.mp4'
-file 'file:/Users/nazeera/Documents/AI_PRODUCER/media/videos/render_scenes/480p15/partial_movie_files/Part3_Chapter3SqueezeTheoremBoundsScene/4072820271_2148910020_2070755139.mp4'
-file 'file:/Users/nazeera/Documents/AI_PRODUCER/media/videos/render_scenes/480p15/partial_movie_files/Part3_Chapter3SqueezeTheoremBoundsScene/4072820271_2995072563_2091415596.mp4'
-file 'file:/Users/nazeera/Documents/AI_PRODUCER/media/videos/render_scenes/480p15/partial_movie_files/Part3_Chapter3SqueezeTheoremBoundsScene/4072820271_3607203440_1505170278.mp4'
-file 'file:/Users/nazeera/Documents/AI_PRODUCER/media/videos/render_scenes/480p15/partial_movie_files/Part3_Chapter3SqueezeTheoremBoundsScene/4072820271_4277570474_4283584082.mp4'

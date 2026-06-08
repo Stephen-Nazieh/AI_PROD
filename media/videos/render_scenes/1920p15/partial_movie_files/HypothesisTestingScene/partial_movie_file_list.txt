@@ -1,4 +1,0 @@
-# This file is used internally by FFMPEG.
-file 'file:/Users/nazeera/Documents/AI_PRODUCER/media/videos/render_scenes/1920p15/partial_movie_files/HypothesisTestingScene/3305510173_3308728323_223132457.mp4'
-file 'file:/Users/nazeera/Documents/AI_PRODUCER/media/videos/render_scenes/1920p15/partial_movie_files/HypothesisTestingScene/909150303_2219171445_1758608749.mp4'
-file 'file:/Users/nazeera/Documents/AI_PRODUCER/media/videos/render_scenes/1920p15/partial_movie_files/HypothesisTestingScene/909150303_2872842549_521637504.mp4'

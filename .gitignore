@@ -73,6 +73,10 @@ OpenVoice/
 05_PROJECTS/
 06_SHARED_ASSETS/
 08_RENDER_FARM/
+
+# Manim render caches (regenerable build artifacts — see AGENTS.md)
+media/
+.manim_cache/
 *.db
 *.db-wal
 *.db-shm
