@@ -1,0 +1,389 @@
+schema: paperclip/v1
+
+# Agent adapters:
+#   Option A (default): local_agent_runtime.py — Full ReAct loop with tool execution.
+#     Best for multi-step agentic tasks (file edits, bash commands, git ops).
+#   Option B: hybrid_agent_runtime.py — Best of both worlds.
+#     Claude Code CLI THINKs (superior coding), local ToolExecutor ACTs (reliable).
+#     Best for coding tasks that need file creation + execution.
+#   Option C: claude-local — Claude Code CLI with local MLX LLM via proxy.
+#     Best for code generation and reasoning. Limited tool execution in non-TTY.
+#   Option D: openclaw_gateway — External OpenClaw proxy (single agent only).
+#
+# To switch an agent to hybrid mode, change its adapter to:
+#   command: /Users/nazeera/Documents/AI_PRODUCER/env/bin/python3
+#   args:
+#     - /Users/nazeera/Documents/AI_PRODUCER/runtime/agents/hybrid_agent_runtime.py
+#   env:
+#     ANTHROPIC_BASE_URL: http://127.0.0.1:8003
+#     ANTHROPIC_AUTH_TOKEN: local
+#     ANTHROPIC_API_KEY: ""
+
+defaults:
+  # Default for NEW agents: hybrid (Claude THINK + local EXECUTE)
+  # Override per-agent based on function (coding → hybrid, research → local)
+  adapter:
+    type: process
+    config:
+      command: /Users/nazeera/Documents/AI_PRODUCER/env/bin/python3
+      args:
+        - /Users/nazeera/Documents/AI_PRODUCER/runtime/agents/hybrid_agent_runtime.py
+      timeoutSec: 3600
+      env:
+        ANTHROPIC_BASE_URL: http://127.0.0.1:8003
+        ANTHROPIC_AUTH_TOKEN: local
+        ANTHROPIC_API_KEY: ""
+  runtime:
+    heartbeat:
+      enabled: false
+      wakeOnDemand: true
+
+agents:
+  ceo:
+    adapter:
+      type: process
+      config:
+        command: /Users/nazeera/Documents/AI_PRODUCER/env/bin/python3
+        args:
+          - /Users/nazeera/Documents/AI_PRODUCER/runtime/agents/local_agent_runtime.py
+        timeoutSec: 3600
+        env:
+          MLX_PRIMARY_URL: http://127.0.0.1:8000/v1
+          MLX_STANDARD_URL: http://127.0.0.1:8001/v1
+          MLX_FAST_URL: http://127.0.0.1:8002/v1
+    runtime:
+      heartbeat:
+        enabled: false
+        wakeOnDemand: true
+
+  cto:
+    adapter:
+      type: process
+      config:
+        command: /Users/nazeera/Documents/AI_PRODUCER/env/bin/python3
+        args:
+          - /Users/nazeera/Documents/AI_PRODUCER/runtime/agents/local_agent_runtime.py
+        timeoutSec: 3600
+        env:
+          MLX_PRIMARY_URL: http://127.0.0.1:8000/v1
+          MLX_STANDARD_URL: http://127.0.0.1:8001/v1
+          MLX_FAST_URL: http://127.0.0.1:8002/v1
+    runtime:
+      heartbeat:
+        enabled: false
+        wakeOnDemand: true
+
+  coo:
+    adapter:
+      type: process
+      config:
+        command: /Users/nazeera/Documents/AI_PRODUCER/env/bin/python3
+        args:
+          - /Users/nazeera/Documents/AI_PRODUCER/runtime/agents/local_agent_runtime.py
+        timeoutSec: 3600
+        env:
+          MLX_PRIMARY_URL: http://127.0.0.1:8000/v1
+          MLX_STANDARD_URL: http://127.0.0.1:8001/v1
+          MLX_FAST_URL: http://127.0.0.1:8002/v1
+    runtime:
+      heartbeat:
+        enabled: false
+        wakeOnDemand: true
+
+  cfo:
+    adapter:
+      type: process
+      config:
+        command: /Users/nazeera/Documents/AI_PRODUCER/env/bin/python3
+        args:
+          - /Users/nazeera/Documents/AI_PRODUCER/runtime/agents/local_agent_runtime.py
+        timeoutSec: 3600
+        env:
+          MLX_PRIMARY_URL: http://127.0.0.1:8000/v1
+          MLX_STANDARD_URL: http://127.0.0.1:8001/v1
+          MLX_FAST_URL: http://127.0.0.1:8002/v1
+    runtime:
+      heartbeat:
+        enabled: false
+        wakeOnDemand: true
+
+  openclaw-proxy:
+    adapter:
+      type: openclaw_gateway
+      config:
+        url: ws://127.0.0.1:18789
+        authToken: ***REMOVED-ROTATED-SEE-.docker/.env***
+        timeoutSec: 120
+        disableDeviceAuth: true
+        sessionKeyStrategy: issue
+
+  bridge-operator:
+    adapter:
+      type: process
+      config:
+        command: /Users/nazeera/Documents/AI_PRODUCER/env/bin/python3
+        args:
+          - /Users/nazeera/Documents/AI_PRODUCER/runtime/agents/paperclip_bridge.py
+        timeoutSec: 3600
+
+  # ── Media Production Agents ───────────────────────────────────────────────
+  video-editor:
+    adapter:
+      type: process
+      config:
+        command: /Users/nazeera/Documents/AI_PRODUCER/env/bin/python3
+        args:
+          - /Users/nazeera/Documents/AI_PRODUCER/runtime/agents/hybrid_agent_runtime.py
+        timeoutSec: 3600
+        env:
+          ANTHROPIC_BASE_URL: http://127.0.0.1:8003
+          ANTHROPIC_AUTH_TOKEN: local
+          ANTHROPIC_API_KEY: ""
+          ENABLE_MACOS_TOOLS: "1"
+    runtime:
+      heartbeat:
+        enabled: false
+        wakeOnDemand: true
+
+  audio-engineer:
+    adapter:
+      type: process
+      config:
+        command: /Users/nazeera/Documents/AI_PRODUCER/env/bin/python3
+        args:
+          - /Users/nazeera/Documents/AI_PRODUCER/runtime/agents/hybrid_agent_runtime.py
+        timeoutSec: 3600
+        env:
+          ANTHROPIC_BASE_URL: http://127.0.0.1:8003
+          ANTHROPIC_AUTH_TOKEN: local
+          ANTHROPIC_API_KEY: ""
+          ENABLE_MACOS_TOOLS: "1"
+    runtime:
+      heartbeat:
+        enabled: false
+        wakeOnDemand: true
+
+  3d-artist:
+    adapter:
+      type: process
+      config:
+        command: /Users/nazeera/Documents/AI_PRODUCER/env/bin/python3
+        args:
+          - /Users/nazeera/Documents/AI_PRODUCER/runtime/agents/hybrid_agent_runtime.py
+        timeoutSec: 3600
+        env:
+          ANTHROPIC_BASE_URL: http://127.0.0.1:8003
+          ANTHROPIC_AUTH_TOKEN: local
+          ANTHROPIC_API_KEY: ""
+          ENABLE_MACOS_TOOLS: "1"
+    runtime:
+      heartbeat:
+        enabled: false
+        wakeOnDemand: true
+
+  render-pipeline-operator:
+    adapter:
+      type: process
+      config:
+        command: /Users/nazeera/Documents/AI_PRODUCER/env/bin/python3
+        args:
+          - /Users/nazeera/Documents/AI_PRODUCER/runtime/agents/hybrid_agent_runtime.py
+        timeoutSec: 3600
+        env:
+          ANTHROPIC_BASE_URL: http://127.0.0.1:8003
+          ANTHROPIC_AUTH_TOKEN: local
+          ANTHROPIC_API_KEY: ""
+          ENABLE_MACOS_TOOLS: "1"
+          ENABLE_DELEGATION_TOOLS: "1"
+    runtime:
+      heartbeat:
+        enabled: false
+        wakeOnDemand: true
+
+  web-asset-curator:
+    adapter:
+      type: process
+      config:
+        command: /Users/nazeera/Documents/AI_PRODUCER/env/bin/python3
+        args:
+          - /Users/nazeera/Documents/AI_PRODUCER/runtime/agents/hybrid_agent_runtime.py
+        timeoutSec: 3600
+        env:
+          ANTHROPIC_BASE_URL: http://127.0.0.1:8003
+          ANTHROPIC_AUTH_TOKEN: local
+          ANTHROPIC_API_KEY: ""
+          ENABLE_DELEGATION_TOOLS: "1"
+    runtime:
+      heartbeat:
+        enabled: false
+        wakeOnDemand: true
+
+  # ── New Production Agents (Phase 4) ───────────────────────────────────────
+  screenplay-writer:
+    adapter:
+      type: process
+      config:
+        command: /Users/nazeera/Documents/AI_PRODUCER/env/bin/python3
+        args:
+          - /Users/nazeera/Documents/AI_PRODUCER/runtime/agents/hybrid_agent_runtime.py
+        timeoutSec: 3600
+        env:
+          ANTHROPIC_BASE_URL: http://127.0.0.1:8003
+          ANTHROPIC_AUTH_TOKEN: local
+          ANTHROPIC_API_KEY: ""
+    runtime:
+      heartbeat:
+        enabled: false
+        wakeOnDemand: true
+
+  shot-list-designer:
+    adapter:
+      type: process
+      config:
+        command: /Users/nazeera/Documents/AI_PRODUCER/env/bin/python3
+        args:
+          - /Users/nazeera/Documents/AI_PRODUCER/runtime/agents/hybrid_agent_runtime.py
+        timeoutSec: 3600
+        env:
+          ANTHROPIC_BASE_URL: http://127.0.0.1:8003
+          ANTHROPIC_AUTH_TOKEN: local
+          ANTHROPIC_API_KEY: ""
+    runtime:
+      heartbeat:
+        enabled: false
+        wakeOnDemand: true
+
+  concept-artist:
+    adapter:
+      type: process
+      config:
+        command: /Users/nazeera/Documents/AI_PRODUCER/env/bin/python3
+        args:
+          - /Users/nazeera/Documents/AI_PRODUCER/runtime/agents/hybrid_agent_runtime.py
+        timeoutSec: 3600
+        env:
+          ANTHROPIC_BASE_URL: http://127.0.0.1:8003
+          ANTHROPIC_AUTH_TOKEN: local
+          ANTHROPIC_API_KEY: ""
+          COMFYUI_URL: "http://127.0.0.1:8188"
+          STORYBOARD_MODEL: "sdxl"
+          STORYBOARD_STYLE: "anime"
+    runtime:
+      heartbeat:
+        enabled: false
+        wakeOnDemand: true
+
+  voice-cast-director:
+    adapter:
+      type: process
+      config:
+        command: /Users/nazeera/Documents/AI_PRODUCER/env/bin/python3
+        args:
+          - /Users/nazeera/Documents/AI_PRODUCER/runtime/agents/hybrid_agent_runtime.py
+        timeoutSec: 3600
+        env:
+          ANTHROPIC_BASE_URL: http://127.0.0.1:8003
+          ANTHROPIC_AUTH_TOKEN: local
+          ANTHROPIC_API_KEY: ""
+          ENABLE_MACOS_TOOLS: "1"
+          KOKORO_MODEL_PATH: /Users/nazeera/Documents/AI_PRODUCER/06_SHARED_ASSETS/ai-models/kokoro/kokoro-v1.0.onnx
+          KOKORO_VOICES_PATH: /Users/nazeera/Documents/AI_PRODUCER/06_SHARED_ASSETS/ai-models/kokoro/voices-v1.0.bin
+          KOKORO_VOICE: af_sarah
+          KOKORO_SPEED: "1.0"
+    runtime:
+      heartbeat:
+        enabled: false
+        wakeOnDemand: true
+
+  compositing-lead:
+    adapter:
+      type: process
+      config:
+        command: /Users/nazeera/Documents/AI_PRODUCER/env/bin/python3
+        args:
+          - /Users/nazeera/Documents/AI_PRODUCER/runtime/agents/hybrid_agent_runtime.py
+        timeoutSec: 3600
+        env:
+          ANTHROPIC_BASE_URL: http://127.0.0.1:8003
+          ANTHROPIC_AUTH_TOKEN: local
+          ANTHROPIC_API_KEY: ""
+          ENABLE_MACOS_TOOLS: "1"
+          AERENDER_PATH: /Applications/Adobe After Effects 2026/aerender
+    runtime:
+      heartbeat:
+        enabled: false
+        wakeOnDemand: true
+
+  colorist:
+    adapter:
+      type: process
+      config:
+        command: /Users/nazeera/Documents/AI_PRODUCER/env/bin/python3
+        args:
+          - /Users/nazeera/Documents/AI_PRODUCER/runtime/agents/hybrid_agent_runtime.py
+        timeoutSec: 3600
+        env:
+          ANTHROPIC_BASE_URL: http://127.0.0.1:8003
+          ANTHROPIC_AUTH_TOKEN: local
+          ANTHROPIC_API_KEY: ""
+          ENABLE_MACOS_TOOLS: "1"
+          RESOLVE_PATH: /Applications/DaVinci Resolve
+    runtime:
+      heartbeat:
+        enabled: false
+        wakeOnDemand: true
+
+  subtitler:
+    adapter:
+      type: process
+      config:
+        command: /Users/nazeera/Documents/AI_PRODUCER/env/bin/python3
+        args:
+          - /Users/nazeera/Documents/AI_PRODUCER/runtime/agents/local_agent_runtime.py
+        timeoutSec: 3600
+        env:
+          MLX_PRIMARY_URL: http://127.0.0.1:8000/v1
+          MLX_STANDARD_URL: http://127.0.0.1:8001/v1
+          MLX_FAST_URL: http://127.0.0.1:8002/v1
+          WHISPER_MODEL: "base"
+    runtime:
+      heartbeat:
+        enabled: false
+        wakeOnDemand: true
+
+  delivery-coordinator:
+    adapter:
+      type: process
+      config:
+        command: /Users/nazeera/Documents/AI_PRODUCER/env/bin/python3
+        args:
+          - /Users/nazeera/Documents/AI_PRODUCER/runtime/agents/local_agent_runtime.py
+        timeoutSec: 3600
+        env:
+          MLX_PRIMARY_URL: http://127.0.0.1:8000/v1
+          MLX_STANDARD_URL: http://127.0.0.1:8001/v1
+          MLX_FAST_URL: http://127.0.0.1:8002/v1
+          ENABLE_MACOS_TOOLS: "1"
+    runtime:
+      heartbeat:
+        enabled: false
+        wakeOnDemand: true
+
+  pipeline-td:
+    adapter:
+      type: process
+      config:
+        command: /Users/nazeera/Documents/AI_PRODUCER/env/bin/python3
+        args:
+          - /Users/nazeera/Documents/AI_PRODUCER/runtime/agents/hybrid_agent_runtime.py
+        timeoutSec: 3600
+        env:
+          ANTHROPIC_BASE_URL: http://127.0.0.1:8003
+          ANTHROPIC_AUTH_TOKEN: local
+          ANTHROPIC_API_KEY: ""
+          ENABLE_MACOS_TOOLS: "1"
+          ENABLE_DELEGATION_TOOLS: "1"
+    runtime:
+      heartbeat:
+        enabled: false
+        wakeOnDemand: true

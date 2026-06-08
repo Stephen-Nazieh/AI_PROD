@@ -53,3 +53,27 @@ logs/
 *.aiff
 *.psd
 *.ai
+
+# Paperclip runtime artifacts
+07_PAPERCLIP/**/*.log
+07_PAPERCLIP/**/.env
+07_PAPERCLIP/**/__pycache__/
+
+# Paperclip company package: agents/ and skills/ are regenerable copies of
+# library/ via 07_PAPERCLIP/scripts/sync_company.py — don't version the dupes.
+# The unique config (.paperclip.yaml, COMPANY.md, teams/, projects/) IS tracked.
+07_PAPERCLIP/companies/*/agents/
+07_PAPERCLIP/companies/*/skills/
+
+# Vendored tools (own git repos / huge installs — never commit)
+ComfyUI/
+OpenVoice/
+
+# Generated production output and runtime state (regenerable, multi-GB)
+05_PROJECTS/
+06_SHARED_ASSETS/
+08_RENDER_FARM/
+*.db
+*.db-wal
+*.db-shm
+.pids/
