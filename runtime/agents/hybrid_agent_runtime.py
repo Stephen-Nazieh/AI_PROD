@@ -511,10 +511,24 @@ def _tool_invoke_openclaw(task: str) -> dict:
 
 # ── Hybrid Runtime ──────────────────────────────────────────────────────────
 
+def _normalize_agent_name(name: str) -> str:
+    """
+    Normalize an agent name for tolerant matching: strip a trailing duplicate
+    suffix (" 2", " 3"), fold the legacy Solocorn brand onto DeParadigm Media
+    (live agents may predate the rebrand), and lowercase.
+    """
+    n = name.strip()
+    n = re.sub(r"\s+\d+$", "", n)                      # "Backend Architect 2" -> "Backend Architect"
+    n = n.replace("Solocorn Studios", "DeParadigm Media")
+    n = n.replace("SOLOCORN", "DEPARADIGM MEDIA").replace("Solocorn", "DeParadigm Media")
+    return n.strip().lower()
+
+
 def load_agent_persona(name: str) -> str | None:
     """
     Resolve an agent's persona (charter body) from library/agents/ by matching
-    the Paperclip agent name against each definition's frontmatter `name:`.
+    the Paperclip agent name against each definition's frontmatter `name:`
+    (tolerant of duplicate suffixes and the Solocorn→DeParadigm rebrand).
     Returns the markdown body after the frontmatter, or None if no match.
     """
     if not name:
@@ -522,7 +536,7 @@ def load_agent_persona(name: str) -> str | None:
     lib = WORKSPACE_ROOT / "library" / "agents"
     if not lib.is_dir():
         return None
-    target = name.strip().lower()
+    target = _normalize_agent_name(name)
     for d in sorted(lib.iterdir()):
         md = d / "AGENTS.md"
         if not md.is_file():
@@ -532,7 +546,7 @@ def load_agent_persona(name: str) -> str | None:
         except Exception:
             continue
         m = re.search(r"^name:\s*(.+)$", text, re.MULTILINE)
-        if m and m.group(1).strip().lower() == target:
+        if m and _normalize_agent_name(m.group(1)) == target:
             parts = text.split("---", 2)
             return parts[2].strip() if len(parts) >= 3 else text.strip()
     return None
