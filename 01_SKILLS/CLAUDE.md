@@ -65,14 +65,17 @@
 - External high-speed RAID mount at `/Volumes/SolocornRAID/03_ASSETS` is the canonical write target for all heavy I/O to prevent local disk saturation.
 
 ### File Separation Guardrail
-Agents must strictly segment data compilation tasks into their matching business subfolder under `02_CURRICULUM/`. Operational assets, startup logs, and creative screenplays must never be dumped loosely into the root directory to prevent context contamination. The four active business tracks are:
+Agents must strictly segment work by **business unit** (channel). Operational assets, startup logs, and creative screenplays must never be dumped loosely into the root directory. Content for a unit lives under `business_units/<slug>/` (`knowledge/` for source/curriculum, `production/<run>/` for pipeline output). The registry `00_CORE/business_units.yaml` is the source of truth.
 
-- `02_CURRICULUM/01_SOLOCORN_EDTECH/` — Educational technology curriculum, lesson modules, and student assessment data.
-- `02_CURRICULUM/02_AP_STATS_MOVIE/` — Statistical visualization scripts, narrative screenplays, and rendered movie assets.
-- `02_CURRICULUM/03_DEVOPS_CONTROL/` — Infrastructure playbooks, deployment manifests, and system telemetry logs.
-- `02_CURRICULUM/04_VERTICAL_FARMING/` — Agricultural sensor datasets, growth-cycle analytics, and farm simulation outputs.
+The legacy `02_CURRICULUM/` track paths still work — they are **compatibility symlinks** redirecting into the units:
 
-Any agent that cannot determine the correct business track must pause and confirm with the user before writing.
+- `02_CURRICULUM/01_SOLOCORN_EDTECH/` → `business_units/edtech/knowledge/` (Dev & Cloud / EdTech)
+- `02_CURRICULUM/03_DEVOPS_CONTROL/` → `business_units/edtech/knowledge/` (Dev & Cloud infra/ops)
+- `02_CURRICULUM/02_AP_STATS_MOVIE/` → `business_units/ap-stats/knowledge/`
+- `02_CURRICULUM/compiled_wiki/` — shared cross-unit knowledge vault (unchanged)
+- (`04_VERTICAL_FARMING` is not a current channel.)
+
+Any agent that cannot determine the correct business unit must pause and confirm with the user before writing.
 
 ## Project Briefing Rules
 

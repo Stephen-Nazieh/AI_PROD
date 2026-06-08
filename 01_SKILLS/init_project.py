@@ -91,11 +91,37 @@ EXAMPLE_SHOT_LIST = {
 }
 
 
-def create_project(project_slug: str, title: str, description: str = "") -> dict:
-    project_dir = WORKSPACE_ROOT / "05_PROJECTS" / project_slug
-    
+def _resolve_run_dir(project_slug: str, unit: str | None) -> tuple[Path, str | None]:
+    """
+    Resolve where a production run is scaffolded.
+
+    With a business unit, the run lives inside that unit's production/ folder
+    (the canonical location, validated against 00_CORE/business_units.yaml).
+    Without a unit, fall back to the legacy 05_PROJECTS/<run>/ location.
+    """
+    if unit:
+        reg = WORKSPACE_ROOT / "00_CORE" / "business_units.yaml"
+        try:
+            import yaml
+            units = (yaml.safe_load(reg.read_text(encoding="utf-8")) or {}).get("units", {})
+        except Exception:
+            units = {}
+        if unit not in units:
+            known = ", ".join(units) or "(registry unavailable)"
+            return WORKSPACE_ROOT, f"Unknown business unit '{unit}'. Known units: {known}"
+        folder = units[unit].get("folder", f"business_units/{unit}")
+        return WORKSPACE_ROOT / folder / "production" / project_slug, None
+    return WORKSPACE_ROOT / "05_PROJECTS" / project_slug, None  # legacy fallback
+
+
+def create_project(project_slug: str, title: str, description: str = "",
+                   unit: str | None = None) -> dict:
+    project_dir, err = _resolve_run_dir(project_slug, unit)
+    if err:
+        return {"status": "error", "message": err}
+
     if project_dir.exists():
-        return {"status": "error", "message": f"Project {project_slug} already exists"}
+        return {"status": "error", "message": f"Run already exists: {project_dir}"}
     
     # Create directories
     for path_str, contents in PROJECT_TEMPLATE.items():
@@ -150,6 +176,7 @@ Great question. Let's look at an example...
     # Create project config
     config = {
         "project": project_slug,
+        "business_unit": unit,
         "title": title,
         "description": description,
         "fps": 24,
@@ -175,12 +202,16 @@ def main():
     parser = argparse.ArgumentParser()
     sub = parser.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("create")
-    p.add_argument("project_slug")
+    p.add_argument("project_slug", help="Run/episode slug")
     p.add_argument("--title", required=True)
     p.add_argument("--description", default="")
+    p.add_argument("--unit", default=None,
+                   help="Business unit slug (see 00_CORE/business_units.yaml). "
+                        "Places the run in business_units/<unit>/production/<slug>/. "
+                        "Omit only for legacy 05_PROJECTS/ placement.")
     args = parser.parse_args()
     if args.cmd == "create":
-        print(json.dumps(create_project(args.project_slug, args.title, args.description), indent=2))
+        print(json.dumps(create_project(args.project_slug, args.title, args.description, args.unit), indent=2))
 
 if __name__ == "__main__":
     main()

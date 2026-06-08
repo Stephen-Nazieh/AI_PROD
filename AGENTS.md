@@ -507,7 +507,12 @@ All rendered frames, intermediate textures, geometry caches, and final delivery 
 
 ## Common Pitfalls for Agents
 
-1. **Guessing business tracks**: If you cannot determine which of the four curriculum tracks a file belongs to (`01_SOLOCORN_EDTECH`, `02_AP_STATS_MOVIE`, `03_DEVOPS_CONTROL`, `04_VERTICAL_FARMING`), **pause and ask the user**.
+1. **Guessing business units**: Content is organized by **business unit** (channel) — see "Business Units (Channels)" above and the registry `00_CORE/business_units.yaml`. The legacy curriculum-track paths are now **compatibility symlinks** that redirect into business-unit `knowledge/` folders, so existing references keep working:
+   - `02_CURRICULUM/01_SOLOCORN_EDTECH/` → `business_units/edtech/knowledge/`
+   - `02_CURRICULUM/03_DEVOPS_CONTROL/` → `business_units/edtech/knowledge/` (Dev & Cloud)
+   - `02_CURRICULUM/02_AP_STATS_MOVIE/` → `business_units/ap-stats/knowledge/`
+   - `04_VERTICAL_FARMING` is not a current channel (no business unit).
+   If you cannot determine which unit a file belongs to, **pause and ask the user**.
 2. **Forgetting the local inference endpoint**: All LLM calls must route to `http://127.0.0.1:8000/v1`. Cloud APIs (OpenAI, Claude, etc.) are forbidden unless the user explicitly overrides.
 3. **Hard-coding user paths**: Use `Path(__file__).resolve().parent.parent` resolution; do not embed `/Users/nazeera/...`.
 4. **Dumping files in root**: Operational assets, logs, and screenplays must never be placed in the repository root. Use the numbered directories.

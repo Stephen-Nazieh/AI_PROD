@@ -6,4 +6,4 @@ Each production run (episode/video) is a subfolder here with the standard pipeli
 
 Create a run with:
 
-    python3 01_SKILLS/init_project.py create edtech-<run> --title "..."
+    python3 01_SKILLS/init_project.py create <run> --unit edtech --title "..."

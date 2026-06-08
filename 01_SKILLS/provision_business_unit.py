@@ -136,14 +136,14 @@ def scaffold_folder(slug: str, unit: dict) -> Path:
     prod = home / "production"
     prod.mkdir(parents=True, exist_ok=True)
     prod_readme = prod / "README.md"
-    if not prod_readme.exists():
+    if True:  # always refresh (kept in sync with the current run-creation command)
         prod_readme.write_text(
             f"# {unit['name']} — production runs\n\n"
             "Each production run (episode/video) is a subfolder here with the "
             "standard pipeline tree:\n\n"
             "`" + "/  ".join(PRODUCTION_DIRS) + "/`\n\n"
             "Create a run with:\n\n"
-            f"    python3 01_SKILLS/init_project.py create {slug}-<run> --title \"...\"\n",
+            f"    python3 01_SKILLS/init_project.py create <run> --unit {slug} --title \"...\"\n",
             encoding="utf-8",
         )
     for keep in ("knowledge/.gitkeep",):
