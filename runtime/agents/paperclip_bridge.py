@@ -1110,95 +1110,56 @@ def worker_mode() -> int:
     return 0 if status_code < 400 else 1
 
 
-# ── Project auto-scaffold (mirror Paperclip projects → 05_PROJECTS/<slug>/) ──
+# ── Business-unit auto-provision (Paperclip project → business_units/<slug>/) ──
 #
-# Paperclip stores projects internally by UUID in ~/.paperclip/instances/.
-# It does NOT create folders in this repo on its own. This poller bridges that
-# gap: it watches the Paperclip projects API and runs init_project.py to scaffold
-# a 05_PROJECTS/<slug>/ folder for any project that doesn't have one yet — so a
-# project created in the Paperclip UI shows up as a real folder in the workspace.
+# Each Paperclip project IS a business unit (channel). Paperclip stores projects
+# internally by UUID and creates no repo folders; this poller bridges that gap by
+# provisioning a unified business_units/<slug>/ home (BRIEF.md, knowledge/,
+# production/, assets/) for any project not yet in the registry
+# (00_CORE/business_units.yaml). Idempotent; backed by provision_business_unit.py.
 
-SCAFFOLD_STATE_PATH = WORKSPACE_ROOT / ".pids" / "scaffolded_projects.json"
 SCAFFOLD_POLL_INTERVAL = int(os.environ.get("PROJECT_SCAFFOLD_POLL_SECONDS", "30"))
-
-
-def _load_scaffold_state() -> dict:
-    """Return {project_id: folder_slug} for projects already scaffolded."""
-    try:
-        return json.loads(SCAFFOLD_STATE_PATH.read_text(encoding="utf-8"))
-    except (FileNotFoundError, json.JSONDecodeError):
-        return {}
-
-
-def _save_scaffold_state(state: dict) -> None:
-    SCAFFOLD_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
-    SCAFFOLD_STATE_PATH.write_text(
-        json.dumps(state, indent=2, ensure_ascii=False), encoding="utf-8"
-    )
 
 
 def scaffold_projects_once(reporter: "PaperclipReporter") -> dict:
     """
-    Fetch Paperclip projects and scaffold a 05_PROJECTS/<slug>/ folder for any
-    that aren't tracked yet. Returns a summary dict. Idempotent: a project is
-    recorded in the state file once handled, and existing folders are never
-    overwritten (init_project.py refuses to clobber).
+    Fetch Paperclip projects and provision a business_units/<slug>/ home for any
+    project not yet registered as a business unit. Idempotent (registry-backed).
     """
     projects = reporter._request(
         "GET", f"/api/companies/{reporter.company_id}/projects"
     )
     if not isinstance(projects, list):
-        return {"status": "error", "error": "could not list projects", "scaffolded": []}
+        return {"status": "error", "error": "could not list projects", "provisioned": []}
 
-    # init_project.create_project lives in 01_SKILLS (already on sys.path)
+    # provision_business_unit lives in 01_SKILLS (already on sys.path)
     try:
-        from init_project import create_project
+        import provision_business_unit as pbu
     except ImportError as e:
-        return {"status": "error", "error": f"init_project import failed: {e}", "scaffolded": []}
+        return {"status": "error", "error": f"provision_business_unit import failed: {e}", "provisioned": []}
 
-    state = _load_scaffold_state()
-    scaffolded: list[str] = []
-
+    known = pbu.registered_project_ids()
+    provisioned: list[str] = []
     for proj in projects:
-        pid = proj.get("id")
-        slug = proj.get("urlKey") or pid
-        if not pid or pid in state:
+        if proj.get("id") in known:
             continue
+        slug = pbu.provision_from_paperclip_project(proj)
+        if slug:
+            provisioned.append(slug)
+            print(f"🏢 Provisioned business unit business_units/{slug}/ for Paperclip project '{proj.get('name')}'")
 
-        project_dir = WORKSPACE_ROOT / "05_PROJECTS" / slug
-        if project_dir.exists():
-            # Already on disk (created manually or by an earlier run) — just record it.
-            state[pid] = slug
-            continue
-
-        result = create_project(
-            slug,
-            proj.get("name") or slug,
-            proj.get("description") or "",
-        )
-        if result.get("status") == "error":
-            print(f"⚠️  scaffold failed for {slug}: {result.get('message')}", file=sys.stderr)
-            continue
-
-        state[pid] = slug
-        scaffolded.append(slug)
-        print(f"🗂️  Scaffolded 05_PROJECTS/{slug}/ for Paperclip project '{proj.get('name')}'")
-
-    if scaffolded or state != _load_scaffold_state():
-        _save_scaffold_state(state)
-
-    return {"status": "ok", "checked": len(projects), "scaffolded": scaffolded}
+    return {"status": "ok", "checked": len(projects), "provisioned": provisioned}
 
 
 def project_scaffold_poller(interval: int = SCAFFOLD_POLL_INTERVAL) -> None:
-    """Background loop: periodically scaffold folders for new Paperclip projects."""
+    """Background loop: provision business-unit homes for new Paperclip projects."""
     reporter = PaperclipReporter()
-    print(f"🛰️  Project auto-scaffold poller started (every {interval}s → 05_PROJECTS/)")
+    print(f"🛰️  Business-unit auto-provision poller started (every {interval}s → business_units/)")
     while True:
         try:
             scaffold_projects_once(reporter)
         except Exception as e:  # never let the poller kill the thread
-            print(f"⚠️  project scaffold poll error: {e}", file=sys.stderr)
+            print(f"⚠️  business-unit poll error: {e}", file=sys.stderr)
         time.sleep(interval)
 
 

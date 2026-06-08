@@ -298,6 +298,49 @@ npx paperclipai company import --yes /Users/nazeera/Documents/AI_PRODUCER/07_PAP
 
 ---
 
+## Business Units (Channels)
+
+The studio is organized into **business units** — one per monetization channel.
+This reconciles the three taxonomies (channels / curriculum tracks / Paperclip
+projects) into a single model:
+
+> **A business unit = a Paperclip Project + a same-named Team** (under the single
+> "Solocorn Studios" company) **+ a unified filesystem home** at
+> `business_units/<slug>/`.
+
+- **Registry (source of truth):** `00_CORE/business_units.yaml` — maps each
+  unit's slug → name, domain, `paperclip_project_id`, team, and folder.
+- **Per-unit folder layout:**
+  - `BRIEF.md` — unit charter; points agents at `00_CORE/` context
+  - `knowledge/` — curriculum input / source notes (tracked)
+  - `production/` — container of production runs; each run is a subfolder with
+    the `01-scripts … 09-deliver` pipeline tree (gitignored — heavy/regenerable)
+  - `assets/` — rendered media (gitignored)
+- **Current units:** `edtech`, `ap-stats`, `translation`, `ambient`.
+
+### Create / sync a business unit (as needed)
+
+```bash
+# New unit:
+python3 01_SKILLS/provision_business_unit.py provision podcast \
+    --name "Solocorn Podcast" --domain "Long-form audio interviews"
+# Re-sync an existing one (repairs folder, re-ensures Paperclip project/team):
+python3 01_SKILLS/provision_business_unit.py provision ap-stats
+python3 01_SKILLS/provision_business_unit.py list
+```
+
+This scaffolds the folder, ensures the Paperclip Project + Team, sets the
+project description to the folder home, and updates the registry. The bridge's
+background poller (`:3101`) auto-provisions a unit home for any **new Paperclip
+project** within ~30s, so creating a project in the Paperclip UI also yields a
+`business_units/<slug>/` home.
+
+> Optionally, in the Paperclip UI link each project's local folder to its
+> `business_units/<slug>/` so agents operate directly in the organized home
+> (the API does not expose this binding).
+
+---
+
 ## Testing Instructions
 
 There are three small smoke tests in `01_SKILLS/`:

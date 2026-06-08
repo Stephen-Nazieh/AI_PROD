@@ -80,6 +80,11 @@ media/
 
 # Manim render output dropped into curriculum track asset dirs (regenerable)
 02_CURRICULUM/*/assets/
+
+# Business unit working dirs: rendered assets + heavy production runs (regenerable).
+# The per-unit BRIEF.md, knowledge/, and production/README.md ARE tracked.
+business_units/*/assets/
+business_units/*/production/*/
 *.db
 *.db-wal
 *.db-shm

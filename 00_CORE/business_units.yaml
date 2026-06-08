@@ -1,0 +1,33 @@
+company: Solocorn Studios
+company_id: 15041ee2-b1c5-43ac-b488-04934bfa1806
+units:
+  edtech:
+    name: Solocorn Dev & Cloud
+    channel: 1
+    domain: Serverless GCP/AWS architectures, AWS transitions, Security+ compliance,
+      DevOps tooling
+    paperclip_project_id: 76cdf731-76e9-4678-aac1-67df6def0c3e
+    team: edtech
+    folder: business_units/edtech
+  ap-stats:
+    name: AP Statistics Movie Series
+    channel: 2
+    domain: Story-driven multi-episode AP Statistics seasons mapped to the College
+      Board catalog
+    paperclip_project_id: 23b2f710-b364-4263-b1e7-bacace21ba62
+    team: ap-stats
+    folder: business_units/ap-stats
+  translation:
+    name: Multi-Language Translation Factory
+    channel: 3
+    domain: Automated Spanish and Mandarin dubbing via XTTS v2 voice cloning
+    paperclip_project_id: 8da8fae2-7add-4252-9c99-4a9e5f1742b0
+    team: translation
+    folder: business_units/translation
+  ambient:
+    name: Ambient Deep-Focus Loops
+    channel: 4
+    domain: 10-hour passive deep-focus coding ambience loop channels
+    paperclip_project_id: cd533598-b85c-4bf6-a3dd-7a6084d23c18
+    team: ambient-loops
+    folder: business_units/ambient
