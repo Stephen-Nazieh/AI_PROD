@@ -97,3 +97,7 @@ business_units/*/*/production/*/
 01_SKILLS/compiled_lesson_blueprint.json
 03_ASSETS/test_*.png
 My ideas/
+
+# Generated skills manifest (regenerable) + ingest drop-zone (transient)
+07_PAPERCLIP/scripts/skills_manifest.json
+02_CURRICULUM/raw_sources/
