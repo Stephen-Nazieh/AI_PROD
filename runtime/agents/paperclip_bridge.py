@@ -999,7 +999,7 @@ def parse_issue_to_task(issue: dict) -> tuple[str, dict]:
         (["voiceover", "synthesize voice", "say ", "wav"], "/voiceover", {"text": "Hello from Solocorn bridge."}),
         (["process script", "scene manifest", "markdown script"], "/process-script", {"track_name": "ap_stats_movie"}),
         (["vault search", "search wiki", "query vault"], "/vault/search", {"query": "z-score", "limit": 5}),
-        (["vault create", "create note", "new wiki"], "/vault/create", {"path": "02_CURRICULUM/compiled_wiki/_worker_note.md", "content": "# Worker Note\n\nCreated by bridge-operator."}),
+        (["vault create", "create note", "new wiki"], "/vault/create", {"path": "_worker_note.md", "content": "# Worker Note\n\nCreated by bridge-operator."}),
     ]
 
     for keywords, endpoint, default_payload in keyword_map:

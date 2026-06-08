@@ -77,6 +77,9 @@ OpenVoice/
 # Manim render caches (regenerable build artifacts — see AGENTS.md)
 media/
 .manim_cache/
+
+# Manim render output dropped into curriculum track asset dirs (regenerable)
+02_CURRICULUM/*/assets/
 *.db
 *.db-wal
 *.db-shm

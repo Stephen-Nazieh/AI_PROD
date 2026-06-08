@@ -76,8 +76,17 @@ def clean_raw_content(raw_text: str) -> str:
 def _resolve_note_path(name_or_path: str) -> Path:
     """
     Resolve a note name or relative path to an absolute path inside compiled_wiki/.
+
+    Accepts bare names ("ZScores") and workspace-relative paths that already
+    include the wiki prefix ("02_CURRICULUM/compiled_wiki/ZScores.md"). The prefix
+    is stripped so callers passing a full repo-relative path don't produce a
+    doubled "compiled_wiki/02_CURRICULUM/compiled_wiki/..." nest.
     """
-    target = WIKI_DIR / name_or_path
+    p = name_or_path.strip().lstrip("/")
+    wiki_rel = WIKI_DIR.relative_to(WORKSPACE_ROOT).as_posix()  # 02_CURRICULUM/compiled_wiki
+    if p == wiki_rel or p.startswith(wiki_rel + "/"):
+        p = p[len(wiki_rel):].lstrip("/")
+    target = WIKI_DIR / p
     if not target.suffix:
         target = target.with_suffix(".md")
     return target
