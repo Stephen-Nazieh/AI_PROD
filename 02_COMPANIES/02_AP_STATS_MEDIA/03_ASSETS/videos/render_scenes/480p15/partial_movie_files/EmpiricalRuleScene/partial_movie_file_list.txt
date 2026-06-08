@@ -1,6 +1,0 @@
-# This file is used internally by FFMPEG.
-file 'file:/Users/nazeera/Documents/AI_PRODUCER/02_COMPANIES/02_AP_STATS_MEDIA/03_ASSETS/videos/render_scenes/480p15/partial_movie_files/EmpiricalRuleScene/1584795214_1694855184_223132457.mp4'
-file 'file:/Users/nazeera/Documents/AI_PRODUCER/02_COMPANIES/02_AP_STATS_MEDIA/03_ASSETS/videos/render_scenes/480p15/partial_movie_files/EmpiricalRuleScene/4072820271_321365616_405544628.mp4'
-file 'file:/Users/nazeera/Documents/AI_PRODUCER/02_COMPANIES/02_AP_STATS_MEDIA/03_ASSETS/videos/render_scenes/480p15/partial_movie_files/EmpiricalRuleScene/4072820271_1432596116_1227624461.mp4'
-file 'file:/Users/nazeera/Documents/AI_PRODUCER/02_COMPANIES/02_AP_STATS_MEDIA/03_ASSETS/videos/render_scenes/480p15/partial_movie_files/EmpiricalRuleScene/4072820271_1982339343_1655730965.mp4'
-file 'file:/Users/nazeera/Documents/AI_PRODUCER/02_COMPANIES/02_AP_STATS_MEDIA/03_ASSETS/videos/render_scenes/480p15/partial_movie_files/EmpiricalRuleScene/4072820271_4277570474_446518985.mp4'
