@@ -1110,45 +1110,46 @@ def worker_mode() -> int:
     return 0 if status_code < 400 else 1
 
 
-# ── Business-unit auto-provision (Paperclip project → business_units/<slug>/) ──
+# ── Business-unit auto-provision (Paperclip project → business_units/<co>/<unit>) ──
 #
-# Each Paperclip project IS a business unit (channel). Paperclip stores projects
-# internally by UUID and creates no repo folders; this poller bridges that gap by
-# provisioning a unified business_units/<slug>/ home (BRIEF.md, knowledge/,
-# production/, assets/) for any project not yet in the registry
-# (00_CORE/business_units.yaml). Idempotent; backed by provision_business_unit.py.
+# Each Paperclip project IS a business unit (channel) within a company. Paperclip
+# stores projects internally by UUID and creates no repo folders; this poller
+# bridges that gap by provisioning a unified business_units/<company>/<unit>/ home
+# (BRIEF.md, knowledge/, production/, assets/) for any project not yet in the
+# registry (00_CORE/business_units.yaml). Iterates ALL registered companies.
+# Idempotent; backed by provision_business_unit.py.
 
 SCAFFOLD_POLL_INTERVAL = int(os.environ.get("PROJECT_SCAFFOLD_POLL_SECONDS", "30"))
 
 
 def scaffold_projects_once(reporter: "PaperclipReporter") -> dict:
     """
-    Fetch Paperclip projects and provision a business_units/<slug>/ home for any
-    project not yet registered as a business unit. Idempotent (registry-backed).
+    For every registered company, provision a business_units/<company>/<unit>/ home
+    for any Paperclip project not yet registered. Idempotent (registry-backed).
     """
-    projects = reporter._request(
-        "GET", f"/api/companies/{reporter.company_id}/projects"
-    )
-    if not isinstance(projects, list):
-        return {"status": "error", "error": "could not list projects", "provisioned": []}
-
     # provision_business_unit lives in 01_SKILLS (already on sys.path)
     try:
         import provision_business_unit as pbu
     except ImportError as e:
         return {"status": "error", "error": f"provision_business_unit import failed: {e}", "provisioned": []}
 
-    known = pbu.registered_project_ids()
     provisioned: list[str] = []
-    for proj in projects:
-        if proj.get("id") in known:
+    checked = 0
+    for cslug, cid in pbu.registered_companies():
+        projects = reporter._request("GET", f"/api/companies/{cid}/projects")
+        if not isinstance(projects, list):
             continue
-        slug = pbu.provision_from_paperclip_project(proj)
-        if slug:
-            provisioned.append(slug)
-            print(f"🏢 Provisioned business unit business_units/{slug}/ for Paperclip project '{proj.get('name')}'")
+        checked += len(projects)
+        known = pbu.registered_project_ids(cslug)
+        for proj in projects:
+            if proj.get("id") in known:
+                continue
+            slug = pbu.provision_from_paperclip_project(cslug, proj)
+            if slug:
+                provisioned.append(f"{cslug}/{slug}")
+                print(f"🏢 Provisioned business_units/{cslug}/{slug}/ for project '{proj.get('name')}'")
 
-    return {"status": "ok", "checked": len(projects), "provisioned": provisioned}
+    return {"status": "ok", "checked": checked, "provisioned": provisioned}
 
 
 def project_scaffold_poller(interval: int = SCAFFOLD_POLL_INTERVAL) -> None:

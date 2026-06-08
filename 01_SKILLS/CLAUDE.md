@@ -65,13 +65,13 @@
 - External high-speed RAID mount at `/Volumes/SolocornRAID/03_ASSETS` is the canonical write target for all heavy I/O to prevent local disk saturation.
 
 ### File Separation Guardrail
-Agents must strictly segment work by **business unit** (channel). Operational assets, startup logs, and creative screenplays must never be dumped loosely into the root directory. Content for a unit lives under `business_units/<slug>/` (`knowledge/` for source/curriculum, `production/<run>/` for pipeline output). The registry `00_CORE/business_units.yaml` is the source of truth.
+Agents must strictly segment work by **company → business unit** (channel). Operational assets, startup logs, and creative screenplays must never be dumped loosely into the root directory. Content for a unit lives under `business_units/<company>/<unit>/` (`knowledge/` for source/curriculum, `production/<run>/` for pipeline output). The registry `00_CORE/business_units.yaml` (a `companies:` map) is the source of truth.
 
-The legacy `02_CURRICULUM/` track paths still work — they are **compatibility symlinks** redirecting into the units:
+The legacy `02_CURRICULUM/` track paths still work — they are **compatibility symlinks** redirecting into the Solocorn Studios units:
 
-- `02_CURRICULUM/01_SOLOCORN_EDTECH/` → `business_units/edtech/knowledge/` (Dev & Cloud / EdTech)
-- `02_CURRICULUM/03_DEVOPS_CONTROL/` → `business_units/edtech/knowledge/` (Dev & Cloud infra/ops)
-- `02_CURRICULUM/02_AP_STATS_MOVIE/` → `business_units/ap-stats/knowledge/`
+- `02_CURRICULUM/01_SOLOCORN_EDTECH/` → `business_units/solocorn-studios/edtech/knowledge/` (Dev & Cloud)
+- `02_CURRICULUM/03_DEVOPS_CONTROL/` → `business_units/solocorn-studios/edtech/knowledge/` (Dev & Cloud infra/ops)
+- `02_CURRICULUM/02_AP_STATS_MOVIE/` → `business_units/solocorn-studios/ap-stats/knowledge/`
 - `02_CURRICULUM/compiled_wiki/` — shared cross-unit knowledge vault (unchanged)
 - (`04_VERTICAL_FARMING` is not a current channel.)
 

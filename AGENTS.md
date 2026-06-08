@@ -298,46 +298,54 @@ npx paperclipai company import --yes /Users/nazeera/Documents/AI_PRODUCER/07_PAP
 
 ---
 
-## Business Units (Channels)
+## Companies & Business Units (Channels)
 
-The studio is organized into **business units** — one per monetization channel.
-This reconciles the three taxonomies (channels / curriculum tracks / Paperclip
-projects) into a single model:
+The workspace is organized as **companies → business units (channels)**, which
+reconciles the three taxonomies (channels / curriculum tracks / Paperclip
+projects) into a single multi-company model:
 
-> **A business unit = a Paperclip Project + a same-named Team** (under the single
-> "Solocorn Studios" company) **+ a unified filesystem home** at
-> `business_units/<slug>/`.
+> **A COMPANY = a Paperclip company + a package under
+> `07_PAPERCLIP/companies/<company>/`.**
+> **A BUSINESS UNIT (channel) = a Paperclip Project + a same-named Team within a
+> company + a unified filesystem home at `business_units/<company>/<unit>/`.**
 
-- **Registry (source of truth):** `00_CORE/business_units.yaml` — maps each
-  unit's slug → name, domain, `paperclip_project_id`, team, and folder.
-- **Per-unit folder layout:**
+- **Registry (source of truth):** `00_CORE/business_units.yaml` — a `companies:`
+  map; each company has `id`, `name`, `package`, and a `units:` map (slug → name,
+  domain, `paperclip_project_id`, team, folder).
+- **Per-unit folder layout** (`business_units/<company>/<unit>/`):
   - `BRIEF.md` — unit charter; points agents at `00_CORE/` context
   - `knowledge/` — curriculum input / source notes (tracked)
-  - `production/` — container of production runs; each run is a subfolder with
-    the `01-scripts … 09-deliver` pipeline tree (gitignored — heavy/regenerable)
+  - `production/` — container of runs; each run is a subfolder with the
+    `01-scripts … 09-deliver` pipeline tree (gitignored — heavy/regenerable)
   - `assets/` — rendered media (gitignored)
-- **Current units:** `edtech`, `ap-stats`, `translation`, `ambient`.
+- **Current companies:** `solocorn-studios` (units: edtech, ap-stats,
+  translation, ambient), `deparadigm-media`, `nazeera-multimedia`.
 
-### Create / sync a business unit (as needed)
+### Create / sync companies and units (as needed)
 
 ```bash
-# New unit:
-python3 01_SKILLS/provision_business_unit.py provision podcast \
-    --name "Solocorn Podcast" --domain "Long-form audio interviews"
-# Re-sync an existing one (repairs folder, re-ensures Paperclip project/team):
-python3 01_SKILLS/provision_business_unit.py provision ap-stats
-python3 01_SKILLS/provision_business_unit.py list
+python3 01_SKILLS/provision_business_unit.py companies
+# Register/create a company (creates it in Paperclip if --id omitted):
+python3 01_SKILLS/provision_business_unit.py add-company acme --name "Acme Co"
+# Create/sync a business unit under a company:
+python3 01_SKILLS/provision_business_unit.py provision acme shorts \
+    --name "Acme Shorts" --domain "..."
+python3 01_SKILLS/provision_business_unit.py provision solocorn-studios ap-stats  # re-sync
+python3 01_SKILLS/provision_business_unit.py list [--company solocorn-studios]
 ```
 
-This scaffolds the folder, ensures the Paperclip Project + Team, sets the
+Provisioning scaffolds the folder, ensures the Paperclip Project + Team, sets the
 project description to the folder home, and updates the registry. The bridge's
-background poller (`:3101`) auto-provisions a unit home for any **new Paperclip
-project** within ~30s, so creating a project in the Paperclip UI also yields a
-`business_units/<slug>/` home.
+background poller (`:3101`) iterates **all registered companies** and
+auto-provisions a `business_units/<company>/<unit>/` home for any new Paperclip
+project within ~30s.
+
+Production runs go inside a unit:
+`init_project.py create <run> --company <c> --unit <u> --title "..."`.
 
 > Optionally, in the Paperclip UI link each project's local folder to its
-> `business_units/<slug>/` so agents operate directly in the organized home
-> (the API does not expose this binding).
+> `business_units/<company>/<unit>/` so agents operate directly in the organized
+> home (the API does not expose this binding).
 
 ---
 
@@ -508,9 +516,9 @@ All rendered frames, intermediate textures, geometry caches, and final delivery 
 ## Common Pitfalls for Agents
 
 1. **Guessing business units**: Content is organized by **business unit** (channel) — see "Business Units (Channels)" above and the registry `00_CORE/business_units.yaml`. The legacy curriculum-track paths are now **compatibility symlinks** that redirect into business-unit `knowledge/` folders, so existing references keep working:
-   - `02_CURRICULUM/01_SOLOCORN_EDTECH/` → `business_units/edtech/knowledge/`
-   - `02_CURRICULUM/03_DEVOPS_CONTROL/` → `business_units/edtech/knowledge/` (Dev & Cloud)
-   - `02_CURRICULUM/02_AP_STATS_MOVIE/` → `business_units/ap-stats/knowledge/`
+   - `02_CURRICULUM/01_SOLOCORN_EDTECH/` → `business_units/solocorn-studios/edtech/knowledge/`
+   - `02_CURRICULUM/03_DEVOPS_CONTROL/` → `business_units/solocorn-studios/edtech/knowledge/` (Dev & Cloud)
+   - `02_CURRICULUM/02_AP_STATS_MOVIE/` → `business_units/solocorn-studios/ap-stats/knowledge/`
    - `04_VERTICAL_FARMING` is not a current channel (no business unit).
    If you cannot determine which unit a file belongs to, **pause and ask the user**.
 2. **Forgetting the local inference endpoint**: All LLM calls must route to `http://127.0.0.1:8000/v1`. Cloud APIs (OpenAI, Claude, etc.) are forbidden unless the user explicitly overrides.

@@ -1,33 +1,54 @@
-company: Solocorn Studios
-company_id: 15041ee2-b1c5-43ac-b488-04934bfa1806
-units:
-  edtech:
-    name: Solocorn Dev & Cloud
-    channel: 1
-    domain: Serverless GCP/AWS architectures, AWS transitions, Security+ compliance,
-      DevOps tooling
-    paperclip_project_id: 76cdf731-76e9-4678-aac1-67df6def0c3e
-    team: edtech
-    folder: business_units/edtech
-  ap-stats:
-    name: AP Statistics Movie Series
-    channel: 2
-    domain: Story-driven multi-episode AP Statistics seasons mapped to the College
-      Board catalog
-    paperclip_project_id: 23b2f710-b364-4263-b1e7-bacace21ba62
-    team: ap-stats
-    folder: business_units/ap-stats
-  translation:
-    name: Multi-Language Translation Factory
-    channel: 3
-    domain: Automated Spanish and Mandarin dubbing via XTTS v2 voice cloning
-    paperclip_project_id: 8da8fae2-7add-4252-9c99-4a9e5f1742b0
-    team: translation
-    folder: business_units/translation
-  ambient:
-    name: Ambient Deep-Focus Loops
-    channel: 4
-    domain: 10-hour passive deep-focus coding ambience loop channels
-    paperclip_project_id: cd533598-b85c-4bf6-a3dd-7a6084d23c18
-    team: ambient-loops
-    folder: business_units/ambient
+companies:
+  solocorn-studios:
+    id: 15041ee2-b1c5-43ac-b488-04934bfa1806
+    name: Solocorn Studios
+    package: 07_PAPERCLIP/companies/solocorn-studios
+    units:
+      edtech:
+        name: Solocorn Dev & Cloud
+        channel: 1
+        domain: Serverless GCP/AWS architectures, AWS transitions, Security+ compliance,
+          DevOps tooling
+        paperclip_project_id: 76cdf731-76e9-4678-aac1-67df6def0c3e
+        team: edtech
+        folder: business_units/solocorn-studios/edtech
+      ap-stats:
+        name: AP Statistics Movie Series
+        channel: 2
+        domain: Story-driven multi-episode AP Statistics seasons mapped to the College
+          Board catalog
+        paperclip_project_id: 23b2f710-b364-4263-b1e7-bacace21ba62
+        team: ap-stats
+        folder: business_units/solocorn-studios/ap-stats
+      translation:
+        name: Multi-Language Translation Factory
+        channel: 3
+        domain: Automated Spanish and Mandarin dubbing via XTTS v2 voice cloning
+        paperclip_project_id: 8da8fae2-7add-4252-9c99-4a9e5f1742b0
+        team: translation
+        folder: business_units/solocorn-studios/translation
+      ambient:
+        name: Ambient Deep-Focus Loops
+        channel: 4
+        domain: 10-hour passive deep-focus coding ambience loop channels
+        paperclip_project_id: cd533598-b85c-4bf6-a3dd-7a6084d23c18
+        team: ambient-loops
+        folder: business_units/solocorn-studios/ambient
+    slug: solocorn-studios
+  deparadigm-media:
+    id: d30e9c9a-5d3d-4865-bfd4-a5532d285a13
+    name: DeParadigm Media
+    package: 07_PAPERCLIP/companies/deparadigm-media
+    units:
+      onboarding:
+        name: Onboarding
+        domain: ''
+        team: onboarding
+        folder: business_units/deparadigm-media/onboarding
+        paperclip_project_id: 823f3dc9-df9c-4e4c-bad8-19a777c0e00f
+    slug: deparadigm-media
+  nazeera-multimedia:
+    id: 0337cde4-55de-4b6c-8925-f605a733714e
+    name: Nazeera Multimedia
+    package: 07_PAPERCLIP/companies/nazeera-multimedia
+    units: {}

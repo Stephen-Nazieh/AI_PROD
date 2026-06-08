@@ -82,9 +82,10 @@ media/
 02_CURRICULUM/*/assets/
 
 # Business unit working dirs: rendered assets + heavy production runs (regenerable).
-# The per-unit BRIEF.md, knowledge/, and production/README.md ARE tracked.
-business_units/*/assets/
-business_units/*/production/*/
+# Layout: business_units/<company>/<unit>/. The per-unit BRIEF.md, knowledge/, and
+# production/README.md ARE tracked.
+business_units/*/*/assets/
+business_units/*/*/production/*/
 *.db
 *.db-wal
 *.db-shm

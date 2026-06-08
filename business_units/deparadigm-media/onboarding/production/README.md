@@ -1,4 +1,4 @@
-# Ambient Deep-Focus Loops — production runs
+# Onboarding (DeParadigm Media) — production runs
 
 Each production run (episode/video) is a subfolder here with the standard pipeline tree:
 
@@ -6,4 +6,4 @@ Each production run (episode/video) is a subfolder here with the standard pipeli
 
 Create a run with:
 
-    python3 01_SKILLS/init_project.py create <run> --unit ambient --title "..."
+    python3 01_SKILLS/init_project.py create <run> --company deparadigm-media --unit onboarding --title "..."

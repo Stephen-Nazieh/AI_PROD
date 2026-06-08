@@ -91,32 +91,37 @@ EXAMPLE_SHOT_LIST = {
 }
 
 
-def _resolve_run_dir(project_slug: str, unit: str | None) -> tuple[Path, str | None]:
+def _resolve_run_dir(project_slug: str, company: str | None,
+                     unit: str | None) -> tuple[Path, str | None]:
     """
     Resolve where a production run is scaffolded.
 
-    With a business unit, the run lives inside that unit's production/ folder
-    (the canonical location, validated against 00_CORE/business_units.yaml).
-    Without a unit, fall back to the legacy 05_PROJECTS/<run>/ location.
+    With --company and --unit, the run lives inside that unit's production/ folder
+    (validated against 00_CORE/business_units.yaml). Without them, fall back to the
+    legacy 05_PROJECTS/<run>/ location.
     """
-    if unit:
+    if unit or company:
+        if not (unit and company):
+            return WORKSPACE_ROOT, "Provide BOTH --company and --unit (or neither for legacy)."
         reg = WORKSPACE_ROOT / "00_CORE" / "business_units.yaml"
         try:
             import yaml
-            units = (yaml.safe_load(reg.read_text(encoding="utf-8")) or {}).get("units", {})
+            companies = (yaml.safe_load(reg.read_text(encoding="utf-8")) or {}).get("companies", {})
         except Exception:
-            units = {}
+            companies = {}
+        if company not in companies:
+            return WORKSPACE_ROOT, f"Unknown company '{company}'. Known: {', '.join(companies) or '(none)'}"
+        units = companies[company].get("units", {})
         if unit not in units:
-            known = ", ".join(units) or "(registry unavailable)"
-            return WORKSPACE_ROOT, f"Unknown business unit '{unit}'. Known units: {known}"
-        folder = units[unit].get("folder", f"business_units/{unit}")
+            return WORKSPACE_ROOT, f"Unknown unit '{unit}' in '{company}'. Known: {', '.join(units) or '(none)'}"
+        folder = units[unit].get("folder", f"business_units/{company}/{unit}")
         return WORKSPACE_ROOT / folder / "production" / project_slug, None
     return WORKSPACE_ROOT / "05_PROJECTS" / project_slug, None  # legacy fallback
 
 
 def create_project(project_slug: str, title: str, description: str = "",
-                   unit: str | None = None) -> dict:
-    project_dir, err = _resolve_run_dir(project_slug, unit)
+                   company: str | None = None, unit: str | None = None) -> dict:
+    project_dir, err = _resolve_run_dir(project_slug, company, unit)
     if err:
         return {"status": "error", "message": err}
 
@@ -176,6 +181,7 @@ Great question. Let's look at an example...
     # Create project config
     config = {
         "project": project_slug,
+        "company": company,
         "business_unit": unit,
         "title": title,
         "description": description,
@@ -205,13 +211,16 @@ def main():
     p.add_argument("project_slug", help="Run/episode slug")
     p.add_argument("--title", required=True)
     p.add_argument("--description", default="")
+    p.add_argument("--company", default=None,
+                   help="Company slug (see 00_CORE/business_units.yaml).")
     p.add_argument("--unit", default=None,
-                   help="Business unit slug (see 00_CORE/business_units.yaml). "
-                        "Places the run in business_units/<unit>/production/<slug>/. "
-                        "Omit only for legacy 05_PROJECTS/ placement.")
+                   help="Business unit slug. With --company, places the run in "
+                        "business_units/<company>/<unit>/production/<slug>/. "
+                        "Omit both for legacy 05_PROJECTS/ placement.")
     args = parser.parse_args()
     if args.cmd == "create":
-        print(json.dumps(create_project(args.project_slug, args.title, args.description, args.unit), indent=2))
+        print(json.dumps(create_project(args.project_slug, args.title, args.description,
+                                        args.company, args.unit), indent=2))
 
 if __name__ == "__main__":
     main()

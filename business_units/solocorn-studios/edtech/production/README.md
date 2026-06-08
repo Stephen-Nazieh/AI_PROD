@@ -1,4 +1,4 @@
-# Multi-Language Translation Factory — production runs
+# Solocorn Dev & Cloud (Solocorn Studios) — production runs
 
 Each production run (episode/video) is a subfolder here with the standard pipeline tree:
 
@@ -6,4 +6,4 @@ Each production run (episode/video) is a subfolder here with the standard pipeli
 
 Create a run with:
 
-    python3 01_SKILLS/init_project.py create <run> --unit translation --title "..."
+    python3 01_SKILLS/init_project.py create <run> --company solocorn-studios --unit edtech --title "..."
