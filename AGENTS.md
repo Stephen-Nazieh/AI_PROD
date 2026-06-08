@@ -277,6 +277,25 @@ python3 07_PAPERCLIP/scripts/sync_company.py --company solocorn-studios --all
 npx paperclipai company import --yes /Users/nazeera/Documents/AI_PRODUCER/07_PAPERCLIP/companies/solocorn-studios
 ```
 
+> ⚠️ **`company import` is NOT idempotent — it creates a brand-new company every
+> time, it does not update the existing one.** Re-importing without cleanup
+> accumulates duplicate companies (e.g. multiple "Solocorn Studios"), and the
+> bridge keeps targeting the original `PAPERCLIP_COMPANY_ID` (`15041ee2-…`), so
+> the new copy is dead weight. Prefer editing agents/skills **in place** via the
+> Paperclip UI/API and reserve `import` for first-time setup. If you must
+> re-import, delete the stale company afterward:
+>
+> ```bash
+> curl -X DELETE http://127.0.0.1:3100/api/companies/<old_company_id>
+> ```
+>
+> Caveat: Paperclip's delete has a cascade bug — a company that has accrued
+> `cost_events` (i.e. agents have run) returns HTTP 500 (`heartbeat_runs` →
+> `cost_events` foreign-key violation). Only companies with no run history
+> delete cleanly via the API. Removing an active one requires deleting its
+> `cost_events` rows in the embedded Postgres (`~/.paperclip/instances/default/db`,
+> port 54329) first — do this only with care.
+
 ---
 
 ## Testing Instructions
