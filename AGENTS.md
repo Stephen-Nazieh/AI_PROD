@@ -265,7 +265,15 @@ Bridge API: `http://localhost:3101`
 
 ### Re-import Company Package (after agent/skill changes)
 
+The package's `agents/` and `skills/` folders are **not** stored on disk —
+they are regenerated from the canonical `library/` via `sync_company.py`
+(this avoids a 4.3MB duplicate). Always sync **before** importing:
+
 ```bash
+# 1. Regenerate agents/ and skills/ from library/ into the package
+python3 07_PAPERCLIP/scripts/sync_company.py --company solocorn-studios --all
+
+# 2. Import the freshly-synced package into Paperclip
 npx paperclipai company import --yes /Users/nazeera/Documents/AI_PRODUCER/07_PAPERCLIP/companies/solocorn-studios
 ```
 
