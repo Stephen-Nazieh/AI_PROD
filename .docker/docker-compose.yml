@@ -45,14 +45,18 @@ services:
     restart: unless-stopped
 
   # NOTE: The "production tracking" Postgres on port 5432 (consumed by
-  # init_database.py / solocorn_media_bridge.py, creds postgres/postgres/postgres)
-  # already runs as a standalone container named `solocorn_db` started outside
-  # this compose project (`docker ps` shows it bound to 0.0.0.0:5432->5432/tcp
-  # with populated `production_tracks`/`media_assets` tables). Do not define a
-  # second postgres service here — it will conflict on the port. If you ever
-  # need to recreate it: `docker run -d --name solocorn_db -p 5432:5432
-  # -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=postgres
-  # -v solocorn_db_data:/var/lib/postgresql/data postgres:15-alpine`
+  # init_database.py / solocorn_media_bridge.py as PRODUCTION_DB_*) already runs as
+  # a standalone container named `solocorn_db` started outside this compose project.
+  # It is bound to 127.0.0.1 ONLY (not network-exposed) and uses a strong password
+  # (in .env as PRODUCTION_DB_PASSWORD). Data is a host bind mount at
+  # .docker/postgres_staging_data. Do not define a second postgres service here — it
+  # will conflict on the port. To recreate (preserves data via the bind mount; export
+  # PRODUCTION_DB_PASSWORD from .env first, do NOT revert to a default password):
+  #   docker run -d --name solocorn_db --restart unless-stopped \
+  #     -p 127.0.0.1:5432:5432 \
+  #     -e POSTGRES_USER=postgres -e POSTGRES_DB=postgres \
+  #     -e POSTGRES_PASSWORD="$PRODUCTION_DB_PASSWORD" \
+  #     -v "$PWD/.docker/postgres_staging_data":/var/lib/postgresql/data postgres:15-alpine
 
   # Persistent Relational Storage Memory Layer for Graphify & Paperclip Corporate Logs
   paperclip_db:
