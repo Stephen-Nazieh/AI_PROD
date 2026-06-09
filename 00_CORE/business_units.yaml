@@ -4,16 +4,16 @@ companies:
     name: DeParadigm Media
     package: 07_PAPERCLIP/companies/deparadigm-media
     units:
-      edtech:
+      dev-cloud:
         name: Dev & Cloud
         channel: 1
         domain: Serverless GCP/AWS architectures, AWS transitions, Security+ compliance,
           DevOps tooling
         paperclip_project_id: 76cdf731-76e9-4678-aac1-67df6def0c3e
         team: edtech
-        folder: business_units/deparadigm-media/edtech
+        folder: business_units/deparadigm-media/dev-cloud
       ap-stats:
-        name: AP Statistics Movie Series
+        name: AP Stats
         channel: 2
         domain: Story-driven multi-episode AP Statistics seasons mapped to the College
           Board catalog
@@ -21,14 +21,14 @@ companies:
         team: ap-stats
         folder: business_units/deparadigm-media/ap-stats
       translation:
-        name: Multi-Language Translation Factory
+        name: Translation
         channel: 3
         domain: Automated Spanish and Mandarin dubbing via XTTS v2 voice cloning
         paperclip_project_id: 8da8fae2-7add-4252-9c99-4a9e5f1742b0
         team: translation
         folder: business_units/deparadigm-media/translation
       ambient:
-        name: Ambient Deep-Focus Loops
+        name: Ambient
         channel: 4
         domain: 10-hour passive deep-focus coding ambience loop channels
         paperclip_project_id: cd533598-b85c-4bf6-a3dd-7a6084d23c18

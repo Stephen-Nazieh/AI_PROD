@@ -1,4 +1,4 @@
-# Knowledge Base — deparadigm-media/edtech
+# Knowledge Base — deparadigm-media/dev-cloud
 
 Isolated knowledge base for this project/business unit. Managed via
 `01_SKILLS/knowledge_base.py`.

@@ -69,8 +69,8 @@ Agents must strictly segment work by **company → business unit** (channel). Op
 
 The legacy `02_CURRICULUM/` track paths still work — they are **compatibility symlinks** redirecting into the DeParadigm Media units:
 
-- `02_CURRICULUM/01_SOLOCORN_EDTECH/` → `business_units/deparadigm-media/edtech/knowledge/` (Dev & Cloud)
-- `02_CURRICULUM/03_DEVOPS_CONTROL/` → `business_units/deparadigm-media/edtech/knowledge/` (Dev & Cloud infra/ops)
+- `02_CURRICULUM/01_SOLOCORN_EDTECH/` → `business_units/deparadigm-media/dev-cloud/knowledge/` (Dev & Cloud)
+- `02_CURRICULUM/03_DEVOPS_CONTROL/` → `business_units/deparadigm-media/dev-cloud/knowledge/` (Dev & Cloud infra/ops)
 - `02_CURRICULUM/02_AP_STATS_MOVIE/` → `business_units/deparadigm-media/ap-stats/knowledge/`
 - `02_CURRICULUM/compiled_wiki/` — shared cross-unit knowledge vault (unchanged)
 - (`04_VERTICAL_FARMING` is not a current channel.)

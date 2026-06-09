@@ -537,8 +537,8 @@ All rendered frames, intermediate textures, geometry caches, and final delivery 
 ## Common Pitfalls for Agents
 
 1. **Guessing business units**: Content is organized by **business unit** (channel) — see "Business Units (Channels)" above and the registry `00_CORE/business_units.yaml`. The legacy curriculum-track paths are now **compatibility symlinks** that redirect into business-unit `knowledge/` folders, so existing references keep working:
-   - `02_CURRICULUM/01_SOLOCORN_EDTECH/` → `business_units/deparadigm-media/edtech/knowledge/`
-   - `02_CURRICULUM/03_DEVOPS_CONTROL/` → `business_units/deparadigm-media/edtech/knowledge/` (Dev & Cloud)
+   - `02_CURRICULUM/01_SOLOCORN_EDTECH/` → `business_units/deparadigm-media/dev-cloud/knowledge/`
+   - `02_CURRICULUM/03_DEVOPS_CONTROL/` → `business_units/deparadigm-media/dev-cloud/knowledge/` (Dev & Cloud)
    - `02_CURRICULUM/02_AP_STATS_MOVIE/` → `business_units/deparadigm-media/ap-stats/knowledge/`
    - `04_VERTICAL_FARMING` is not a current channel (no business unit).
    If you cannot determine which unit a file belongs to, **pause and ask the user**.
