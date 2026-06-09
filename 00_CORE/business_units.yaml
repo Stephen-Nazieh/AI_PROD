@@ -40,6 +40,12 @@ companies:
         team: sarcastic-me
         folder: business_units/deparadigm-media/sarcastic-me
         paperclip_project_id: 41765592-e51f-44da-b7ca-e2ca301cb7da
+      book-review:
+        name: Book review
+        domain: ''
+        team: book-review
+        folder: business_units/deparadigm-media/book-review
+        paperclip_project_id: a58ee3e5-752a-447f-b79a-864844c8cc9d
     slug: deparadigm-media
   nazeera-multimedia:
     id: 0337cde4-55de-4b6c-8925-f605a733714e
