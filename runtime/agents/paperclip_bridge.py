@@ -105,6 +105,61 @@ PROJECT_IDS = {
 BRIDGE_AGENT_ID = "3ab5c382-241f-4283-a39d-9612e8fd4df5"
 
 
+# ── Per-project artifact routing ────────────────────────────────────────────
+#
+# Generated artifacts (timelines, voiceovers, renders) belong to the producing
+# project's run folder — business_units/<company>/<unit>/production/<run>/<subdir>/
+# — not a shared global dump. resolve_artifact_path() routes there whenever the
+# payload carries project context (company+unit[+run], or a Paperclip project_id
+# that maps to a unit via the registry), and falls back to the legacy global path
+# only when no context is available. An explicit payload `output_path` always wins.
+
+def _bridge_registry() -> dict:
+    try:
+        import yaml
+        reg = WORKSPACE_ROOT / "00_CORE" / "business_units.yaml"
+        return (yaml.safe_load(reg.read_text(encoding="utf-8")) or {}).get("companies", {})
+    except Exception:
+        return {}
+
+
+def _unit_folder_for(company: str | None, unit: str | None, project_id: str | None) -> str | None:
+    companies = _bridge_registry()
+    if not (company and unit) and project_id:
+        for cslug, cdata in companies.items():
+            for uslug, urec in (cdata.get("units") or {}).items():
+                if urec.get("paperclip_project_id") == project_id:
+                    return urec.get("folder", f"business_units/{cslug}/{uslug}")
+    if company and unit:
+        urec = (companies.get(company, {}).get("units", {}) or {}).get(unit, {})
+        return urec.get("folder", f"business_units/{company}/{unit}")
+    return None
+
+
+def resolve_artifact_path(payload: dict, subdir: str, default_name: str, global_default: str) -> str:
+    """Route a generated artifact into the owning project's run folder when context
+    is available; otherwise return the legacy global path. `output_path` overrides."""
+    explicit = payload.get("output_path")
+    if explicit:
+        return explicit
+    folder = _unit_folder_for(payload.get("company"), payload.get("unit"),
+                              payload.get("project_id") or payload.get("projectId"))
+    if folder:
+        prod = WORKSPACE_ROOT / folder / "production"
+        run = payload.get("run")
+        if not run and prod.exists():
+            runs = sorted(d.name for d in prod.iterdir()
+                          if d.is_dir() and not d.name.startswith("_"))
+            run = runs[-1] if runs else "_staging"
+        out_dir = prod / (run or "_staging") / subdir
+        try:
+            out_dir.mkdir(parents=True, exist_ok=True)
+            return str(out_dir / default_name)
+        except Exception:
+            pass
+    return global_default
+
+
 # ── Paperclip Bidirectional Reporter (Phase 8) ──────────────────────────────
 
 class PaperclipReporter:
@@ -762,7 +817,9 @@ class BridgeHandler(BaseHTTPRequestHandler):
 
         payload = self._read_json()
         assets = payload.get("assets", [])
-        output_path = payload.get("output_path", str(WORKSPACE_ROOT / "03_ASSETS" / "_HANDOFF_FCP_CAPCUT" / "generated_timeline.fcpxml"))
+        output_path = resolve_artifact_path(
+            payload, "09-deliver", "timeline.fcpxml",
+            str(WORKSPACE_ROOT / "03_ASSETS" / "_HANDOFF_FCP_CAPCUT" / "generated_timeline.fcpxml"))
         start = time.time()
 
         try:
@@ -789,7 +846,9 @@ class BridgeHandler(BaseHTTPRequestHandler):
 
         payload = self._read_json()
         text = payload.get("text", "")
-        output_path = payload.get("output_path", str(WORKSPACE_ROOT / "media" / "audio" / "voiceover.wav"))
+        output_path = resolve_artifact_path(
+            payload, "06-audio/dialogue", "voiceover.wav",
+            str(WORKSPACE_ROOT / "media" / "audio" / "voiceover.wav"))
         start = time.time()
 
         if not text:
@@ -908,8 +967,13 @@ def execute_cli_task(task_json: dict, issue_id: str | None = None,
     Optionally reports cost events to Paperclip.
     """
     endpoint = task_json.get("endpoint", "/health")
-    payload = task_json.get("payload", {})
+    payload = dict(task_json.get("payload", {}))
     method = task_json.get("method", "POST")
+
+    # Surface the run's project context so artifact handlers can route output into
+    # the owning project's business_units/<co>/<unit>/production/<run>/ folder.
+    if project_id and not (payload.get("project_id") or payload.get("projectId")):
+        payload["project_id"] = project_id
 
     start = time.time()
 

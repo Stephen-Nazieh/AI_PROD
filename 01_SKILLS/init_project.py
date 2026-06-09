@@ -15,35 +15,34 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
+import sys
 
-PROJECT_TEMPLATE = {
-    "01-scripts": ["shot-list.json", "screenplay.md", "director_notes.json"],
-    "02-storyboards": [],
-    "03-layout": [],
-    "04-raw_renders": [],
-    "05-assets": {
-        "characters": [],
-        "characters_2d": [],
-        "environments": [],
-        "environments_2d": [],
-        "props": [],
-        "textures": [],
-    },
-    "06-audio": {
-        "dialogue": [],
-        "music": [],
-        "sound_design": [],
-    },
-    "07-editing": [],
-    "08-subtitles": [],
-    "09-deliver": {
-        "masters": [],
-        "web": [],
-        "thumbnails": [],
-    },
-    "episodes": [],
+WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(WORKSPACE_ROOT / "01_SKILLS"))
+
+# Canonical pipeline stages live in provision_business_unit.PRODUCTION_DIRS — the
+# single source of truth shared with the business-unit scaffolder, so a run's tree
+# always matches what provisioning advertises. Fallback keeps init usable in
+# isolation.
+try:
+    from provision_business_unit import PRODUCTION_DIRS  # type: ignore
+except Exception:
+    PRODUCTION_DIRS = [
+        "01-scripts", "02-storyboards", "03-layout", "04-raw_renders",
+        "05-assets", "06-audio", "07-editing", "08-subtitles", "09-deliver",
+    ]
+
+# Subdirectories layered onto specific stages (init_project enrichment).
+PRODUCTION_SUBDIRS = {
+    "05-assets": ["characters", "characters_2d", "environments",
+                  "environments_2d", "props", "textures"],
+    "06-audio": ["dialogue", "music", "sound_design"],
+    "09-deliver": ["masters", "web", "thumbnails"],
 }
+
+# stage -> list of subdirs (empty = leaf stage). Derived from the canonical tree.
+PROJECT_TEMPLATE = {stage: PRODUCTION_SUBDIRS.get(stage, []) for stage in PRODUCTION_DIRS}
+PROJECT_TEMPLATE["episodes"] = []
 
 EXAMPLE_SHOT_LIST = {
     "project": "",
@@ -128,14 +127,12 @@ def create_project(project_slug: str, title: str, description: str = "",
     if project_dir.exists():
         return {"status": "error", "message": f"Run already exists: {project_dir}"}
     
-    # Create directories
-    for path_str, contents in PROJECT_TEMPLATE.items():
-        p = project_dir / path_str
-        if isinstance(contents, list):
-            p.mkdir(parents=True, exist_ok=True)
-        else:
-            for sub in contents:
-                (p / sub).mkdir(parents=True, exist_ok=True)
+    # Create the pipeline stage directories (and any subdirs) from the canonical tree
+    for stage, subdirs in PROJECT_TEMPLATE.items():
+        base = project_dir / stage
+        base.mkdir(parents=True, exist_ok=True)
+        for sub in subdirs:
+            (base / sub).mkdir(parents=True, exist_ok=True)
     
     # Create shot-list template
     shot_list = EXAMPLE_SHOT_LIST.copy()

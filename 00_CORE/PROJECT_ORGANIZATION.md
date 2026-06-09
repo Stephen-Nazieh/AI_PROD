@@ -84,6 +84,43 @@ This is distinct from the **global** cross-unit vault at
 reference vault. Per-project KBs are the isolated, default home for a project's
 own knowledge.
 
+## Production runs & artifacts (per project)
+
+Every movie/video is one **run** under its project, holding the full pipeline in
+one isolated folder:
+
+```
+business_units/<company>/<unit>/production/<run>/
+├── project.yaml
+├── 01-scripts/      # screenplay.md, shot-list.json, director_notes.json
+├── 02-storyboards/
+├── 03-layout/       # Blender scenes, keyframe caches
+├── 04-raw_renders/
+├── 05-assets/       # characters/ environments/ props/ textures/ (+ 2d variants)
+├── 06-audio/        # dialogue/ music/ sound_design/   ← voiceovers land here
+├── 07-editing/
+├── 08-subtitles/
+└── 09-deliver/      # masters/ web/ thumbnails/        ← final outputs + timelines
+```
+
+- **Canonical stages** are defined once in `provision_business_unit.PRODUCTION_DIRS`;
+  `init_project.py` derives its scaffold from that list, so a run's tree always
+  matches what provisioning advertises. Create a run with:
+  `init_project.py create <run> --company <c> --unit <u> --title "…"`.
+- **Tracked vs heavy:** the run folders (`production/*/`) and `assets/` are
+  **gitignored** (multi-GB, regenerable); the *structure* (`BRIEF.md`,
+  `knowledge/`, `production/README.md`) is versioned.
+- **Per-project artifact routing:** bridge-generated artifacts route into the
+  owning run, not a global dump. The bridge resolves the target from the task's
+  Paperclip `project_id` (→ unit via the registry) or an explicit
+  `company`/`unit`/`run` in the payload — voiceovers → `<run>/06-audio/dialogue/`,
+  FCPXML timelines → `<run>/09-deliver/`. An explicit `output_path` always wins;
+  with no context it falls back to the legacy global path.
+
+**`03_ASSETS/`** is shared **staging/handoff** (e.g. `_HANDOFF_FCP_CAPCUT/`,
+`3d_stage_assets/`), **not** per-project storage. Stray loose media that had
+accumulated at its root was archived to `03_ASSETS/_archive/`.
+
 ## Maintenance notes
 
 - **Do not rename or delete the `02_CURRICULUM/01–03` aliases casually** — they
