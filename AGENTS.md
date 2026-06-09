@@ -319,7 +319,14 @@ projects) into a single multi-company model:
     `01-scripts … 09-deliver` pipeline tree (gitignored — heavy/regenerable)
   - `assets/` — rendered media (gitignored)
 - **Current companies:** `deparadigm-media` (units: edtech, ap-stats,
-  translation, ambient), `deparadigm-media`, `nazeera-multimedia`.
+  translation, ambient, sarcastic-me), `nazeera-multimedia`.
+
+> 📁 **Full folder map** — where each project lives and the role of every
+> project-related folder (`business_units/`, `02_CURRICULUM/`, `05_PROJECTS/`,
+> and Paperclip's internal `projects/`/`teams/`) — is documented authoritatively
+> in [`00_CORE/PROJECT_ORGANIZATION.md`](00_CORE/PROJECT_ORGANIZATION.md). No data
+> is duplicated across them: `business_units/` is the source of truth; the
+> `02_CURRICULUM/` curriculum entries are symlink aliases into it.
 
 ### Create / sync companies and units (as needed)
 
