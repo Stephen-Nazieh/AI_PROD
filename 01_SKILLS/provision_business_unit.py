@@ -156,9 +156,14 @@ def scaffold_folder(company_slug: str, unit_slug: str, unit: dict, company_name:
         f"--company {company_slug} --unit {unit_slug} --title \"...\"\n",
         encoding="utf-8",
     )
-    keep = home / "knowledge" / ".gitkeep"
-    if not keep.exists():
-        keep.write_text("", encoding="utf-8")
+    # Isolated per-project knowledge base (sources/ inbox, notes/, .kb/index.json, README)
+    try:
+        from knowledge_base import scaffold as kb_scaffold
+        kb_scaffold(home / "knowledge", company_slug, unit_slug)
+    except Exception as e:  # never block provisioning on KB scaffold
+        (home / "knowledge").mkdir(parents=True, exist_ok=True)
+        (home / "knowledge" / ".gitkeep").write_text("", encoding="utf-8")
+        print(f"  ⚠️  KB scaffold fallback ({e}); created bare knowledge/")
     write_brief(home, company_slug, unit_slug, unit, company_name)
     print(f"  ✅ folder scaffolded: {unit['folder']}/")
     return home
@@ -175,7 +180,9 @@ def write_brief(home: Path, company_slug: str, unit_slug: str, unit: dict, compa
         f"- **Paperclip team:** `{unit.get('team', unit_slug)}`\n"
         f"- **Paperclip project:** `{unit.get('paperclip_project_id', '(unset)')}`\n\n"
         "## Layout\n"
-        "- `knowledge/` — curriculum input / source notes for this unit\n"
+        "- `knowledge/` — isolated knowledge base (sources/ inbox, notes/, .kb/ index); "
+        "manage with `01_SKILLS/knowledge_base.py <cmd> "
+        f"{company_slug} {unit_slug}`\n"
         "- `production/` — container of runs; each run has the 01–09 pipeline tree\n"
         "- `assets/` — rendered media (gitignored; regenerable)\n\n"
         "## Context\n"

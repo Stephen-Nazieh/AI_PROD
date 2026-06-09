@@ -48,6 +48,42 @@ duplication** anywhere in this structure.
 4. *(Curriculum channels only)* optionally add a symlink alias under
    `02_CURRICULUM/` pointing at the unit's `knowledge/`.
 
+## Per-project knowledge bases
+
+Every project has its **own isolated knowledge base** at
+`business_units/<company>/<unit>/knowledge/`, managed by
+`01_SKILLS/knowledge_base.py`:
+
+```
+knowledge/
+├── README.md       # manifest (auto-generated)
+├── sources/        # inbox — drop raw files, then `ingest`  (sources/_done after)
+├── notes/          # curated KB documents (markdown + frontmatter; searchable)
+└── .kb/index.json  # machine manifest of documents
+```
+
+- **Isolated:** each unit's KB is searched and managed independently — content in
+  one project's KB never leaks into another's.
+- **Auto-created:** `provision_business_unit.py` scaffolds the KB for every unit,
+  so new Paperclip projects get one automatically (via the bridge poller). No
+  manual setup.
+- **Managed via CLI:**
+  ```bash
+  python3 01_SKILLS/knowledge_base.py add    <company> <unit> file.md --tags a,b
+  python3 01_SKILLS/knowledge_base.py ingest <company> <unit>          # process sources/
+  python3 01_SKILLS/knowledge_base.py search <company> <unit> "query" [--semantic]
+  python3 01_SKILLS/knowledge_base.py list   <company> <unit>
+  python3 01_SKILLS/knowledge_base.py reindex <company> <unit>         # rebuild index from disk
+  python3 01_SKILLS/knowledge_base.py status                           # all KBs at a glance
+  ```
+- **oMLX-aware:** `--raw`/`ingest` clean documents through the local MLX server
+  (`:8000`); if it's offline, content is stored as-is (the KB still works).
+
+This is distinct from the **global** cross-unit vault at
+`02_CURRICULUM/compiled_wiki/` (managed by `skills.py`), which remains a shared
+reference vault. Per-project KBs are the isolated, default home for a project's
+own knowledge.
+
 ## Maintenance notes
 
 - **Do not rename or delete the `02_CURRICULUM/01–03` aliases casually** — they
