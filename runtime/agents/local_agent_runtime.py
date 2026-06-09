@@ -103,6 +103,16 @@ class PaperclipClient:
     def get_issue(self, issue_id: str) -> dict | None:
         return self._request("GET", f"/api/issues/{issue_id}")
 
+    def next_assigned_issue(self, agent_id: str) -> dict | None:
+        """Oldest backlog issue assigned to this agent (for wake-on-demand pickup), or None."""
+        issues = self._request(
+            "GET", f"/api/companies/{self.company_id}/issues?assigneeAgentId={agent_id}"
+        )
+        if not isinstance(issues, list):
+            return None
+        pending = [i for i in issues if isinstance(i, dict) and i.get("status") == "backlog"]
+        return pending[0] if pending else None
+
     def get_agent(self, agent_id: str) -> dict | None:
         return self._request("GET", f"/api/agents/{agent_id}")
 
@@ -1107,11 +1117,19 @@ def main() -> int:
 
     client = PaperclipClient(api_url, company_id)
 
-    # If no issue ID provided, fallback to bridge mode
+    # Woken with no specific issue (wake-on-demand): pick up an assigned backlog
+    # issue and reason on it via the agent's instructions, rather than the bridge's
+    # endpoint router. Processes one issue per wake; Paperclip wakes again for more.
     if not issue_id:
-        print("ℹ️  No PAPERCLIP_ISSUE_ID. Running in bridge fallback mode.", file=sys.stderr)
-        from paperclip_bridge import worker_mode
-        return worker_mode()
+        print("ℹ️  No PAPERCLIP_ISSUE_ID — checking for assigned backlog issues.", file=sys.stderr)
+        picked = client.next_assigned_issue(agent_id)
+        if not picked:
+            print("ℹ️  No pending tasks. Exiting cleanly.", file=sys.stderr)
+            return 0
+        issue_id = picked["id"]
+        issue_title = picked.get("title", "")
+        issue_description = picked.get("description", "")
+        print(f"📋 Picked up assigned issue {picked.get('identifier', issue_id)} — {issue_title}", file=sys.stderr)
 
     # Load issue details if not provided in env
     if not issue_title or not issue_description:
