@@ -34,6 +34,12 @@ companies:
         paperclip_project_id: cd533598-b85c-4bf6-a3dd-7a6084d23c18
         team: ambient-loops
         folder: business_units/deparadigm-media/ambient
+      sarcastic-me:
+        name: Sarcastic Me
+        domain: ''
+        team: sarcastic-me
+        folder: business_units/deparadigm-media/sarcastic-me
+        paperclip_project_id: 41765592-e51f-44da-b7ca-e2ca301cb7da
     slug: deparadigm-media
   nazeera-multimedia:
     id: 0337cde4-55de-4b6c-8925-f605a733714e
