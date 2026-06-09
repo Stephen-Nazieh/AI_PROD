@@ -102,7 +102,7 @@ Agents missing this header are considered unbriefed and must not be dispatched u
 The `pae_da_vinci` engine is now online and registered for active duty. All 3D format processing — including ZBrush `.ztl` / `.zsc`, 3ds Max `.max` / `.ms`, and Maya `.ma` / `.py` assets — must bypass internal system caches. Output is to be written directly onto the high-speed external storage drive mounted at `/Volumes/SolocornRAID/03_ASSETS` to prevent local disk saturation during heavy geometry or texture streaming operations.
 
 ### Corporate Governance Control Plane
-Paperclip is officially deployed as our executive dashboard. It coordinates high-level business missions and enforces token expenditure boundaries across our 4 isolated subfolders, while utilizing a persistent local PostgreSQL cluster for long-term task-ancestry retention.
+Paperclip is officially deployed as our executive dashboard. It coordinates high-level business missions and enforces token expenditure boundaries across our registered business units, while utilizing a persistent local PostgreSQL cluster for long-term task-ancestry retention.
 
 ## Automation Dispatch Boundaries
 
@@ -114,9 +114,9 @@ Heavy video timeline compilations and asset file optimization sweeps are restric
 
 ## Administrative Governance Shell
 
-Paperclip is deployed as the master administrative governance shell for the DeParadigm Media. It operates as a dedicated containerized dashboard (`paperclip_studio_governor`) on host port 3005, providing executive oversight across all active agent operations. Its primary responsibilities are:
+Paperclip is deployed as the master administrative governance shell for DeParadigm Media. It runs locally via `npx paperclipai` on host port **3100** (embedded PostgreSQL on `54329`), with the studio bridge on `:3101`, providing executive oversight across all active agent operations. Its primary responsibilities are:
 
-- **Mission Tracking**: Monitors high-level company missions and strategic objectives across the four business subfolders (`01_SOLOCORN_EDTECH`, `02_AP_STATS_MOVIE`, `03_DEVOPS_CONTROL`, `04_VERTICAL_FARMING`).
+- **Mission Tracking**: Monitors high-level company missions and strategic objectives across the registered business units (companies → channels; source of truth `00_CORE/business_units.yaml`, with per-unit homes at `business_units/<company>/<unit>/`).
 - **Token Expenditure Boundaries**: Enforces hard spending caps on inference tokens routed through the native oMLX endpoint, with alerts triggered when any business track exceeds its allocated budget.
 - **Zero-Human Auditing**: Generates automated audit trails for every agent handoff, QA verdict, and media pipeline dispatch without requiring manual review.
-- **Governance Endpoint**: Accessible at `http://127.0.0.1:3005/governor` via the local gateway routing table.
+- **Governance Endpoint**: Paperclip API/UI at `http://127.0.0.1:3100`; studio bridge at `http://127.0.0.1:3101`.
