@@ -126,6 +126,10 @@ def cmd_pipeline(args) -> int:
     return subprocess.call([PY, str(SKILLS / "pipeline.py"), *args.rest])
 
 
+def cmd_agents(args) -> int:
+    return subprocess.call([PY, str(SKILLS / "agents_ops.py"), *args.rest])
+
+
 def cmd_backup(args) -> int:
     return subprocess.call([PY, str(SKILLS / "backup.py")])
 
@@ -178,6 +182,10 @@ def main(argv=None) -> int:
     p_pl = sub.add_parser("pipeline", help="production pipeline (status/advance/run/snapshot <co> <unit> <run>)")
     p_pl.add_argument("rest", nargs=argparse.REMAINDER)
     p_pl.set_defaults(fn=cmd_pipeline)
+
+    p_ag = sub.add_parser("agents", help="agent ops (skills/digest/tree/budget)")
+    p_ag.add_argument("rest", nargs=argparse.REMAINDER)
+    p_ag.set_defaults(fn=cmd_agents)
 
     sub.add_parser("backup", help="snapshot DBs + registry + KBs + personas").set_defaults(fn=cmd_backup)
 

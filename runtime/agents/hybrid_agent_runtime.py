@@ -558,7 +558,18 @@ def load_agent_persona(name: str) -> str | None:
         m = re.search(r"^name:\s*(.+)$", text, re.MULTILINE)
         if m and _normalize_agent_name(m.group(1)) == target:
             parts = text.split("---", 2)
-            return parts[2].strip() if len(parts) >= 3 else text.strip()
+            body = parts[2].strip() if len(parts) >= 3 else text.strip()
+            # Persistent per-agent memory: durable facts the agent has learned,
+            # appended so they carry across runs (see `studio agents remember`).
+            mem = d / "MEMORY.md"
+            if mem.is_file():
+                try:
+                    mtext = mem.read_text(encoding="utf-8").strip()
+                except Exception:
+                    mtext = ""
+                if mtext:
+                    body += "\n\n## Persistent memory (facts you have learned)\n\n" + mtext
+            return body
     return None
 
 
