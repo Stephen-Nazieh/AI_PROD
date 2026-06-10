@@ -10,6 +10,7 @@ the runtime are themselves estimates (chars/4), so treat $ as a ballpark, not a 
 """
 from __future__ import annotations
 
+import datetime
 import json
 import os
 import pathlib
@@ -23,6 +24,26 @@ RATES = {
     "kimi-for-coding": (float(os.environ.get("KIMI_USD_IN", "0.60")),
                         float(os.environ.get("KIMI_USD_OUT", "2.50"))),
 }
+
+# Per-channel daily spend cap (USD). Default applies to all; override one channel via
+# env CAP_<unit-with-underscores>, e.g. CAP_SARCASTIC_ME=2.0. Set 0 to disable a cap.
+DEFAULT_DAILY_CAP = float(os.environ.get("CHANNEL_DAILY_CAP_USD", "5.0"))
+
+
+def daily_cap(unit: str) -> float:
+    return float(os.environ.get(f"CAP_{unit.upper().replace('-', '_')}", DEFAULT_DAILY_CAP))
+
+
+def today_spend(company: str, unit: str) -> float:
+    midnight = time.mktime(datetime.date.today().timetuple())
+    return round(sum(r.get("usd", 0.0) for r in _rows()
+                     if r.get("company") == company and r.get("unit") == unit
+                     and r.get("ts", 0) >= midnight), 4)
+
+
+def over_budget(company: str, unit: str) -> bool:
+    cap = daily_cap(unit)
+    return cap > 0 and today_spend(company, unit) >= cap
 
 
 def estimate_usd(model: str, in_tok: int, out_tok: int) -> float:
@@ -88,9 +109,12 @@ def _print() -> None:
         return
     print(f"  total: ${s['total_usd']:.2f} over {s['calls']} call(s) "
           f"({s['in_tok']//1000}K in / {s['out_tok']//1000}K out)")
-    print("  by channel:")
+    print("  by channel (total | today/cap):")
     for u, d in sorted(s["by_unit"].items(), key=lambda kv: -kv[1]["usd"]):
-        print(f"    {u:42} ${d['usd']:.2f}  ({d['calls']} calls)")
+        company, _, unit = u.partition("/")
+        ts, cap = today_spend(company, unit), daily_cap(unit)
+        flag = "  🚫 OVER CAP" if (cap > 0 and ts >= cap) else ""
+        print(f"    {u:36} ${d['usd']:.2f}  | today ${ts:.2f}/${cap:.0f}{flag}  ({d['calls']} calls)")
     print("  by model:")
     for m, d in sorted(s["by_model"].items(), key=lambda kv: -kv[1]["usd"]):
         print(f"    {m:42} ${d['usd']:.2f}  ({d['calls']} calls)")

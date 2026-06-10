@@ -847,6 +847,22 @@ def run_hybrid(agent_id: str, issue_id: str, issue_title: str, issue_description
     except Exception:
         _OUTPUT_BASE = None
 
+    # Budget gate: if this channel hit its daily cap, skip BEFORE spending on Kimi.
+    if os.environ.get("CLAUDE_USE_API") == "1":
+        try:
+            company, unit, _ = _channel_from_base()
+            sys.path.insert(0, str(WORKSPACE_ROOT / "01_SKILLS"))
+            import cost_ledger
+            if cost_ledger.over_budget(company, unit):
+                print(f"  🚫 {unit} hit its daily budget cap (${cost_ledger.today_spend(company, unit):.2f}"
+                      f"/${cost_ledger.daily_cap(unit):.0f}) — skipping, no spend", file=sys.stderr)
+                return {"status": "budget_capped",
+                        "summary": f"skipped: '{unit}' over its daily budget cap",
+                        "turns": 0, "total_input_tokens": 0, "total_output_tokens": 0,
+                        "actions": [], "results": [], "claude_calls": []}
+        except Exception:
+            pass
+
     claude = ClaudeClient(persona=persona)
     task = f"{issue_title}\n\n{issue_description}".strip()
 
@@ -1090,6 +1106,14 @@ def main() -> int:
         result = {"status": "error", "error": str(e), "traceback": traceback.format_exc()}
 
     elapsed_ms = round((time.time() - start) * 1000, 2)
+
+    # Budget cap reached → leave the brief queued (no spend, no retry bump); it
+    # resumes when the daily window resets.
+    if result.get("status") == "budget_capped":
+        client.update_issue(issue_id, status="backlog", description=issue_description or "")
+        print("  ⏸ left in backlog — daily budget cap reached", file=sys.stderr)
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        return 0
 
     # Update issue with result
     if result["status"] == "ok":

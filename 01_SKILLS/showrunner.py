@@ -111,6 +111,10 @@ def plan(co: str, unit: str, n: int = 3) -> int:
     if rec is None:
         print(f"❌ unknown unit {co}/{unit}"); return 1
     pid = rec.get("paperclip_project_id")
+    import cost_ledger
+    if cost_ledger.over_budget(co, unit):
+        print(f"🚫 {rec.get('name', unit)} is over its daily budget — skipping (no briefs filed).")
+        return 0
     agents = _agents()
     writer = _writer_for(unit, agents)
     if not writer:
