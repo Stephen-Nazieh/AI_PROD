@@ -120,7 +120,7 @@ def _channel_visual(rd: pathlib.Path) -> tuple[str, int]:
     """(style_suffix, seed_base) for the run's channel, so shots share an identity."""
     try:
         import yaml
-        cfg = yaml.safe_load((WORKSPACE_ROOT / "00_CORE" / "channel_visuals.yaml").read_text())
+        cfg = yaml.safe_load((ROOT / "00_CORE" / "channel_visuals.yaml").read_text())
         unit = rd.parts[rd.parts.index("production") - 1]  # …/<unit>/production/<run>
         ch = (cfg.get("channels") or {}).get(unit) or {}
         d = cfg.get("defaults") or {}
