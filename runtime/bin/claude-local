@@ -1,0 +1,57 @@
+#!/bin/bash
+# claude-local — Project-local Claude Code CLI wrapper (HYBRID routing).
+#
+# Routing:
+#   default              → local MLX proxy (:8003)  — cheap/local, most agents
+#   CLAUDE_USE_API=1     → real Anthropic cloud API — quality-critical agents
+#                          (e.g. the writer agents). Key is read from .env so it
+#                          never has to live in agent adapter configs.
+#
+# Usage:
+#   claude-local -p "prompt"                        # local MLX
+#   CLAUDE_USE_API=1 claude-local -p "prompt"       # real Claude API
+#   CLAUDE_USE_API=1 ANTHROPIC_MODEL=claude-opus-4-8 claude-local -p "..."  # pick tier
+
+set -e
+
+PROJECT_ROOT="/Users/nazeera/Documents/AI_PRODUCER"
+export CLAUDE_CODE_SKIP_UPDATE_CHECK="1"
+
+CLAUDE_BIN="${CLAUDE_BIN:-/Users/nazeera/.local/bin/claude}"
+if [[ ! -x "$CLAUDE_BIN" ]]; then
+    echo "Error: Claude Code CLI not found at $CLAUDE_BIN" >&2
+    echo "Install from: https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview" >&2
+    exit 1
+fi
+
+if [[ "${CLAUDE_USE_API:-0}" == "1" ]]; then
+    # ── Cloud mode: real Anthropic API (quality tier) ───────────────────────────
+    # Auth, in priority order:
+    #   1) a real api03 key already in the env
+    #   2) a real api03 key from .env (kept out of agent configs)
+    #   3) otherwise defer to the CLI's own auth (a `claude /login` session)
+    # NB: an "sk-ant-sid02-" value is a session token, NOT an API key — ignore it
+    # here so it doesn't get sent as ANTHROPIC_API_KEY (the API rejects it).
+    if [[ "$ANTHROPIC_API_KEY" != sk-ant-api* && -f "$PROJECT_ROOT/.env" ]]; then
+        _k="$(grep -E '^ANTHROPIC_API_KEY=' "$PROJECT_ROOT/.env" | head -1 | cut -d= -f2- | tr -d '"' | tr -d "'" | xargs)"
+        if [[ "$_k" == sk-ant-api* ]]; then export ANTHROPIC_API_KEY="$_k"; else unset ANTHROPIC_API_KEY; fi
+    fi
+    # Real API: ensure no local-proxy overrides leak in.
+    unset ANTHROPIC_BASE_URL ANTHROPIC_AUTH_TOKEN
+    export ANTHROPIC_MODEL="${ANTHROPIC_MODEL:-claude-sonnet-4-6}"
+    exec "$CLAUDE_BIN" "$@"
+fi
+
+# ── Local mode: MLX proxy (:8003) ───────────────────────────────────────────────
+export ANTHROPIC_BASE_URL="http://127.0.0.1:8003"
+export ANTHROPIC_AUTH_TOKEN="local"
+export ANTHROPIC_API_KEY=""   # prevent the CLI from trying to auth with the cloud
+
+if ! curl -sf http://127.0.0.1:8003/health > /dev/null 2>&1; then
+    echo "Warning: Local MLX proxy (:8003) is not running." >&2
+    echo "Start it with: $PROJECT_ROOT/runtime/startup/start_model_servers.sh" >&2
+    echo "Falling back to Anthropic cloud API (if an API key is set in the env)." >&2
+    unset ANTHROPIC_BASE_URL ANTHROPIC_AUTH_TOKEN
+fi
+
+exec "$CLAUDE_BIN" "$@"
