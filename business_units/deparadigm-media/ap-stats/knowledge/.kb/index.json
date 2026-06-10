@@ -1,6 +1,95 @@
 {
   "company": "deparadigm-media",
   "unit": "ap-stats",
-  "documents": [],
-  "updated": "2026-06-09T18:59:24"
+  "documents": [
+    {
+      "id": "confidenceintervals",
+      "title": "ConfidenceIntervals",
+      "path": "notes/confidenceintervals.md",
+      "tags": [
+        "ingested"
+      ],
+      "source": "ConfidenceIntervals.txt",
+      "added": "2026-06-10",
+      "bytes": 282
+    },
+    {
+      "id": "hypothesistesting",
+      "title": "HypothesisTesting",
+      "path": "notes/hypothesistesting.md",
+      "tags": [
+        "ingested"
+      ],
+      "source": "HypothesisTesting.txt",
+      "added": "2026-06-10",
+      "bytes": 173
+    },
+    {
+      "id": "normaldistribution",
+      "title": "NormalDistribution",
+      "path": "notes/normaldistribution.md",
+      "tags": [
+        "ingested"
+      ],
+      "source": "NormalDistribution.txt",
+      "added": "2026-06-10",
+      "bytes": 327
+    },
+    {
+      "id": "probabilitymatrices",
+      "title": "ProbabilityMatrices",
+      "path": "notes/probabilitymatrices.md",
+      "tags": [
+        "ingested"
+      ],
+      "source": "ProbabilityMatrices.txt",
+      "added": "2026-06-10",
+      "bytes": 205
+    },
+    {
+      "id": "standarddeviation",
+      "title": "StandardDeviation",
+      "path": "notes/standarddeviation.md",
+      "tags": [
+        "ingested"
+      ],
+      "source": "StandardDeviation.txt",
+      "added": "2026-06-10",
+      "bytes": 217
+    },
+    {
+      "id": "zscores",
+      "title": "ZScores",
+      "path": "notes/zscores.md",
+      "tags": [
+        "ingested"
+      ],
+      "source": "ZScores.txt",
+      "added": "2026-06-10",
+      "bytes": 218
+    },
+    {
+      "id": "ap-stats-course-units",
+      "title": "ap-stats-course-units",
+      "path": "notes/ap-stats-course-units.md",
+      "tags": [
+        "ingested"
+      ],
+      "source": "ap-stats-course-units.md",
+      "added": "2026-06-10",
+      "bytes": 1470
+    },
+    {
+      "id": "z-score-transcript",
+      "title": "z_score_transcript",
+      "path": "notes/z-score-transcript.md",
+      "tags": [
+        "ingested"
+      ],
+      "source": "z_score_transcript.txt",
+      "added": "2026-06-10",
+      "bytes": 524
+    }
+  ],
+  "updated": "2026-06-10T16:29:32"
 }

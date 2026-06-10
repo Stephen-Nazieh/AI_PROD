@@ -1,0 +1,1 @@
+so basically um like if you have a normal distribution curve and you want to find the z score you like take the data point x and you subtract the mean mu and then you divide by the standard deviation sigma which is basically the formula z equals x minus mu over sigma and that tells you how many standard deviations you are away from the average you know?

@@ -1,0 +1,1 @@
+Confidence Intervals calculate structural margins of error. This mathematical calculation relies directly on Z-Scores and Standard Error bounds.
