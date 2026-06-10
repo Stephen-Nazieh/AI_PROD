@@ -1,6 +1,40 @@
 {
   "company": "deparadigm-media",
   "unit": "sarcastic-me",
-  "documents": [],
-  "updated": "2026-06-09T18:59:24"
+  "documents": [
+    {
+      "id": "character-bible",
+      "title": "character-bible",
+      "path": "notes/character-bible.md",
+      "tags": [
+        "ingested"
+      ],
+      "source": "character-bible.md",
+      "added": "2026-06-10",
+      "bytes": 1913
+    },
+    {
+      "id": "sarcasm-writing",
+      "title": "sarcasm-writing",
+      "path": "notes/sarcasm-writing.md",
+      "tags": [
+        "ingested"
+      ],
+      "source": "sarcasm-writing.md",
+      "added": "2026-06-10",
+      "bytes": 1424
+    },
+    {
+      "id": "vtuber-production",
+      "title": "vtuber-production",
+      "path": "notes/vtuber-production.md",
+      "tags": [
+        "ingested"
+      ],
+      "source": "vtuber-production.md",
+      "added": "2026-06-10",
+      "bytes": 1589
+    }
+  ],
+  "updated": "2026-06-10T16:41:30"
 }
