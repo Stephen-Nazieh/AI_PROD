@@ -37,8 +37,13 @@ MAX_SHOTS = int(os.environ.get("PIPELINE_MAX_SHOTS", "5"))
 # ── helpers ───────────────────────────────────────────────────────────────────
 
 def _read_script(rd: pathlib.Path) -> str:
-    f = rd / "01-scripts" / "screenplay.md"
-    return f.read_text(encoding="utf-8", errors="ignore") if f.exists() else ""
+    d = rd / "01-scripts"
+    f = d / "screenplay.md"
+    if f.exists():
+        return f.read_text(encoding="utf-8", errors="ignore")
+    # fall back to the largest .md a writer left under 01-scripts/
+    mds = sorted(d.glob("*.md"), key=lambda p: -p.stat().st_size) if d.is_dir() else []
+    return mds[0].read_text(encoding="utf-8", errors="ignore") if mds else ""
 
 
 def _script_to_spoken(script: str) -> str:

@@ -726,6 +726,35 @@ def _clear_retry(issue_id: str) -> None:
         _save_retry(state)
 
 
+def _maybe_trigger_pipeline() -> None:
+    """If this run left a script under a channel's production run, fire the full
+    production pipeline (storyboard→renders→audio→edit→subtitles→deliver) detached,
+    so an approved script flows straight to a finished, QA-gated video."""
+    base = _OUTPUT_BASE
+    if not base:
+        return
+    sd = base / "01-scripts"
+    if not (sd.is_dir() and any(sd.glob("*.md"))):
+        return  # not a script-producing run
+    parts = base.parts
+    if "business_units" not in parts or "production" not in parts:
+        return
+    try:
+        bi, pi = parts.index("business_units"), parts.index("production")
+        company, unit, run = parts[bi + 1], parts[bi + 2], parts[pi + 1]
+    except (ValueError, IndexError):
+        return
+    try:
+        log = open("/tmp/auto_pipeline.log", "a")
+        subprocess.Popen(
+            [sys.executable, str(WORKSPACE_ROOT / "01_SKILLS" / "pipeline.py"),
+             "run", company, unit, run],
+            stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+        print(f"  🎬 auto-triggered pipeline: {company}/{unit}/{run}", file=sys.stderr)
+    except Exception as e:
+        print(f"  ⚠️ auto-pipeline trigger failed: {str(e)[:100]}", file=sys.stderr)
+
+
 def load_channel_style(project_id: str | None) -> str | None:
     """Resolve a channel's voice/goals (STYLE.md) from the issue's Paperclip project.
 
@@ -1067,6 +1096,12 @@ def main() -> int:
                 summary=f"Created by hybrid agent {agent_id}",
                 metadata={"localPath": str(path), "language": action.get("language", "")},
             )
+
+    # Auto-trigger the production pipeline if this run left a script in a channel's
+    # production run (brief → script → finished video). Fire-and-forget; disable with
+    # AUTO_PIPELINE_DISABLED=1.
+    if status == "done" and os.environ.get("AUTO_PIPELINE_DISABLED") != "1":
+        _maybe_trigger_pipeline()
 
     # Output result JSON
     print(json.dumps(result, indent=2, ensure_ascii=False))
