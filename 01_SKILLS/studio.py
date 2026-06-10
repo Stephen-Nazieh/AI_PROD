@@ -96,8 +96,13 @@ def cmd_new_run(args) -> int:
                             "--title", args.title])
 
 
+_KB_TOOLS = {"semantic", "add-url", "promote", "pull", "audit", "stale", "graph"}
+
+
 def cmd_kb(args) -> int:
-    return subprocess.call([PY, str(SKILLS / "knowledge_base.py"), *args.rest])
+    # route advanced commands to kb_tools.py, basics to knowledge_base.py
+    tool = "kb_tools.py" if (args.rest and args.rest[0] in _KB_TOOLS) else "knowledge_base.py"
+    return subprocess.call([PY, str(SKILLS / tool), *args.rest])
 
 
 def cmd_pipeline(args) -> int:
