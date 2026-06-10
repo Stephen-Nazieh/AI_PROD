@@ -650,6 +650,82 @@ def compute_output_base(issue: dict | None) -> Path:
     return WORKSPACE_ROOT / ".agent_output" / run_slug
 
 
+def load_kb_context(cslug: str, uslug: str, query: str, k: int = 3, max_chars: int = 2000) -> str | None:
+    """Retrieve the channel KB's most relevant notes for the task and format them for
+    injection — so agents GROUND output in the channel's knowledge instead of just
+    the model's training. Lightweight lexical scoring (no sklearn, fast per-run)."""
+    notes_dir = WORKSPACE_ROOT / "business_units" / cslug / uslug / "knowledge" / "notes"
+    if not notes_dir.is_dir():
+        return None
+    q_terms = set(re.findall(r"[a-z0-9]{3,}", (query or "").lower()))
+    if not q_terms:
+        return None
+    scored = []
+    for f in sorted(notes_dir.glob("*.md")):
+        try:
+            text = f.read_text(encoding="utf-8", errors="ignore")
+        except Exception:
+            continue
+        body = text.split("---", 2)[-1] if text.startswith("---") else text
+        terms = re.findall(r"[a-z0-9]{3,}", body.lower())
+        if not terms:
+            continue
+        # query-term hits, length-normalized so a long note doesn't always win
+        hits = sum(1 for t in terms if t in q_terms)
+        score = hits / (len(terms) ** 0.5)
+        if hits:
+            scored.append((score, f.stem, body.strip()))
+    if not scored:
+        return None
+    scored.sort(reverse=True)
+    parts, total = [], 0
+    for _, name, body in scored[:k]:
+        chunk = f"### {name}\n{body[:700].strip()}"
+        if total + len(chunk) > max_chars:
+            break
+        parts.append(chunk)
+        total += len(chunk)
+    if not parts:
+        return None
+    return ("## Relevant knowledge from this channel's KB — use these facts; prefer them "
+            "over your own assumptions:\n\n" + "\n\n".join(parts))
+
+
+# ── Retry / backoff for failed runs ───────────────────────────────────────────
+# Failed runs used to be re-queued to backlog forever (the dispatcher re-wakes them
+# every 45s → thrash). Track attempts; after MAX_RETRIES, block + flag for a human.
+MAX_RETRIES = 3
+_RETRY_STATE = WORKSPACE_ROOT / ".agent_output" / "retry_state.json"
+
+
+def _load_retry() -> dict:
+    try:
+        return json.loads(_RETRY_STATE.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def _save_retry(state: dict) -> None:
+    try:
+        _RETRY_STATE.parent.mkdir(parents=True, exist_ok=True)
+        _RETRY_STATE.write_text(json.dumps(state), encoding="utf-8")
+    except Exception:
+        pass
+
+
+def _bump_retry(issue_id: str) -> int:
+    state = _load_retry()
+    state[issue_id] = state.get(issue_id, 0) + 1
+    _save_retry(state)
+    return state[issue_id]
+
+
+def _clear_retry(issue_id: str) -> None:
+    state = _load_retry()
+    if state.pop(issue_id, None) is not None:
+        _save_retry(state)
+
+
 def load_channel_style(project_id: str | None) -> str | None:
     """Resolve a channel's voice/goals (STYLE.md) from the issue's Paperclip project.
 
@@ -693,6 +769,12 @@ def run_hybrid(agent_id: str, issue_id: str, issue_title: str, issue_description
         if style:
             persona = (persona or "") + "\n\n" + style
             print(f"  🎨 Channel voice injected", file=sys.stderr)
+        ch = _channel_for_project(iss.get("projectId"))
+        if ch:
+            kbctx = load_kb_context(ch[0], ch[1], f"{issue_title}\n{issue_description}")
+            if kbctx:
+                persona = (persona or "") + "\n\n" + kbctx
+                print(f"  📚 KB context injected ({ch[1]})", file=sys.stderr)
         _OUTPUT_BASE = compute_output_base(iss)
         print(f"  📂 Output → {_OUTPUT_BASE.relative_to(WORKSPACE_ROOT)}/", file=sys.stderr)
     except Exception:
@@ -945,6 +1027,7 @@ def main() -> int:
     # Update issue with result
     if result["status"] == "ok":
         status = "done"
+        _clear_retry(issue_id)
         desc = (
             f"**Status**: Completed ✅\n\n"
             f"{result['summary']}\n\n"
@@ -954,12 +1037,20 @@ def main() -> int:
             f"**Elapsed**: {elapsed_ms} ms"
         )
     else:
-        status = "backlog"
-        desc = (
-            f"**Status**: Failed ❌\n\n"
-            f"**Error**: {result.get('error', 'Unknown error')}\n\n"
-            f"**Elapsed**: {elapsed_ms} ms"
-        )
+        # Failed — retry up to MAX_RETRIES (preserving the original brief so the
+        # retry still has its instructions), then block + flag for a human.
+        attempts = _bump_retry(issue_id)
+        err = str(result.get("error", "no output produced"))[:200]
+        if attempts >= MAX_RETRIES:
+            status = "blocked"
+            _clear_retry(issue_id)
+            desc = ((issue_description or "") +
+                    f"\n\n---\n⚠️ **Auto-retry exhausted** after {attempts} attempts — needs human "
+                    f"review. Last error: {err}")
+        else:
+            status = "backlog"            # dispatcher will retry
+            desc = issue_description or "" # PRESERVE the brief for the next attempt
+        print(f"  ↻ attempt {attempts}/{MAX_RETRIES} failed → {status} ({err[:60]})", file=sys.stderr)
 
     client.update_issue(issue_id, status=status, description=desc)
 
