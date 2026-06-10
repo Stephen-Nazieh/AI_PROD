@@ -3,14 +3,13 @@
 #
 # Routing:
 #   default              → local MLX proxy (:8003)  — cheap/local, most agents
-#   CLAUDE_USE_API=1     → real Anthropic cloud API — quality-critical agents
-#                          (e.g. the writer agents). Key is read from .env so it
-#                          never has to live in agent adapter configs.
+#   CLAUDE_USE_API=1     → Kimi Code cloud API (Anthropic-compatible) — quality
+#                          tier for the writer agents. KIMI_API_KEY is read from
+#                          .env so it never lives in agent adapter configs.
 #
 # Usage:
 #   claude-local -p "prompt"                        # local MLX
-#   CLAUDE_USE_API=1 claude-local -p "prompt"       # real Claude API
-#   CLAUDE_USE_API=1 ANTHROPIC_MODEL=claude-opus-4-8 claude-local -p "..."  # pick tier
+#   CLAUDE_USE_API=1 claude-local -p "prompt"       # Kimi (kimi-for-coding)
 
 set -e
 
@@ -25,20 +24,18 @@ if [[ ! -x "$CLAUDE_BIN" ]]; then
 fi
 
 if [[ "${CLAUDE_USE_API:-0}" == "1" ]]; then
-    # ── Cloud mode: real Anthropic API (quality tier) ───────────────────────────
-    # Auth, in priority order:
-    #   1) a real api03 key already in the env
-    #   2) a real api03 key from .env (kept out of agent configs)
-    #   3) otherwise defer to the CLI's own auth (a `claude /login` session)
-    # NB: an "sk-ant-sid02-" value is a session token, NOT an API key — ignore it
-    # here so it doesn't get sent as ANTHROPIC_API_KEY (the API rejects it).
-    if [[ "$ANTHROPIC_API_KEY" != sk-ant-api* && -f "$PROJECT_ROOT/.env" ]]; then
-        _k="$(grep -E '^ANTHROPIC_API_KEY=' "$PROJECT_ROOT/.env" | head -1 | cut -d= -f2- | tr -d '"' | tr -d "'" | xargs)"
-        if [[ "$_k" == sk-ant-api* ]]; then export ANTHROPIC_API_KEY="$_k"; else unset ANTHROPIC_API_KEY; fi
+    # ── Cloud mode: Kimi Code (Anthropic-compatible) ────────────────────────────
+    # Quality tier for the writer agents. Key lives in .env (gitignored), never in
+    # agent adapter configs. Override endpoint/model via KIMI_BASE_URL/ANTHROPIC_MODEL.
+    _kimi="$(grep -E '^KIMI_API_KEY=' "$PROJECT_ROOT/.env" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"' | tr -d "'" | xargs)"
+    if [[ -z "$_kimi" ]]; then
+        echo "Error: CLAUDE_USE_API=1 but KIMI_API_KEY is not set in $PROJECT_ROOT/.env" >&2
+        exit 1
     fi
-    # Real API: ensure no local-proxy overrides leak in.
-    unset ANTHROPIC_BASE_URL ANTHROPIC_AUTH_TOKEN
-    export ANTHROPIC_MODEL="${ANTHROPIC_MODEL:-claude-sonnet-4-6}"
+    export ANTHROPIC_BASE_URL="${KIMI_BASE_URL:-https://api.kimi.com/coding}"
+    export ANTHROPIC_AUTH_TOKEN="$_kimi"   # Kimi authenticates via the bearer token
+    export ANTHROPIC_API_KEY=""            # not x-api-key
+    export ANTHROPIC_MODEL="${ANTHROPIC_MODEL:-kimi-for-coding}"
     exec "$CLAUDE_BIN" "$@"
 fi
 

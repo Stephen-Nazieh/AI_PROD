@@ -77,8 +77,9 @@ def main() -> int:
         ok = "✅" if code in (200, 201) else f"❌({code})"
         print(f"  {ok} {w['name']:32} → {'API' if mode=='--api' else 'local'}")
     if mode == "--api":
-        print("\n  Writers now route to the real Claude API. Ensure .env has a valid "
-              "sk-ant-api03-… key (or `claude` is logged in).")
+        print("\n  Writers now route to the cloud API (Kimi Code, kimi-for-coding) via the "
+              "claude-local wrapper. Ensure KIMI_API_KEY is set in .env. Note: Kimi is a "
+              "heavier model (~60-70s/run) but higher quality. Revert with --local.")
     return 0
 
 
