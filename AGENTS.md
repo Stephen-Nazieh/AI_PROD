@@ -61,12 +61,20 @@ AI_PRODUCER/
 ├── 07_PAPERCLIP/               # Paperclip company package + bridge adapter
 │   ├── companies/
 │   │   └── deparadigm-media/   # agentcompanies/v1 company (agents, skills, projects, teams)
-│   └── scripts/                # normalize_skills.py, create_org_chart.py, paperclip_bridge.py
+│   └── scripts/                # normalize_skills.py, create_org_chart.py (runtimes moved to runtime/agents/)
+├── business_units/             # SOURCE OF TRUTH for projects: <company>/<unit>/ → knowledge/ (per-project KB), production/<run>/ (pipeline runs), assets/, BRIEF.md
+├── runtime/                    # Agent runtimes + studio bridge: runtime/agents/{hybrid,local}_agent_runtime.py, paperclip_bridge.py
+├── library/                    # Agent personas (library/agents/<role>/AGENTS.md) + skill library (library/skills/)
 ├── .docker/                    # Docker Compose + gateway routing + nginx staging configs
 ├── env/                        # Python 3.14 virtual environment (committed historically)
 ├── media/                      # Manim cache output target (videos, images, audio, Tex)
 └── .manim_cache/               # Secondary Manim render cache
 ```
+
+> **Project structure:** companies → business units (channels). Each Paperclip
+> project maps 1:1 to `business_units/<company>/<unit>/` (registry:
+> `00_CORE/business_units.yaml`; full map: `00_CORE/PROJECT_ORGANIZATION.md`).
+> The `02_CURRICULUM/` entries are compatibility symlink aliases into those units.
 
 ### Path Constants Used Across Python Modules
 
