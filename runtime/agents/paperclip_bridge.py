@@ -640,6 +640,8 @@ class BridgeHandler(BaseHTTPRequestHandler):
             self._handle_health()
         elif path == "/sync-projects":
             self._handle_sync_projects()
+        elif path == "/dispatch-agents":
+            self._handle_dispatch_agents()
         else:
             self._send_json(404, {"error": f"Unknown endpoint: {path}"})
 
@@ -689,6 +691,11 @@ class BridgeHandler(BaseHTTPRequestHandler):
         result = scaffold_projects_once(PaperclipReporter())
         code = 200 if result.get("status") == "ok" else 500
         self._send_json(code, result)
+
+    def _handle_dispatch_agents(self) -> None:
+        """Manually trigger agent auto-dispatch (wake agents with backlog work)."""
+        result = agent_dispatch_once()
+        self._send_json(200 if result.get("status") == "ok" else 500, result)
 
     # ── POST /ingest ───────────────────────────────────────────────────────
 
@@ -1228,6 +1235,53 @@ def project_scaffold_poller(interval: int = SCAFFOLD_POLL_INTERVAL) -> None:
         time.sleep(interval)
 
 
+# ── Agent auto-dispatch ──────────────────────────────────────────────────────
+#
+# Agents run wakeOnDemand (heartbeat disabled), and nothing wakes them — so an
+# issue assigned in the Paperclip UI just sits in backlog. This poller closes that
+# loop: it finds backlog issues with an assignee and wakes those (idle) agents.
+# Paired with the runtime's auto-pickup, the woken agent grabs its assigned issue
+# and runs it. Demand-driven: only agents WITH pending work are woken.
+
+AGENT_DISPATCH_INTERVAL = int(os.environ.get("AGENT_DISPATCH_POLL_SECONDS", "45"))
+
+
+def agent_dispatch_once() -> dict:
+    issues = _api_request("GET", f"/api/companies/{PAPERCLIP_COMPANY_ID}/issues")
+    if isinstance(issues, dict):
+        issues = issues.get("data", [])
+    if not isinstance(issues, list):
+        return {"status": "error", "error": "could not list issues", "woken": []}
+    pending: dict[str, int] = {}
+    for i in issues:
+        if i.get("status") == "backlog" and i.get("assigneeAgentId"):
+            pending[i["assigneeAgentId"]] = pending.get(i["assigneeAgentId"], 0) + 1
+    woken = []
+    for agent_id, n in pending.items():
+        agent = _api_request("GET", f"/api/agents/{agent_id}")
+        if not isinstance(agent, dict) or agent.get("status") != "idle" or agent.get("pausedAt"):
+            continue  # busy / paused / unknown → leave it
+        # triggerDetail must be one of: manual | ping | callback | system
+        resp = _api_request("POST", f"/api/agents/{agent_id}/wakeup",
+                            {"source": "on_demand", "triggerDetail": "system",
+                             "reason": f"auto-dispatch: {n} pending issue(s)"})
+        if resp is not None:  # only count a genuinely-accepted wakeup
+            woken.append(agent.get("name", agent_id))
+    return {"status": "ok", "pending_agents": len(pending), "woken": woken}
+
+
+def agent_dispatch_poller(interval: int = AGENT_DISPATCH_INTERVAL) -> None:
+    print(f"🤖 Agent auto-dispatch poller started (every {interval}s → wakes agents with backlog work)")
+    while True:
+        try:
+            r = agent_dispatch_once()
+            if r.get("woken"):
+                print(f"⏰ dispatched {len(r['woken'])} agent(s): {', '.join(r['woken'][:5])}")
+        except Exception as e:
+            print(f"⚠️  agent-dispatch poll error: {e}", file=sys.stderr)
+        time.sleep(interval)
+
+
 # ── Server bootstrap ────────────────────────────────────────────────────────
 
 def main() -> int:
@@ -1258,9 +1312,13 @@ def main() -> int:
     print(f"              /process-script, /vault/search, /vault/create, /sync-projects")
     print(f"   Bidirectional sync: ENABLED (reports to Paperclip on {PAPERCLIP_API_BASE})")
 
-    # Background poller: scaffold 05_PROJECTS/<slug>/ folders for new Paperclip projects.
+    # Background poller: scaffold business_units/<co>/<unit>/ for new Paperclip projects.
     if os.environ.get("PROJECT_SCAFFOLD_DISABLED") != "1":
         threading.Thread(target=project_scaffold_poller, daemon=True).start()
+    # Background poller: wake agents that have backlog issues assigned (so assigning
+    # work in the Paperclip UI actually triggers the agent). Disable with AGENT_DISPATCH_DISABLED=1.
+    if os.environ.get("AGENT_DISPATCH_DISABLED") != "1":
+        threading.Thread(target=agent_dispatch_poller, daemon=True).start()
     print(f"   CLI mode: --execute '<json_task>'")
     print(f"   Press Ctrl+C to stop.")
 
