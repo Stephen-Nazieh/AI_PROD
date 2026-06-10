@@ -16,18 +16,18 @@ pkill -f "mlx_lm.server" 2>/dev/null || true
 pkill -f "anthropic_openai_proxy" 2>/dev/null || true
 sleep 1
 
-# Executive: Llama 4 Scout (port 8000)
-if [ -d "/Users/nazeera/.cache/huggingface/hub/Llama-4-Scout-17B-16E-Instruct-4bit" ]; then
-    echo "Starting Llama 4 Scout on :8000..."
-    nohup python3 -m mlx_lm.server \
-        --model /Users/nazeera/.cache/huggingface/hub/Llama-4-Scout-17B-16E-Instruct-4bit \
-        --port 8000 > /tmp/mlx_scout.log 2>&1 &
-    echo $! > /tmp/mlx_scout.pid
-    sleep 3
-    curl -s http://localhost:8000/v1/models > /dev/null 2>&1 && echo "  ✅ Scout ready" || echo "  ⚠️  Scout failed to start"
-else
-    echo "  ⏭ Llama 4 Scout not downloaded yet (skipping)"
-fi
+# Coding/fast: Qwen2.5-Coder-7B (port 8000)
+# NOTE: Llama-4-Scout-17B-16E (a 109B-total MoE) was impractically slow on this
+# hardware (>100s/token, memory-thrashing alongside the other models). Replaced
+# with the cached Qwen-Coder-7B (sub-second). IMPORTANT: clients must send this
+# exact model name — mlx_lm.server loads whatever model the request asks for.
+echo "Starting Qwen2.5-Coder-7B on :8000..."
+nohup python3 -m mlx_lm.server \
+    --model mlx-community/Qwen2.5-Coder-7B-Instruct-4bit \
+    --port 8000 > "$(dirname "$0")/../../logs/mlx_coder7b.log" 2>&1 &
+echo $! > /tmp/mlx_coder7b.pid
+sleep 3
+curl -s http://localhost:8000/v1/models > /dev/null 2>&1 && echo "  ✅ Coder7B ready" || echo "  ⚠️  Coder7B failed to start"
 
 # Standard: Qwen2.5-32B (port 8001)
 if [ -d "/Users/nazeera/.cache/huggingface/hub/Qwen2.5-32B-Instruct-4bit" ]; then

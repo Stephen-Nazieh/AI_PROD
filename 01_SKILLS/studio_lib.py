@@ -157,6 +157,30 @@ def services() -> list[dict]:
     return out
 
 
+# ── Local MLX inference ──────────────────────────────────────────────────────
+#
+# CRITICAL: mlx_lm.server loads whatever model the REQUEST names. If the name
+# doesn't match the server's loaded model, it tries to fetch it from HuggingFace
+# (404 / multi-GB download / hang). Always send the exact loaded model name.
+MLX_FAST = ("http://127.0.0.1:8002/v1/chat/completions", "mlx-community/Qwen2.5-7B-Instruct-4bit")
+MLX_BIG = ("http://127.0.0.1:8001/v1/chat/completions", "mlx-community/Qwen2.5-32B-Instruct-4bit")
+
+
+def mlx_chat(messages, big=False, timeout=90, max_tokens=1500, temperature=0.2):
+    """Call a local MLX server with the correct model name. Returns text or None."""
+    import urllib.request
+    url, model = MLX_BIG if big else MLX_FAST
+    body = {"model": model, "messages": messages,
+            "temperature": temperature, "max_tokens": max_tokens}
+    try:
+        req = urllib.request.Request(url, data=json.dumps(body).encode(),
+                                     headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            return json.loads(r.read().decode())["choices"][0]["message"]["content"].strip()
+    except Exception:
+        return None
+
+
 def human_bytes(n: float) -> str:
     for unit in ("B", "K", "M", "G", "T"):
         if n < 1024 or unit == "T":

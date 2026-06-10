@@ -100,25 +100,11 @@ LANG_NAMES = {"es": "Spanish", "zh": "Mandarin Chinese", "fr": "French",
 
 
 def _mlx_translate(text, lang_name, timeout=90):
-    import urllib.request
-    body = {"model": "local",
-            "messages": [{"role": "system", "content": f"You are a professional {lang_name} translator. "
-                          f"Translate accurately, preserving meaning and tone. Output only the translation."},
-                         {"role": "user", "content": text[:3000]}],
-            "temperature": 0.2, "max_tokens": 1500}
-    # prefer the faster 7B server (:8002), fall back to :8001/:8000
-    for port in (8002, 8001, 8000):
-        try:
-            req = urllib.request.Request(f"http://127.0.0.1:{port}/v1/chat/completions",
-                                         data=json.dumps(body).encode(),
-                                         headers={"Content-Type": "application/json"})
-            with urllib.request.urlopen(req, timeout=timeout) as r:
-                txt = json.loads(r.read().decode())["choices"][0]["message"]["content"].strip()
-            if txt:
-                return txt
-        except Exception:
-            continue
-    return None
+    return S.mlx_chat([
+        {"role": "system", "content": f"You are a professional {lang_name} translator. "
+         f"Translate accurately, preserving meaning and tone. Output only the translation."},
+        {"role": "user", "content": text[:3000]}],
+        big=True, timeout=timeout, max_tokens=1500)
 
 
 def i18n(co, unit, run, langs) -> int:
@@ -163,28 +149,17 @@ def i18n(co, unit, run, langs) -> int:
     return 0
 
 
-def _omlx_titles(topic, n, timeout=25):
-    """Generate titles via the local MLX server, with a hard timeout + fallback."""
-    import urllib.request
-    body = {
-        "model": "mlx-community/Qwen2.5-Coder-7B-Instruct-4bit",
-        "messages": [
-            {"role": "system", "content": "You write clear, accurate educational video titles. No hype words."},
-            {"role": "user", "content": f"Generate {n} concise, non-clickbait video titles for: {topic}. "
-                                        f"One per line, no numbering."},
-        ],
-        "temperature": 0.4, "max_tokens": 200,
-    }
-    try:
-        req = urllib.request.Request("http://127.0.0.1:8000/v1/chat/completions",
-                                     data=json.dumps(body).encode(),
-                                     headers={"Content-Type": "application/json"})
-        with urllib.request.urlopen(req, timeout=timeout) as r:
-            txt = json.loads(r.read().decode())["choices"][0]["message"]["content"]
-        lines = [l.strip("-•0123456789. ").strip() for l in txt.splitlines() if l.strip()]
-        return [l for l in lines if l][:n] or None
-    except Exception:
-        return None  # MLX slow/offline → deterministic fallback titles
+def _omlx_titles(topic, n, timeout=40):
+    """Generate titles via the local MLX server (correct model name), with fallback."""
+    txt = S.mlx_chat([
+        {"role": "system", "content": "You write clear, accurate educational video titles. No hype words."},
+        {"role": "user", "content": f"Generate {n} concise, non-clickbait video titles for: {topic}. "
+                                    f"One per line, no numbering."}],
+        big=False, timeout=timeout, max_tokens=200, temperature=0.4)
+    if not txt:
+        return None
+    lines = [l.strip("-•0123456789. ").strip() for l in txt.splitlines() if l.strip()]
+    return [l for l in lines if l][:n] or None
 
 
 def ab(co, unit, run, n_titles, render=False) -> int:

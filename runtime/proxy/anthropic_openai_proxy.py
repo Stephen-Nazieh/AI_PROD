@@ -36,6 +36,16 @@ DEFAULT_BACKENDS = {
     "llama4": os.getenv("MLX_LLAMA_URL", "http://127.0.0.1:8000/v1"),
 }
 
+# backend key → the EXACT model name loaded on that server. mlx_lm.server loads
+# whatever model the request names, so we MUST send the loaded name (else it tries
+# to fetch a nonexistent model from HuggingFace → 404 / multi-GB download / hang).
+# (:8000 now serves Qwen2.5-Coder-7B, not the impractically-slow Llama-4-Scout.)
+BACKEND_MODEL_NAMES = {
+    "qwen7b": "mlx-community/Qwen2.5-7B-Instruct-4bit",
+    "qwen32b": "mlx-community/Qwen2.5-32B-Instruct-4bit",
+    "llama4": "mlx-community/Qwen2.5-Coder-7B-Instruct-4bit",
+}
+
 # Anthropic model name → backend key
 MODEL_ALIASES = {
     # Default / catch-all → Qwen32B (always available)
@@ -232,6 +242,10 @@ async def messages(request: Request):
     openai_tools = anthropic_tools_to_openai(tools) if tools else None
 
     openai_body: dict[str, Any] = {
+        # send the loaded MLX model name so the server uses it instead of trying
+        # to load the Anthropic name (which would 404/hang) — root-cause fix for
+        # slow agent runs through claude-local → :8003 → MLX.
+        "model": BACKEND_MODEL_NAMES.get(backend_key, "mlx-community/Qwen2.5-32B-Instruct-4bit"),
         "messages": openai_messages,
         "max_tokens": max_tokens,
         "temperature": temperature,
