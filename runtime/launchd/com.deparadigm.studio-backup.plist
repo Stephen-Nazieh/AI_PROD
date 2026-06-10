@@ -6,25 +6,20 @@
     <string>com.deparadigm.studio-backup</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/Users/nazeera/Documents/AI_PRODUCER/studio</string>
-        <string>backup</string>
+        <string>/bin/bash</string>
+        <string>/Users/nazeera/.studio-backup.sh</string>
     </array>
-    <key>WorkingDirectory</key>
-    <string>/Users/nazeera/Documents/AI_PRODUCER</string>
     <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>
         <string>/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
     </dict>
     <key>StartCalendarInterval</key>
-    <dict>
-        <key>Hour</key><integer>3</integer>
-        <key>Minute</key><integer>0</integer>
-    </dict>
+    <dict><key>Hour</key><integer>3</integer><key>Minute</key><integer>0</integer></dict>
     <key>StandardOutPath</key>
-    <string>/Users/nazeera/Documents/AI_PRODUCER/logs/backup.log</string>
+    <string>/Users/nazeera/Library/Logs/studio-backup.log</string>
     <key>StandardErrorPath</key>
-    <string>/Users/nazeera/Documents/AI_PRODUCER/logs/backup.log</string>
+    <string>/Users/nazeera/Library/Logs/studio-backup.log</string>
     <key>RunAtLoad</key>
     <false/>
 </dict>
