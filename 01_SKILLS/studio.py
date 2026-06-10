@@ -130,6 +130,10 @@ def cmd_agents(args) -> int:
     return subprocess.call([PY, str(SKILLS / "agents_ops.py"), *args.rest])
 
 
+def cmd_creative(args) -> int:
+    return subprocess.call([PY, str(SKILLS / "creative.py"), *args.rest])
+
+
 def cmd_backup(args) -> int:
     return subprocess.call([PY, str(SKILLS / "backup.py")])
 
@@ -183,9 +187,13 @@ def main(argv=None) -> int:
     p_pl.add_argument("rest", nargs=argparse.REMAINDER)
     p_pl.set_defaults(fn=cmd_pipeline)
 
-    p_ag = sub.add_parser("agents", help="agent ops (skills/digest/tree/budget)")
+    p_ag = sub.add_parser("agents", help="agent ops (skills/digest/tree/budget/remember)")
     p_ag.add_argument("rest", nargs=argparse.REMAINDER)
     p_ag.set_defaults(fn=cmd_agents)
+
+    p_cr = sub.add_parser("creative", help="creative tools (brand-check/i18n/ab/trends)")
+    p_cr.add_argument("rest", nargs=argparse.REMAINDER)
+    p_cr.set_defaults(fn=cmd_creative)
 
     sub.add_parser("backup", help="snapshot DBs + registry + KBs + personas").set_defaults(fn=cmd_backup)
 
