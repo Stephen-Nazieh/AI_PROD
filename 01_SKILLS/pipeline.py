@@ -22,6 +22,7 @@ from __future__ import annotations
 import argparse
 import datetime
 import json
+import os
 import pathlib
 import shutil
 import subprocess
@@ -226,6 +227,53 @@ def advance(company: str, unit: str, run: str) -> dict:
             "seconds": res["seconds"], "qa": qa_note}
 
 
+# ── Concurrency limiter ───────────────────────────────────────────────────────
+# Auto-triggered pipelines each render via the SINGLE ComfyUI + storyboard model;
+# spawning many at once makes them trample each other and stall. A file-semaphore
+# caps how many run at a time (rest wait for a slot). Tune with PIPELINE_MAX_CONCURRENT.
+import time as _time
+SLOT_DIR = pathlib.Path("/tmp/dpm_pipeline_slots")
+MAX_CONCURRENT = int(os.environ.get("PIPELINE_MAX_CONCURRENT", "1"))
+
+
+def _acquire_slot(timeout: int = 2400):
+    SLOT_DIR.mkdir(parents=True, exist_ok=True)
+    deadline = _time.time() + timeout
+    waited = False
+    while _time.time() < deadline:
+        for i in range(MAX_CONCURRENT):
+            sf = SLOT_DIR / f"slot_{i}"
+            if sf.exists():  # reclaim if the holder process is dead
+                try:
+                    os.kill(int(sf.read_text() or "0"), 0)
+                    continue  # alive → taken
+                except (ValueError, OSError):
+                    try:
+                        sf.unlink()
+                    except FileNotFoundError:
+                        pass
+            try:
+                fd = os.open(str(sf), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+                os.write(fd, str(os.getpid()).encode())
+                os.close(fd)
+                return sf
+            except FileExistsError:
+                continue
+        if not waited:
+            print("  ⏳ waiting for a render slot (another pipeline is running)…")
+            waited = True
+        _time.sleep(3)
+    return None
+
+
+def _release_slot(sf) -> None:
+    try:
+        if sf:
+            sf.unlink()
+    except FileNotFoundError:
+        pass
+
+
 def clear_produced(company: str, unit: str, run: str) -> list:
     """Wipe the artifacts of every 'produce' stage (02-09) so a revised script
     re-propagates. Leaves the input script (01-scripts) and manual stages intact."""
@@ -296,6 +344,9 @@ def main(argv=None) -> int:
     parsers["run"].add_argument(
         "--force", action="store_true",
         help="clear produced stages (02-09) and regenerate from the current script")
+    parsers["run"].add_argument(
+        "--no-lock", action="store_true",
+        help="skip the concurrency limiter (don't wait for a render slot)")
     a = ap.parse_args(argv)
     if a.cmd == "status":
         _print_status(a.company, a.unit, a.run)
@@ -305,33 +356,41 @@ def main(argv=None) -> int:
                       f"{'✓' if r['passed'] else '○'} {r['stage']}: {r['detail']} ({r['seconds']}s)"))
         _print_status(a.company, a.unit, a.run)
     elif a.cmd == "run":
-        if getattr(a, "force", False):
-            cleared = clear_produced(a.company, a.unit, a.run)
-            print(f"  ♻️  --force: cleared {len(cleared)} produced stage(s) → "
-                  f"{', '.join(cleared) or 'none'}")
-        # QA the input script BEFORE spending render/TTS compute (#5).
-        import pipeline_stages as PS
-        sq = PS.qa_review(run_dir(a.company, a.unit, a.run), "01-scripts")
-        print(f"  QA(script): {'✓ pass' if sq['pass'] else '✗ FAIL'} — {sq['notes']}")
-        if not sq["pass"]:
-            print("  ⏸  script failed QA review — revise the script, then re-run.")
-            return 0
-        for _ in range(len(S.PRODUCTION_DIRS) + 1):
-            r = advance(a.company, a.unit, a.run)
-            if r.get("done"):
-                print("  " + r["msg"])
-                # Stage publish for human approval (does NOT upload).
-                try:
-                    import publish
-                    publish.prep(a.company, a.unit, a.run)
-                except Exception as e:
-                    print(f"  ⚠️ publish prep skipped: {e}")
-                break
-            qa = f"  ⟂ QA: {r['qa']}" if r.get("qa") else ""
-            print(f"  {'✓' if r['passed'] else '○'} {r['stage']}: {r['detail']}{qa}")
-            if not r["passed"]:
-                print(f"  ⏸  blocked at {r['stage']} — produce its artifacts, then re-run")
-                break
+        # Concurrency limiter (#3): hold a render slot so pipelines don't trample
+        # the single ComfyUI/storyboard model. Skip the queue with --no-lock.
+        slot = None if getattr(a, "no_lock", False) else _acquire_slot()
+        if slot is None and not getattr(a, "no_lock", False):
+            print("  ⏸  timed out waiting for a render slot"); return 1
+        try:
+            if getattr(a, "force", False):
+                cleared = clear_produced(a.company, a.unit, a.run)
+                print(f"  ♻️  --force: cleared {len(cleared)} produced stage(s) → "
+                      f"{', '.join(cleared) or 'none'}")
+            # QA the input script BEFORE spending render/TTS compute (#5).
+            import pipeline_stages as PS
+            sq = PS.qa_review(run_dir(a.company, a.unit, a.run), "01-scripts")
+            print(f"  QA(script): {'✓ pass' if sq['pass'] else '✗ FAIL'} — {sq['notes']}")
+            if not sq["pass"]:
+                print("  ⏸  script failed QA review — revise the script, then re-run.")
+                return 0
+            for _ in range(len(S.PRODUCTION_DIRS) + 1):
+                r = advance(a.company, a.unit, a.run)
+                if r.get("done"):
+                    print("  " + r["msg"])
+                    # Stage publish for human approval (does NOT upload).
+                    try:
+                        import publish
+                        publish.prep(a.company, a.unit, a.run)
+                    except Exception as e:
+                        print(f"  ⚠️ publish prep skipped: {e}")
+                    break
+                qa = f"  ⟂ QA: {r['qa']}" if r.get("qa") else ""
+                print(f"  {'✓' if r['passed'] else '○'} {r['stage']}: {r['detail']}{qa}")
+                if not r["passed"]:
+                    print(f"  ⏸  blocked at {r['stage']} — produce its artifacts, then re-run")
+                    break
+        finally:
+            _release_slot(slot)
     elif a.cmd == "snapshot":
         print("  " + snapshot(a.company, a.unit, a.run))
     return 0
