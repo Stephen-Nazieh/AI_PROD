@@ -48,6 +48,17 @@ def dump_db(container: str, user: str, db: str, password: str, out: pathlib.Path
 
 
 def main() -> int:
+    # Maintenance: reclaim duplicate production artifacts before snapshotting state
+    # (skip with --no-dedup). Symlinks in-place; gitignored regenerable files only.
+    if "--no-dedup" not in sys.argv:
+        try:
+            import business
+            print("🧹 Dedup pass (reclaiming duplicate production artifacts)…")
+            business.dedup(None, apply=True)
+            print()
+        except Exception as ex:
+            print(f"  ⚠️ dedup skipped: {ex}\n")
+
     ts = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     base = (RAID / "_studio_backups") if RAID.exists() else (ROOT / ".backups")
     dest = base / f"backup_{ts}"

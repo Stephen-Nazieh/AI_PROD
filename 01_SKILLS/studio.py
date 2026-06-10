@@ -143,7 +143,7 @@ def cmd_youtube(args) -> int:
 
 
 def cmd_backup(args) -> int:
-    return subprocess.call([PY, str(SKILLS / "backup.py")])
+    return subprocess.call([PY, str(SKILLS / "backup.py"), *(["--no-dedup"] if args.no_dedup else [])])
 
 
 def cmd_heal(args) -> int:
@@ -211,7 +211,9 @@ def main(argv=None) -> int:
     p_yt.add_argument("rest", nargs=argparse.REMAINDER)
     p_yt.set_defaults(fn=cmd_youtube)
 
-    sub.add_parser("backup", help="snapshot DBs + registry + KBs + personas").set_defaults(fn=cmd_backup)
+    p_bk = sub.add_parser("backup", help="dedup + snapshot DBs/registry/KBs/personas")
+    p_bk.add_argument("--no-dedup", action="store_true", help="skip the dedup maintenance pass")
+    p_bk.set_defaults(fn=cmd_backup)
 
     p_heal = sub.add_parser("heal", help="probe services + auto-recover the down ones")
     p_heal.add_argument("--apply", action="store_true", help="actually restart (default: dry run)")
