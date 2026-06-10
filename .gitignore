@@ -109,3 +109,12 @@ client_secret*.json
 token.json
 *-token.json
 trends.yaml
+
+# Node / Google quickstart artifacts (not part of the Python studio)
+node_modules/
+package.json
+package-lock.json
+auth_test.js
+
+# Regenerable KB cross-reference cache
+**/.kb/graph.json
