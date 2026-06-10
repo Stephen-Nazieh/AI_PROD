@@ -1,6 +1,40 @@
 {
   "company": "deparadigm-media",
   "unit": "dev-cloud",
-  "documents": [],
-  "updated": "2026-06-09T22:55:51"
+  "documents": [
+    {
+      "id": "gcp-aws-service-map",
+      "title": "gcp-aws-service-map",
+      "path": "notes/gcp-aws-service-map.md",
+      "tags": [
+        "ingested"
+      ],
+      "source": "gcp-aws-service-map.md",
+      "added": "2026-06-10",
+      "bytes": 997
+    },
+    {
+      "id": "security-plus-domains",
+      "title": "security-plus-domains",
+      "path": "notes/security-plus-domains.md",
+      "tags": [
+        "ingested"
+      ],
+      "source": "security-plus-domains.md",
+      "added": "2026-06-10",
+      "bytes": 2424
+    },
+    {
+      "id": "serverless-cold-starts",
+      "title": "serverless-cold-starts",
+      "path": "notes/serverless-cold-starts.md",
+      "tags": [
+        "ingested"
+      ],
+      "source": "serverless-cold-starts.md",
+      "added": "2026-06-10",
+      "bytes": 1312
+    }
+  ],
+  "updated": "2026-06-10T16:25:57"
 }
