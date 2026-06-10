@@ -226,6 +226,26 @@ def advance(company: str, unit: str, run: str) -> dict:
             "seconds": res["seconds"], "qa": qa_note}
 
 
+def clear_produced(company: str, unit: str, run: str) -> list:
+    """Wipe the artifacts of every 'produce' stage (02-09) so a revised script
+    re-propagates. Leaves the input script (01-scripts) and manual stages intact."""
+    rd = run_dir(company, unit, run)
+    plan = load_plan(rd)["stages"]
+    cleared = []
+    for stage, spec in plan.items():
+        if spec.get("handler") != "produce":
+            continue
+        sdir = rd / stage
+        if sdir.exists():
+            for f in sdir.iterdir():
+                if f.is_dir():
+                    shutil.rmtree(f, ignore_errors=True)
+                else:
+                    f.unlink()
+            cleared.append(stage)
+    return cleared
+
+
 def snapshot(company: str, unit: str, run: str) -> str:
     rd = run_dir(company, unit, run)
     if not rd.exists():
@@ -268,9 +288,14 @@ def _print_status(company, unit, run):
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="pipeline")
     sub = ap.add_subparsers(dest="cmd", required=True)
+    parsers = {}
     for name in ("status", "advance", "run", "snapshot"):
         p = sub.add_parser(name)
         p.add_argument("company"); p.add_argument("unit"); p.add_argument("run")
+        parsers[name] = p
+    parsers["run"].add_argument(
+        "--force", action="store_true",
+        help="clear produced stages (02-09) and regenerate from the current script")
     a = ap.parse_args(argv)
     if a.cmd == "status":
         _print_status(a.company, a.unit, a.run)
@@ -280,6 +305,10 @@ def main(argv=None) -> int:
                       f"{'✓' if r['passed'] else '○'} {r['stage']}: {r['detail']} ({r['seconds']}s)"))
         _print_status(a.company, a.unit, a.run)
     elif a.cmd == "run":
+        if getattr(a, "force", False):
+            cleared = clear_produced(a.company, a.unit, a.run)
+            print(f"  ♻️  --force: cleared {len(cleared)} produced stage(s) → "
+                  f"{', '.join(cleared) or 'none'}")
         # QA the input script BEFORE spending render/TTS compute (#5).
         import pipeline_stages as PS
         sq = PS.qa_review(run_dir(a.company, a.unit, a.run), "01-scripts")

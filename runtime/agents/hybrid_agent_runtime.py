@@ -744,13 +744,21 @@ def _maybe_trigger_pipeline() -> None:
         company, unit, run = parts[bi + 1], parts[bi + 2], parts[pi + 1]
     except (ValueError, IndexError):
         return
+    cmd = [sys.executable, str(WORKSPACE_ROOT / "01_SKILLS" / "pipeline.py"),
+           "run", company, unit, run]
+    # If the run was already delivered and the script is newer than the master, the
+    # script was revised → force a re-propagate so downstream stages regenerate.
+    master = base / "09-deliver" / "master.mp4"
+    scripts = list(sd.glob("*.md"))
+    forced = (master.exists() and scripts and
+              max(s.stat().st_mtime for s in scripts) > master.stat().st_mtime)
+    if forced:
+        cmd.append("--force")
     try:
         log = open("/tmp/auto_pipeline.log", "a")
-        subprocess.Popen(
-            [sys.executable, str(WORKSPACE_ROOT / "01_SKILLS" / "pipeline.py"),
-             "run", company, unit, run],
-            stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
-        print(f"  🎬 auto-triggered pipeline: {company}/{unit}/{run}", file=sys.stderr)
+        subprocess.Popen(cmd, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+        print(f"  🎬 auto-triggered pipeline{' (--force: script revised)' if forced else ''}: "
+              f"{company}/{unit}/{run}", file=sys.stderr)
     except Exception as e:
         print(f"  ⚠️ auto-pipeline trigger failed: {str(e)[:100]}", file=sys.stderr)
 
