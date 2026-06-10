@@ -726,6 +726,36 @@ def _clear_retry(issue_id: str) -> None:
         _save_retry(state)
 
 
+def _channel_from_base() -> tuple[str, str, str]:
+    """(company, unit, run) parsed from the current output base, or ('?','?','?')."""
+    base = _OUTPUT_BASE
+    if base and "business_units" in base.parts and "production" in base.parts:
+        p = base.parts
+        try:
+            bi, pi = p.index("business_units"), p.index("production")
+            return p[bi + 1], p[bi + 2], p[pi + 1]
+        except (ValueError, IndexError):
+            pass
+    return "?", "?", "?"
+
+
+def _record_run_cost(agent_id: str, result: dict) -> None:
+    """Log this run's estimated inference cost (cloud writer calls only) to the ledger."""
+    if os.environ.get("CLAUDE_USE_API") != "1":
+        return  # local model → free; don't clutter the ledger
+    try:
+        company, unit, run = _channel_from_base()
+        model = os.environ.get("ANTHROPIC_MODEL", "kimi-for-coding")
+        sys.path.insert(0, str(WORKSPACE_ROOT / "01_SKILLS"))
+        import cost_ledger
+        usd = cost_ledger.record(company, unit, run, agent_id, model,
+                                 result.get("total_input_tokens", 0),
+                                 result.get("total_output_tokens", 0))
+        print(f"  💰 logged ~${usd:.3f} ({model})", file=sys.stderr)
+    except Exception as e:
+        print(f"  ⚠️ cost record failed: {str(e)[:80]}", file=sys.stderr)
+
+
 def _maybe_trigger_pipeline() -> None:
     """If this run left a script under a channel's production run, fire the full
     production pipeline (storyboard→renders→audio→edit→subtitles→deliver) detached,
@@ -1104,6 +1134,9 @@ def main() -> int:
                 summary=f"Created by hybrid agent {agent_id}",
                 metadata={"localPath": str(path), "language": action.get("language", "")},
             )
+
+    # Record inference cost for this run (cloud writer calls) to the cost ledger.
+    _record_run_cost(agent_id, result)
 
     # Auto-trigger the production pipeline if this run left a script in a channel's
     # production run (brief → script → finished video). Fire-and-forget; disable with

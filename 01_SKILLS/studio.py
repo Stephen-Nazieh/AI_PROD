@@ -146,6 +146,10 @@ def cmd_backup(args) -> int:
     return subprocess.call([PY, str(SKILLS / "backup.py"), *(["--no-dedup"] if args.no_dedup else [])])
 
 
+def cmd_costs(args) -> int:
+    return subprocess.call([PY, str(SKILLS / "cost_ledger.py")])
+
+
 def cmd_heal(args) -> int:
     return subprocess.call([PY, str(SKILLS / "observability.py"), "heal", *(["--apply"] if args.apply else [])])
 
@@ -214,6 +218,8 @@ def main(argv=None) -> int:
     p_bk = sub.add_parser("backup", help="dedup + snapshot DBs/registry/KBs/personas")
     p_bk.add_argument("--no-dedup", action="store_true", help="skip the dedup maintenance pass")
     p_bk.set_defaults(fn=cmd_backup)
+
+    sub.add_parser("costs", help="inference cost ledger ($/channel/model)").set_defaults(fn=cmd_costs)
 
     p_heal = sub.add_parser("heal", help="probe services + auto-recover the down ones")
     p_heal.add_argument("--apply", action="store_true", help="actually restart (default: dry run)")
