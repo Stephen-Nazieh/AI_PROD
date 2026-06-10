@@ -40,15 +40,15 @@ BRIDGE = "http://127.0.0.1:3101"
 # orchestrator gates on the artifacts they leave behind; a couple are wired to
 # bridge endpoints to show automated dispatch. Tune per run in .pipeline/plan.yaml.
 DEFAULT_PLAN = {
-    "01-scripts":     {"handler": "manual", "gate": ["screenplay.md"]},
-    "02-storyboards": {"handler": "manual", "gate": []},            # optional
-    "03-layout":      {"handler": "manual", "gate": ["*"]},
-    "04-raw_renders": {"handler": "manual", "gate": ["*"]},
-    "05-assets":      {"handler": "manual", "gate": ["*"]},
-    "06-audio":       {"handler": "manual", "gate": ["*"]},
-    "07-editing":     {"handler": "manual", "gate": ["*"]},
-    "08-subtitles":   {"handler": "manual", "gate": []},            # optional
-    "09-deliver":     {"handler": "manual", "gate": ["masters/*", "web/*"], "gate_any": True},
+    "01-scripts":     {"handler": "manual",  "gate": ["screenplay.md"]},   # input (a writer agent)
+    "02-storyboards": {"handler": "produce", "fn": "storyboard", "gate": ["shotlist.json"]},
+    "03-layout":      {"handler": "manual",  "gate": []},                  # optional
+    "04-raw_renders": {"handler": "produce", "fn": "renders",    "gate": ["shot_*.png"]},
+    "05-assets":      {"handler": "manual",  "gate": []},                  # optional
+    "06-audio":       {"handler": "produce", "fn": "audio",      "gate": ["*.wav"]},
+    "07-editing":     {"handler": "produce", "fn": "editing",    "gate": ["timeline.mp4"]},
+    "08-subtitles":   {"handler": "produce", "fn": "subtitles",  "gate": ["*.srt"]},
+    "09-deliver":     {"handler": "produce", "fn": "deliver",    "gate": ["master.mp4"]},
 }
 
 
@@ -135,6 +135,15 @@ def run_handler(rd: pathlib.Path, company: str, unit: str, run: str,
                 body = json.loads(resp.read().decode())
             ok = body.get("status") == "ok"
             detail = body.get("output_path", body.get("error", "ok"))
+        elif h == "produce":
+            # run the stage's Python producer (storyboard/renders/audio/editing/…)
+            import pipeline_stages as PS
+            fn = PS.PRODUCERS.get(spec.get("fn", ""))
+            if fn is None:
+                ok, detail = False, f"unknown producer '{spec.get('fn')}'"
+            else:
+                r = fn(rd=rd, company=company, unit=unit, run=run)
+                ok, detail = r["ok"], r["detail"]
         elif h == "agent":
             # create a Paperclip issue for the responsible role/agent to do the stage
             detail = create_stage_issue(company, unit, run, stage, spec)
@@ -198,10 +207,23 @@ def advance(company: str, unit: str, run: str) -> dict:
     spec = plan.get(nxt, {})
     res = run_handler(rd, company, unit, run, nxt, spec)
     passed = res["ok"] and gate_satisfied(rd, nxt, spec)
+    # QA review gate (#5): at key stages, a content review can BLOCK before more
+    # compute is spent. A failed gate flags the run for a human.
+    qa_note = ""
+    import pipeline_stages as PS
+    if passed and nxt in PS.QA_STAGES:
+        qa = PS.qa_review(rd, nxt)
+        qa_note = qa["notes"]
+        if not qa["pass"]:
+            passed = False
+            res["detail"] = f"QA gate blocked: {qa['notes']}"
+            create_stage_issue(company, unit, run, nxt,
+                               {"title_suffix": "QA review failed"})
     record(rd, {"stage": nxt, "handler": res["handler"], "ok": passed,
-                "detail": res["detail"], "seconds": res["seconds"], "tokens": res["tokens"]})
+                "detail": res["detail"], "seconds": res["seconds"], "tokens": res["tokens"],
+                "qa": qa_note})
     return {"done": False, "stage": nxt, "passed": passed, "detail": res["detail"],
-            "seconds": res["seconds"]}
+            "seconds": res["seconds"], "qa": qa_note}
 
 
 def snapshot(company: str, unit: str, run: str) -> str:
@@ -258,11 +280,19 @@ def main(argv=None) -> int:
                       f"{'✓' if r['passed'] else '○'} {r['stage']}: {r['detail']} ({r['seconds']}s)"))
         _print_status(a.company, a.unit, a.run)
     elif a.cmd == "run":
+        # QA the input script BEFORE spending render/TTS compute (#5).
+        import pipeline_stages as PS
+        sq = PS.qa_review(run_dir(a.company, a.unit, a.run), "01-scripts")
+        print(f"  QA(script): {'✓ pass' if sq['pass'] else '✗ FAIL'} — {sq['notes']}")
+        if not sq["pass"]:
+            print("  ⏸  script failed QA review — revise the script, then re-run.")
+            return 0
         for _ in range(len(S.PRODUCTION_DIRS) + 1):
             r = advance(a.company, a.unit, a.run)
             if r.get("done"):
                 print("  " + r["msg"]); break
-            print(f"  {'✓' if r['passed'] else '○'} {r['stage']}: {r['detail']}")
+            qa = f"  ⟂ QA: {r['qa']}" if r.get("qa") else ""
+            print(f"  {'✓' if r['passed'] else '○'} {r['stage']}: {r['detail']}{qa}")
             if not r["passed"]:
                 print(f"  ⏸  blocked at {r['stage']} — produce its artifacts, then re-run")
                 break
