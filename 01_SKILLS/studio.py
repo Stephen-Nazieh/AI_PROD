@@ -45,6 +45,14 @@ def cmd_status(args) -> int:
     for s in S.services():
         mark = f"{GREEN}●{RESET}" if s["up"] else f"{RED}○{RESET}"
         print(f"    {mark} {s['name']:18} {s['detail']}")
+    import json as _json
+    def _kb_docs(folder):
+        idx = WORKSPACE_ROOT / folder / "knowledge" / ".kb" / "index.json"
+        try:
+            return len(_json.loads(idx.read_text()).get("documents", []))
+        except Exception:
+            return 0
+
     print(f"\n  {BOLD}Companies & business units{RESET}")
     runs = S.all_runs()
     for cslug, cdata in S.companies().items():
@@ -53,12 +61,21 @@ def cmd_status(args) -> int:
         for uslug, u in us.items():
             ur = [r for r in runs if r["company"] == cslug and r["unit"] == uslug]
             deliv = sum(1 for r in ur if r["delivered"])
-            kb = SKILLS  # kb count via index
+            docs = _kb_docs(u.get("folder", f"business_units/{cslug}/{uslug}"))
             print(f"      • {u.get('name', uslug):22} {uslug:14} "
-                  f"{len(ur)} run(s), {deliv} delivered")
+                  f"{len(ur)} run(s), {deliv} delivered, {docs} KB docs")
+
+    agents = "?"
+    try:
+        import urllib.request
+        agents = len(_json.loads(urllib.request.urlopen(
+            "http://127.0.0.1:3100/api/companies/15041ee2-b1c5-43ac-b488-04934bfa1806/agents",
+            timeout=6).read()))
+    except Exception:
+        pass
     print(f"\n  {BOLD}Totals{RESET}: {len(runs)} runs, "
           f"{sum(1 for r in runs if r['delivered'])} delivered, "
-          f"{S.human_bytes(sum(r['bytes'] for r in runs))} of artifacts")
+          f"{S.human_bytes(sum(r['bytes'] for r in runs))} artifacts, {agents} agents")
     return 0
 
 
@@ -113,6 +130,19 @@ def cmd_backup(args) -> int:
     return subprocess.call([PY, str(SKILLS / "backup.py")])
 
 
+def cmd_heal(args) -> int:
+    return subprocess.call([PY, str(SKILLS / "observability.py"), "heal", *(["--apply"] if args.apply else [])])
+
+
+def cmd_logs(args) -> int:
+    extra = []
+    if args.grep:
+        extra += ["--grep", args.grep]
+    if args.errors:
+        extra += ["--errors"]
+    return subprocess.call([PY, str(SKILLS / "observability.py"), "logs", "--lines", str(args.lines), *extra])
+
+
 def cmd_doctor(args) -> int:
     smoke = WORKSPACE_ROOT / "tests" / "smoke_test.py"
     if smoke.exists():
@@ -150,6 +180,16 @@ def main(argv=None) -> int:
     p_pl.set_defaults(fn=cmd_pipeline)
 
     sub.add_parser("backup", help="snapshot DBs + registry + KBs + personas").set_defaults(fn=cmd_backup)
+
+    p_heal = sub.add_parser("heal", help="probe services + auto-recover the down ones")
+    p_heal.add_argument("--apply", action="store_true", help="actually restart (default: dry run)")
+    p_heal.set_defaults(fn=cmd_heal)
+
+    p_logs = sub.add_parser("logs", help="aggregate recent logs across sources")
+    p_logs.add_argument("--grep"); p_logs.add_argument("--lines", type=int, default=40)
+    p_logs.add_argument("--errors", action="store_true")
+    p_logs.set_defaults(fn=cmd_logs)
+
     sub.add_parser("doctor", help="run smoke tests / health checks").set_defaults(fn=cmd_doctor)
 
     args = ap.parse_args(argv)
