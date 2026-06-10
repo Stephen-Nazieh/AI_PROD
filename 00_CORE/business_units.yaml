@@ -46,6 +46,20 @@ companies:
         team: book-review
         folder: business_units/deparadigm-media/book-review
         paperclip_project_id: a58ee3e5-752a-447f-b79a-864844c8cc9d
+      sarcastic-commentary:
+        name: Sarcastic Commentary
+        domain: Dry, deadpan commentary and reaction videos on tech, news, and culture
+          — a smart sarcastic take on what's happening.
+        team: sarcastic-commentary
+        folder: business_units/deparadigm-media/sarcastic-commentary
+        paperclip_project_id: 4d575371-5d9b-48ed-ab0e-59e62b2c904f
+      sarcastic-explainers:
+        name: Sarcastic Explainers
+        domain: Educational explainers delivered in a deadpan, sarcastic voice — teaching
+          concepts with attitude while keeping the facts accurate.
+        team: sarcastic-explainers
+        folder: business_units/deparadigm-media/sarcastic-explainers
+        paperclip_project_id: 9f439f1f-d0a5-4195-98f6-609e9a14e50d
     slug: deparadigm-media
   nazeera-multimedia:
     id: 0337cde4-55de-4b6c-8925-f605a733714e
