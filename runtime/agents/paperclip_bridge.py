@@ -1244,6 +1244,8 @@ def project_scaffold_poller(interval: int = SCAFFOLD_POLL_INTERVAL) -> None:
 # and runs it. Demand-driven: only agents WITH pending work are woken.
 
 AGENT_DISPATCH_INTERVAL = int(os.environ.get("AGENT_DISPATCH_POLL_SECONDS", "45"))
+AGENT_WAKE_COOLDOWN = int(os.environ.get("AGENT_WAKE_COOLDOWN", "90"))
+_LAST_WOKEN: dict[str, float] = {}
 
 
 def agent_dispatch_once() -> dict:
@@ -1257,7 +1259,14 @@ def agent_dispatch_once() -> dict:
         if i.get("status") == "backlog" and i.get("assigneeAgentId"):
             pending[i["assigneeAgentId"]] = pending.get(i["assigneeAgentId"], 0) + 1
     woken = []
+    now = time.time()
     for agent_id, n in pending.items():
+        # Cooldown: don't re-wake an agent within AGENT_WAKE_COOLDOWN. Closes the race
+        # where a manual /dispatch-agents and the auto-poller both fire in the brief
+        # window before the agent flips out of 'idle' → two concurrent runs on one
+        # issue (one delivers, the other gets 'blocked').
+        if now - _LAST_WOKEN.get(agent_id, 0) < AGENT_WAKE_COOLDOWN:
+            continue
         agent = _api_request("GET", f"/api/agents/{agent_id}")
         if not isinstance(agent, dict) or agent.get("status") != "idle" or agent.get("pausedAt"):
             continue  # busy / paused / unknown → leave it
@@ -1266,6 +1275,7 @@ def agent_dispatch_once() -> dict:
                             {"source": "on_demand", "triggerDetail": "system",
                              "reason": f"auto-dispatch: {n} pending issue(s)"})
         if resp is not None:  # only count a genuinely-accepted wakeup
+            _LAST_WOKEN[agent_id] = now
             woken.append(agent.get("name", agent_id))
     return {"status": "ok", "pending_agents": len(pending), "woken": woken}
 
