@@ -72,6 +72,40 @@ def _channel_context(co: str, unit: str) -> str:
     return ctx
 
 
+def _performance_signals(co: str, unit: str) -> str:
+    """What's working (our published videos' views) + what's trending — the learning
+    loop's input to topic selection. Graceful: returns a note if there's no data yet."""
+    lines = []
+    prod = S.unit_folder(co, unit) / "production"
+    published = []
+    if prod.is_dir():
+        for mf in prod.glob("*/09-deliver/publish_manifest.json"):
+            try:
+                m = json.loads(mf.read_text())
+                if m.get("status") == "uploaded" and m.get("videoId"):
+                    published.append(m["videoId"])
+            except Exception:
+                pass
+    if published:
+        try:
+            import youtube_client
+            stats = [youtube_client.video_stats(v) for v in published[:25]]
+            stats = sorted([s for s in stats if s], key=lambda x: -x.get("views", 0))[:5]
+            if stats:
+                lines.append("OUR TOP PERFORMERS (views): "
+                             + "; ".join(f"{s['title']} ({s['views']}v/{s['likes']}♥)" for s in stats))
+        except Exception:
+            pass
+    try:
+        import youtube_client
+        tr = youtube_client.trending(n=8)
+        if tr:
+            lines.append("TRENDING ON YOUTUBE NOW: " + "; ".join(tr[:8]))
+    except Exception:
+        pass
+    return "\n".join(lines) or "(no performance/trend data yet — use the channel KB + judgment)"
+
+
 def plan(co: str, unit: str, n: int = 3) -> int:
     rec = S.units(co).get(unit)
     if rec is None:
@@ -83,14 +117,16 @@ def plan(co: str, unit: str, n: int = 3) -> int:
         print(f"❌ no writer agent resolvable for {unit}"); return 1
     ctx = _channel_context(co, unit)
     recent = _recent_titles(co, unit, pid)
+    signals = _performance_signals(co, unit)
     msg = [
         {"role": "system", "content":
          f"You are the showrunner for the '{rec.get('name', unit)}' channel. Using the channel "
-         f"context below, propose {n} FRESH, specific, on-brand episode ideas. Avoid anything "
-         f"similar to the recent titles. For each: a punchy title and a 2-3 sentence brief "
-         f"(topic, angle, key beats). Reply with ONLY a JSON array: "
-         f"[{{\"title\":\"...\",\"brief\":\"...\"}}].\n\n"
-         f"CHANNEL CONTEXT:\n{ctx}\n\nRECENT TITLES (avoid): {recent}"},
+         f"context below, propose {n} FRESH, specific, on-brand episode ideas. Lean into what's "
+         f"working and ride relevant trends; avoid anything similar to the recent titles. For "
+         f"each: a punchy title and a 2-3 sentence brief (topic, angle, key beats). Reply with "
+         f"ONLY a JSON array: [{{\"title\":\"...\",\"brief\":\"...\"}}].\n\n"
+         f"CHANNEL CONTEXT:\n{ctx}\n\nPERFORMANCE & TRENDS:\n{signals}\n\n"
+         f"RECENT TITLES (avoid): {recent}"},
         {"role": "user", "content": f"Give me {n} episode ideas."},
     ]
     out = S.mlx_chat(msg, big=True, max_tokens=1400, temperature=0.7) or ""

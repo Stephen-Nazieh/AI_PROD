@@ -70,6 +70,19 @@ def trending(region: str = "US", n: int = 10) -> list[str]:
     return [i["snippet"]["title"] for i in r.get("items", [])]
 
 
+def video_stats(video_id: str) -> dict:
+    """Views/likes/comments for one of our videos (for the analytics feedback loop)."""
+    r = _yt().videos().list(part="snippet,statistics", id=video_id).execute()
+    items = r.get("items", [])
+    if not items:
+        return {}
+    v = items[0]
+    s = v.get("statistics", {})
+    return {"id": video_id, "title": v["snippet"]["title"],
+            "views": int(s.get("viewCount", 0)), "likes": int(s.get("likeCount", 0)),
+            "comments": int(s.get("commentCount", 0))}
+
+
 def upload(video: str, title: str, description: str = "", tags=None,
            privacy: str = "private", category: str = "27") -> str:
     from googleapiclient.http import MediaFileUpload
