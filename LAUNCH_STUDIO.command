@@ -81,6 +81,16 @@ echo ""
 echo "============================================================"
 echo "🎉 Studio is up."
 echo ""
+
+# Open the Paperclip dashboard in the browser (it's a headless web server, not an
+# app — without this you'd just have the URL). Set STUDIO_NO_OPEN=1 to skip.
+if [ "${STUDIO_NO_OPEN:-0}" != "1" ] && command -v open >/dev/null 2>&1; then
+    if curl -s -m5 http://127.0.0.1:3100/api/health >/dev/null 2>&1; then
+        echo "   🌐 Opening Paperclip dashboard in your browser..."
+        open "http://localhost:3100" 2>/dev/null || true
+    fi
+fi
+echo ""
 echo "   Paperclip UI:    http://localhost:3100"
 echo "   Bridge API:      http://localhost:3101"
 echo "   MLX Inference:   http://localhost:8000/v1"
