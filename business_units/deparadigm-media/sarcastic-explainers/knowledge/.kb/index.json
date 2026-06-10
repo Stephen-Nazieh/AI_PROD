@@ -1,6 +1,40 @@
 {
   "company": "deparadigm-media",
   "unit": "sarcastic-explainers",
-  "documents": [],
-  "updated": "2026-06-10T19:04:56"
+  "documents": [
+    {
+      "id": "edutainment-strategy",
+      "title": "edutainment-strategy",
+      "path": "notes/edutainment-strategy.md",
+      "tags": [
+        "ingested"
+      ],
+      "source": "edutainment-strategy.md",
+      "added": "2026-06-10",
+      "bytes": 1739
+    },
+    {
+      "id": "explainer-structure",
+      "title": "explainer-structure",
+      "path": "notes/explainer-structure.md",
+      "tags": [
+        "ingested"
+      ],
+      "source": "explainer-structure.md",
+      "added": "2026-06-10",
+      "bytes": 1947
+    },
+    {
+      "id": "sarcasm-in-teaching",
+      "title": "sarcasm-in-teaching",
+      "path": "notes/sarcasm-in-teaching.md",
+      "tags": [
+        "ingested"
+      ],
+      "source": "sarcasm-in-teaching.md",
+      "added": "2026-06-10",
+      "bytes": 893
+    }
+  ],
+  "updated": "2026-06-10T19:08:50"
 }

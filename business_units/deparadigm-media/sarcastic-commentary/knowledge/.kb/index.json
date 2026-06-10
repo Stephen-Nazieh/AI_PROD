@@ -1,6 +1,40 @@
 {
   "company": "deparadigm-media",
   "unit": "sarcastic-commentary",
-  "documents": [],
-  "updated": "2026-06-10T19:04:56"
+  "documents": [
+    {
+      "id": "commentary-format",
+      "title": "commentary-format",
+      "path": "notes/commentary-format.md",
+      "tags": [
+        "ingested"
+      ],
+      "source": "commentary-format.md",
+      "added": "2026-06-10",
+      "bytes": 744
+    },
+    {
+      "id": "commentary-voice",
+      "title": "commentary-voice",
+      "path": "notes/commentary-voice.md",
+      "tags": [
+        "ingested"
+      ],
+      "source": "commentary-voice.md",
+      "added": "2026-06-10",
+      "bytes": 902
+    },
+    {
+      "id": "reaction-strategy",
+      "title": "reaction-strategy",
+      "path": "notes/reaction-strategy.md",
+      "tags": [
+        "ingested"
+      ],
+      "source": "reaction-strategy.md",
+      "added": "2026-06-10",
+      "bytes": 1397
+    }
+  ],
+  "updated": "2026-06-10T19:08:39"
 }
