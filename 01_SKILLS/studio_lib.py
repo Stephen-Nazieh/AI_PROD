@@ -55,17 +55,25 @@ def unit_folder(company: str, unit: str) -> pathlib.Path:
 # ── Run-state model ─────────────────────────────────────────────────────────
 
 def _populated(stage_dir: pathlib.Path) -> tuple[int, int]:
-    """(file_count, total_bytes) of real files under a stage dir (ignores junk)."""
+    """(file_count, physical_bytes) under a stage dir.
+
+    Symlinks count toward the file count (the run still has those artifacts) but
+    contribute ~0 bytes — after dedup they point at an already-counted original,
+    so byte totals reflect real on-disk usage, not logical content size.
+    """
     n, b = 0, 0
     if not stage_dir.exists():
         return 0, 0
     for f in stage_dir.rglob("*"):
-        if f.is_file() and f.name not in _IGNORE and not f.name.startswith("."):
-            n += 1
-            try:
-                b += f.stat().st_size
-            except OSError:
-                pass
+        if not f.is_file() or f.name in _IGNORE or f.name.startswith("."):
+            continue
+        n += 1
+        if f.is_symlink():
+            continue  # deduped duplicate — no physical disk cost
+        try:
+            b += f.stat().st_size
+        except OSError:
+            pass
     return n, b
 
 
