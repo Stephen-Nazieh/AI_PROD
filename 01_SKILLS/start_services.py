@@ -29,25 +29,37 @@ LOG_DIR = WORKSPACE_ROOT / "logs"
 
 # Service definitions: name -> (start_cmd, health_url_or_cmd, timeout_sec)
 SERVICES = {
-    "mlx_llama4": {
-        "cmd": ["mlx_lm.server", "--model", "mlx-community/Llama-4-Scout-17B-16E-Instruct-4bit", "--port", "8000"],
+    # :8000 — Coder-7B (fast). Llama-4-Scout was a 109B MoE, impractically slow on
+    # this box; replaced with the cached Coder-7B (matches start_model_servers.sh).
+    # All MLX servers launch via the venv python (mlx_lm lives there), never bare.
+    "mlx_coder7b": {
+        "cmd": ["env/bin/python3", "-m", "mlx_lm.server", "--model", "mlx-community/Qwen2.5-Coder-7B-Instruct-4bit", "--port", "8000"],
         "health": "http://127.0.0.1:8000/v1/models",
         "port": 8000,
         "timeout": 60,
         "optional": True,
     },
     "mlx_qwen32b": {
-        "cmd": ["mlx_lm.server", "--model", "mlx-community/Qwen2.5-32B-Instruct-4bit", "--port", "8001"],
+        "cmd": ["env/bin/python3", "-m", "mlx_lm.server", "--model", "mlx-community/Qwen2.5-32B-Instruct-4bit", "--port", "8001"],
         "health": "http://127.0.0.1:8001/v1/models",
         "port": 8001,
         "timeout": 60,
         "optional": True,
     },
     "mlx_qwen7b": {
-        "cmd": ["mlx_lm.server", "--model", "mlx-community/Qwen2.5-7B-Instruct-4bit", "--port", "8002"],
+        "cmd": ["env/bin/python3", "-m", "mlx_lm.server", "--model", "mlx-community/Qwen2.5-7B-Instruct-4bit", "--port", "8002"],
         "health": "http://127.0.0.1:8002/v1/models",
         "port": 8002,
         "timeout": 60,
+        "optional": True,
+    },
+    # :8003 — Anthropic→OpenAI proxy that fronts the MLX servers for claude-local
+    # (local mode). Without this, the ~240 local-mode agents can't reason.
+    "proxy": {
+        "cmd": ["env/bin/python3", "runtime/proxy/anthropic_openai_proxy.py", "--port", "8003"],
+        "health": "http://127.0.0.1:8003/health",
+        "port": 8003,
+        "timeout": 30,
         "optional": True,
     },
     "comfyui": {
@@ -58,7 +70,7 @@ SERVICES = {
         "optional": True,
     },
     "render_worker": {
-        "cmd": ["python3", "01_SKILLS/render_queue.py", "worker", "--workers", "2"],
+        "cmd": ["env/bin/python3", "01_SKILLS/render_queue.py", "worker", "--workers", "2"],
         "health": None,
         "port": None,
         "timeout": 30,
@@ -279,8 +291,8 @@ def main():
     print("=" * 60)
 
     if start_mlx:
-        print("\n🧠 MLX Inference Servers")
-        for name in ["mlx_qwen32b", "mlx_qwen7b", "mlx_llama4"]:
+        print("\n🧠 MLX Inference Servers + Proxy")
+        for name in ["mlx_coder7b", "mlx_qwen32b", "mlx_qwen7b", "proxy"]:
             cfg = SERVICES[name]
             up = service_already_up(name, cfg, pids)
             if up:
