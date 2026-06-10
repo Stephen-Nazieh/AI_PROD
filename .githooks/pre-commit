@@ -1,0 +1,33 @@
+#!/bin/bash
+# DeParadigm Media — block commits that introduce secrets.
+# Install once:  git config core.hooksPath .githooks
+# Bypass (rarely): git commit --no-verify
+set -euo pipefail
+
+# Secret signatures: known-leaked token, private keys, AWS keys, and generic
+# hardcoded credential assignments.
+PATTERNS='SolocornStudio2026|-----BEGIN (RSA|OPENSSH|EC|DSA|PGP) PRIVATE KEY-----|AKIA[0-9A-Z]{16}|(password|passwd|secret|api[_-]?key|auth[_-]?token|access[_-]?token)["'"'"']?[[:space:]]*[:=][[:space:]]*["'"'"'][^"'"'"'[:space:]]{8,}'
+# Lines matching these are legitimate (env lookups, placeholders, redactions).
+ALLOW='os\.environ|getenv|process\.env|<redacted>|REMOVED|example|placeholder|your_|xxxx|\.get\(|=\s*""|:\s*""|\$\{|:\?'
+
+hits=0
+while IFS= read -r f; do
+  [ -z "$f" ] && continue
+  # skip the hook itself + smoke tests (they legitimately contain detection signatures)
+  case "$f" in .githooks/*|tests/smoke_test.py|*.lock|*.pyc|*.min.js|*.map) continue;; esac
+  # scan the staged blob; drop allowed/false-positive lines
+  matches=$(git show ":$f" 2>/dev/null | grep -niIE "$PATTERNS" | grep -vEi "$ALLOW" || true)
+  if [ -n "$matches" ]; then
+    echo "🚫 pre-commit: possible secret in $f"
+    echo "$matches" | head -3 | sed 's/^/     /'
+    hits=1
+  fi
+done < <(git diff --cached --name-only --diff-filter=ACM)
+
+if [ "$hits" = "1" ]; then
+  echo ""
+  echo "Commit blocked. Move secrets to env vars / .env (gitignored)."
+  echo "If this is a false positive: git commit --no-verify"
+  exit 1
+fi
+exit 0

@@ -101,3 +101,6 @@ My ideas/
 # Generated skills manifest (regenerable) + ingest drop-zone (transient)
 07_PAPERCLIP/scripts/skills_manifest.json
 02_CURRICULUM/raw_sources/
+
+# Studio backups (local fallback when RAID unmounted)
+.backups/
