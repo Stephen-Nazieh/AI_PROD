@@ -129,6 +129,55 @@ def _channel_visual(rd: pathlib.Path) -> tuple[str, int]:
         return "", 100
 
 
+def _critique_rerender(rd: pathlib.Path, shots: list, style: str, seed_base: int) -> int:
+    """Editor self-critique (one pass): an LLM reviews the shot list against the script,
+    returns improved prompts for vague/off-topic/failed shots, and we re-render those.
+    Failed shots are always re-attempted. Bounded to MAX_SHOTS re-renders."""
+    import comfyui_client
+    outdir = rd / "04-raw_renders"
+    failed = [int(s["id"]) for s in shots
+              if not (outdir / f"shot_{int(s['id']):02d}.png").exists()]
+    shotdesc = [{"id": int(s["id"]), "visual": s.get("visual", "")} for s in shots]
+    msg = [
+        {"role": "system", "content":
+         "You are a video editor reviewing a shot list against the script. Return improved, "
+         "concrete, renderable image prompts ONLY for shots that are vague, off-topic, or in "
+         "the failed list. Reply with ONLY JSON {\"<id>\":\"<improved prompt>\"} — empty {} if "
+         "all shots are good."},
+        {"role": "user", "content":
+         f"SCRIPT:\n{_read_script(rd)[:1500]}\n\nFAILED shot ids: {failed}\n\nSHOTS:\n{json.dumps(shotdesc)}"},
+    ]
+    improved = {}
+    m = re.search(r"\{.*\}", S.mlx_chat(msg, big=True, max_tokens=800, temperature=0.3) or "", re.S)
+    if m:
+        try:
+            improved = {str(k): str(v) for k, v in json.loads(m.group(0)).items()}
+        except Exception:
+            improved = {}
+    to_fix = dict(improved)
+    for sid in failed:  # always re-attempt failures even if the editor didn't flag them
+        to_fix.setdefault(str(sid), next((s.get("visual") or s.get("line") or "abstract"
+                                          for s in shots if int(s["id"]) == sid), "abstract"))
+    fixed = 0
+    for sid, prompt in list(to_fix.items())[:MAX_SHOTS]:
+        try:
+            sid_i = int(sid)
+        except ValueError:
+            continue
+        op = outdir / f"shot_{sid_i:02d}.png"
+        try:
+            comfyui_client.render(f"{prompt}, {style}" if style else prompt,
+                                  str(op), seed=seed_base + sid_i + 500)  # fresh seed
+            if op.exists() and op.stat().st_size > 0:
+                fixed += 1
+        except Exception as e:
+            print(f"  ⚠️ re-render shot {sid} failed: {str(e)[:60]}", file=sys.stderr)
+    if to_fix:
+        print(f"  🎬 editor pass: re-rendered {fixed}/{len(to_fix)} shot(s) "
+              f"({len(failed)} failed, {len(improved)} flagged weak)", file=sys.stderr)
+    return fixed
+
+
 def renders(rd: pathlib.Path, **_) -> dict:
     sl = rd / "02-storyboards" / "shotlist.json"
     if not sl.exists():
@@ -150,7 +199,14 @@ def renders(rd: pathlib.Path, **_) -> dict:
                 done += 1
         except Exception as e:
             print(f"  ⚠️ render shot {s['id']} failed: {str(e)[:80]}", file=sys.stderr)
-    return {"ok": done > 0, "detail": f"{done}/{len(shots)} shots rendered (styled)",
+    # Editor self-critique pass: review + re-render failed/weak shots (skip: PIPELINE_NO_CRITIQUE=1)
+    if os.environ.get("PIPELINE_NO_CRITIQUE") != "1":
+        try:
+            _critique_rerender(rd, shots, style, seed_base)
+        except Exception as e:
+            print(f"  ⚠️ critique skipped: {str(e)[:80]}", file=sys.stderr)
+    done = sum(1 for f in outdir.glob("shot_*.png") if f.stat().st_size > 0)
+    return {"ok": done > 0, "detail": f"{done}/{len(shots)} shots rendered (styled, editor-reviewed)",
             "artifacts": [f"04-raw_renders/ ({done} png)"]}
 
 
