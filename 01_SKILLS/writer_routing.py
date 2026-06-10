@@ -34,6 +34,11 @@ def _req(method: str, path: str, payload: dict | None = None):
         return e.code, e.read().decode()[:200]
 
 
+def _envval(v):
+    """Paperclip stores env values as {"type":"plain","value":"…"} objects."""
+    return v.get("value") if isinstance(v, dict) else v
+
+
 def _writers() -> list[dict]:
     code, agents = _req("GET", f"/api/companies/{COMPANY}/agents")
     if not isinstance(agents, list):
@@ -60,15 +65,16 @@ def main() -> int:
     for w in writers:
         ac = w.get("adapterConfig") or {}
         env = dict(ac.get("env") or {})
-        cur = "API" if env.get("CLAUDE_USE_API") == "1" else "local"
+        cur = "API" if _envval(env.get("CLAUDE_USE_API")) == "1" else "local"
         if mode == "--status":
-            extra = f" (model {env.get('ANTHROPIC_MODEL')})" if env.get("ANTHROPIC_MODEL") else ""
+            m = _envval(env.get("ANTHROPIC_MODEL"))
+            extra = f" (model {m})" if m else ""
             print(f"  {w['name']:32} → {cur}{extra}")
             continue
         if mode == "--api":
-            env["CLAUDE_USE_API"] = "1"
+            env["CLAUDE_USE_API"] = {"type": "plain", "value": "1"}
             if model:
-                env["ANTHROPIC_MODEL"] = model
+                env["ANTHROPIC_MODEL"] = {"type": "plain", "value": model}
         else:  # --local
             env.pop("CLAUDE_USE_API", None)
             env.pop("ANTHROPIC_MODEL", None)
