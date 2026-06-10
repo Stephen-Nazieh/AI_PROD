@@ -155,6 +155,12 @@ def cmd_publish(args) -> int:
     return subprocess.call([PY, str(SKILLS / "publish.py"), sub, args.company, args.unit, args.run])
 
 
+def cmd_showrunner(args) -> int:
+    if args.unit:
+        return subprocess.call([PY, str(SKILLS / "showrunner.py"), "plan", args.company, args.unit, str(args.n)])
+    return subprocess.call([PY, str(SKILLS / "showrunner.py"), "plan-all", args.company, str(args.n)])
+
+
 def cmd_heal(args) -> int:
     return subprocess.call([PY, str(SKILLS / "observability.py"), "heal", *(["--apply"] if args.apply else [])])
 
@@ -230,6 +236,11 @@ def main(argv=None) -> int:
     p_pub.add_argument("company"); p_pub.add_argument("unit"); p_pub.add_argument("run")
     p_pub.add_argument("--apply", action="store_true", help="actually upload as PRIVATE (your approval)")
     p_pub.set_defaults(fn=cmd_publish)
+
+    p_sr = sub.add_parser("showrunner", help="auto-generate episode briefs (content calendar)")
+    p_sr.add_argument("company"); p_sr.add_argument("unit", nargs="?")
+    p_sr.add_argument("--n", type=int, default=3, help="briefs per channel")
+    p_sr.set_defaults(fn=cmd_showrunner)
 
     p_heal = sub.add_parser("heal", help="probe services + auto-recover the down ones")
     p_heal.add_argument("--apply", action="store_true", help="actually restart (default: dry run)")
