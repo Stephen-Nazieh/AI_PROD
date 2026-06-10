@@ -384,6 +384,31 @@ def _resolve_path(path: str) -> Path:
     return p.resolve()
 
 
+# Per-run base directory for agent FILE WRITES (set by run_hybrid from the task's
+# channel). Keeps creative/work output inside business_units/<co>/<unit>/production/
+# instead of dumping into the repo root. Reads/cwd still resolve against WORKSPACE_ROOT.
+_OUTPUT_BASE: Path | None = None
+
+
+def _resolve_write_path(path: str) -> Path:
+    """Route an agent's file write into the per-run output base.
+
+    Relative paths and stray root-level absolute paths are re-rooted under the
+    channel's production folder; deliberate targets (an existing unit tree, the
+    RAID, or /tmp scratch) are respected as-is.
+    """
+    base = _OUTPUT_BASE or WORKSPACE_ROOT
+    p = Path(path)
+    if p.is_absolute():
+        raw = str(p)                       # before resolve (macOS /tmp → /private/tmp)
+        s = str(p.resolve())
+        if ("/business_units/" in s or s.startswith("/Volumes/")
+                or raw.startswith("/tmp/") or s.startswith("/private/tmp/")):
+            return p.resolve()
+        return (base / p.name).resolve()   # e.g. /repo-root/scripts/x.md → base/x.md
+    return (base / p).resolve()
+
+
 def execute_action(action: dict) -> dict:
     """Execute a parsed action and return result."""
     try:
@@ -406,7 +431,7 @@ def execute_action(action: dict) -> dict:
 
 
 def _tool_write_file(path: str, content: str) -> dict:
-    p = _resolve_path(path)
+    p = _resolve_write_path(path)
     try:
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(content, encoding="utf-8")
@@ -416,7 +441,7 @@ def _tool_write_file(path: str, content: str) -> dict:
 
 
 def _tool_edit_file(path: str, old_string: str, new_string: str) -> dict:
-    p = _resolve_path(path)
+    p = _resolve_write_path(path)
     if not p.exists():
         return {"status": "error", "error": f"File not found: {p}"}
     try:
@@ -573,13 +598,8 @@ def load_agent_persona(name: str) -> str | None:
     return None
 
 
-def load_channel_style(project_id: str | None) -> str | None:
-    """Resolve a channel's voice/goals (STYLE.md) from the issue's Paperclip project.
-
-    Lets one shared role agent (script writer, director, …) adopt the right tone per
-    channel: the runtime injects the channel's STYLE based on which unit the task
-    belongs to (matched via paperclip_project_id in the registry).
-    """
+def _channel_for_project(project_id: str | None) -> tuple[str, str, dict] | None:
+    """(company_slug, unit_slug, unit_record) for a Paperclip project, or None."""
     if not project_id:
         return None
     try:
@@ -590,14 +610,48 @@ def load_channel_style(project_id: str | None) -> str | None:
     for cslug, cdata in (reg.get("companies") or {}).items():
         for uslug, urec in (cdata.get("units") or {}).items():
             if urec.get("paperclip_project_id") == project_id:
-                folder = urec.get("folder", f"business_units/{cslug}/{uslug}")
-                style_f = WORKSPACE_ROOT / folder / "STYLE.md"
-                if style_f.is_file():
-                    return (f"## Channel context — you are producing for the "
-                            f"\"{urec.get('name', uslug)}\" channel.\n"
-                            f"Write your OUTPUT in the voice described below. Apply it; do NOT "
-                            f"restate, summarize, or quote these guidelines back.\n\n"
-                            + style_f.read_text(encoding="utf-8").strip())
+                return cslug, uslug, urec
+    return None
+
+
+def _slug(text: str) -> str:
+    s = re.sub(r"[^a-z0-9]+", "-", (text or "task").strip().lower()).strip("-")
+    return s or "task"
+
+
+def compute_output_base(issue: dict | None) -> Path:
+    """Directory this task's file writes should land in: the channel's production
+    run folder if the task maps to a channel, else a gitignored scratch area. Keeps
+    agent output out of the repo root and segmented by company → unit."""
+    issue = issue or {}
+    run_slug = _slug(issue.get("identifier") or issue.get("title") or "task")
+    ch = _channel_for_project(issue.get("projectId"))
+    if ch:
+        _, uslug, urec = ch
+        folder = urec.get("folder", f"business_units/deparadigm-media/{uslug}")
+        return WORKSPACE_ROOT / folder / "production" / run_slug
+    return WORKSPACE_ROOT / ".agent_output" / run_slug
+
+
+def load_channel_style(project_id: str | None) -> str | None:
+    """Resolve a channel's voice/goals (STYLE.md) from the issue's Paperclip project.
+
+    Lets one shared role agent (script writer, director, …) adopt the right tone per
+    channel: the runtime injects the channel's STYLE based on which unit the task
+    belongs to (matched via paperclip_project_id in the registry).
+    """
+    ch = _channel_for_project(project_id)
+    if not ch:
+        return None
+    cslug, uslug, urec = ch
+    folder = urec.get("folder", f"business_units/{cslug}/{uslug}")
+    style_f = WORKSPACE_ROOT / folder / "STYLE.md"
+    if style_f.is_file():
+        return (f"## Channel context — you are producing for the "
+                f"\"{urec.get('name', uslug)}\" channel.\n"
+                f"Write your OUTPUT in the voice described below. Apply it; do NOT "
+                f"restate, summarize, or quote these guidelines back.\n\n"
+                + style_f.read_text(encoding="utf-8").strip())
     return None
 
 
@@ -613,15 +667,19 @@ def run_hybrid(agent_id: str, issue_id: str, issue_title: str, issue_description
         print(f"  🎭 Persona: {'loaded for ' + str(agent.get('name')) if persona else 'none (generic)'}",
               file=sys.stderr)
 
-    # Inject the CHANNEL's voice/goals so the same role agent adapts per-channel.
+    # Inject the CHANNEL's voice/goals AND route this run's file writes into the
+    # channel's production tree (instead of the repo root).
+    global _OUTPUT_BASE
     try:
         iss = client.get_issue(issue_id) or {}
         style = load_channel_style(iss.get("projectId"))
         if style:
             persona = (persona or "") + "\n\n" + style
             print(f"  🎨 Channel voice injected", file=sys.stderr)
+        _OUTPUT_BASE = compute_output_base(iss)
+        print(f"  📂 Output → {_OUTPUT_BASE.relative_to(WORKSPACE_ROOT)}/", file=sys.stderr)
     except Exception:
-        pass
+        _OUTPUT_BASE = None
 
     claude = ClaudeClient(persona=persona)
     task = f"{issue_title}\n\n{issue_description}".strip()
@@ -891,7 +949,7 @@ def main() -> int:
     # Attach work products for files created
     for action in result.get("actions", []):
         if action["type"] == "write_file":
-            path = _resolve_path(action["path"])
+            path = _resolve_write_path(action["path"])
             client.create_work_product(
                 issue_id=issue_id,
                 title=f"Generated: {action['path']}",

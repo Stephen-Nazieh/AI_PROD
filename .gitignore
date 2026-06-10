@@ -118,3 +118,6 @@ auth_test.js
 
 # Regenerable KB cross-reference cache
 **/.kb/graph.json
+
+# Agent file-write scratch area (non-channel tasks)
+.agent_output/
