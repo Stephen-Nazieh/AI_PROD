@@ -1,0 +1,34 @@
+# Per-channel visual identity — appended to every shot's image prompt so a channel's
+# renders look like a coherent set instead of random SDXL. seed_base keeps a channel
+# in a stable region of latent space; each shot adds its index for variation.
+# `renderer: avatar` is a hook for character channels to drive the vtuber_twin avatar
+# instead of SDXL (not yet implemented — falls back to SDXL with the style).
+defaults:
+  style: "clean modern editorial illustration, professional, cohesive style, high detail"
+  seed_base: 100
+channels:
+  dev-cloud:
+    style: "clean technical isometric illustration, blue and teal palette, minimal, crisp vector"
+    seed_base: 1000
+  ap-stats:
+    style: "warm cinematic educational illustration, soft lighting, chalkboard and notebook accents"
+    seed_base: 2000
+  translation:
+    style: "clean multilingual motion-graphic style, flat shapes, friendly"
+    seed_base: 3000
+  ambient:
+    style: "calm atmospheric digital painting, soft gradients, lo-fi aesthetic, muted dusk tones, no people"
+    seed_base: 4000
+  sarcastic-me:
+    style: "bold flat-vector cartoon, clean thick outlines, vibrant limited palette, deadpan expression"
+    seed_base: 5000
+    renderer: avatar   # future: drive the vtuber_twin avatar; falls back to SDXL for now
+  sarcastic-commentary:
+    style: "punchy flat-vector editorial cartoon, bold outlines, high-contrast palette, satirical"
+    seed_base: 6000
+  sarcastic-explainers:
+    style: "clean explainer-style vector illustration, diagram aesthetic, bold accents, whiteboard feel"
+    seed_base: 7000
+  book-review:
+    style: "cozy warm illustration, soft bookish palette, inviting, gentle texture"
+    seed_base: 8000

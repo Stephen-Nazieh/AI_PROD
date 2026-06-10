@@ -116,6 +116,19 @@ def storyboard(rd: pathlib.Path, **_) -> dict:
     return {"ok": True, "detail": f"{len(shots)} shots", "artifacts": ["02-storyboards/shotlist.json"]}
 
 
+def _channel_visual(rd: pathlib.Path) -> tuple[str, int]:
+    """(style_suffix, seed_base) for the run's channel, so shots share an identity."""
+    try:
+        import yaml
+        cfg = yaml.safe_load((WORKSPACE_ROOT / "00_CORE" / "channel_visuals.yaml").read_text())
+        unit = rd.parts[rd.parts.index("production") - 1]  # …/<unit>/production/<run>
+        ch = (cfg.get("channels") or {}).get(unit) or {}
+        d = cfg.get("defaults") or {}
+        return ch.get("style", d.get("style", "")), int(ch.get("seed_base", d.get("seed_base", 100)))
+    except Exception:
+        return "", 100
+
+
 def renders(rd: pathlib.Path, **_) -> dict:
     sl = rd / "02-storyboards" / "shotlist.json"
     if not sl.exists():
@@ -125,17 +138,19 @@ def renders(rd: pathlib.Path, **_) -> dict:
     outdir.mkdir(parents=True, exist_ok=True)
     sys.path.insert(0, str(SKILLS))
     import comfyui_client
+    style, seed_base = _channel_visual(rd)  # per-channel identity → coherent set
     done = 0
     for s in shots:
         op = outdir / f"shot_{int(s['id']):02d}.png"
+        base = s.get("visual") or s.get("line") or "abstract background"
+        prompt = f"{base}, {style}" if style else base
         try:
-            comfyui_client.render(s.get("visual") or s.get("line") or "abstract background",
-                                  str(op), seed=int(s["id"]))
+            comfyui_client.render(prompt, str(op), seed=seed_base + int(s["id"]))
             if op.exists() and op.stat().st_size > 0:
                 done += 1
         except Exception as e:
             print(f"  ⚠️ render shot {s['id']} failed: {str(e)[:80]}", file=sys.stderr)
-    return {"ok": done > 0, "detail": f"{done}/{len(shots)} shots rendered",
+    return {"ok": done > 0, "detail": f"{done}/{len(shots)} shots rendered (styled)",
             "artifacts": [f"04-raw_renders/ ({done} png)"]}
 
 
