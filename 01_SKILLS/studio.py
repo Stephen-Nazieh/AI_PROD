@@ -169,7 +169,7 @@ def cmd_doctor(args) -> int:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="studio", description="DeParadigm Media studio control plane")
-    sub = ap.add_subparsers(dest="cmd", required=True)
+    sub = ap.add_subparsers(dest="cmd")  # optional — bare `studio` shows the dashboard
 
     sub.add_parser("status", help="services + companies/units/runs overview").set_defaults(fn=cmd_status)
 
@@ -227,6 +227,12 @@ def main(argv=None) -> int:
     sub.add_parser("doctor", help="run smoke tests / health checks").set_defaults(fn=cmd_doctor)
 
     args = ap.parse_args(argv)
+    if not getattr(args, "cmd", None):
+        # no subcommand (e.g. double-clicked) → show the dashboard + a hint
+        rc = cmd_status(args)
+        print(f"\n  {DIM}(this is the `studio` control CLI — try: studio runs | kb | pipeline | "
+              f"agents | doctor.\n   To start services, double-click LAUNCH_STUDIO.command){RESET}")
+        return rc
     return args.fn(args)
 
 
