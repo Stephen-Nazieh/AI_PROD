@@ -1,6 +1,40 @@
 {
   "company": "deparadigm-media",
   "unit": "ambient",
-  "documents": [],
-  "updated": "2026-06-09T18:59:24"
+  "documents": [
+    {
+      "id": "focus-audio-design",
+      "title": "focus-audio-design",
+      "path": "notes/focus-audio-design.md",
+      "tags": [
+        "ingested"
+      ],
+      "source": "focus-audio-design.md",
+      "added": "2026-06-10",
+      "bytes": 1218
+    },
+    {
+      "id": "longform-ambient-strategy",
+      "title": "longform-ambient-strategy",
+      "path": "notes/longform-ambient-strategy.md",
+      "tags": [
+        "ingested"
+      ],
+      "source": "longform-ambient-strategy.md",
+      "added": "2026-06-10",
+      "bytes": 1316
+    },
+    {
+      "id": "seamless-loops",
+      "title": "seamless-loops",
+      "path": "notes/seamless-loops.md",
+      "tags": [
+        "ingested"
+      ],
+      "source": "seamless-loops.md",
+      "added": "2026-06-10",
+      "bytes": 1422
+    }
+  ],
+  "updated": "2026-06-10T16:34:45"
 }
