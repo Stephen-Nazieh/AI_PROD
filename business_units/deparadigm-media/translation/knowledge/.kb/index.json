@@ -1,6 +1,40 @@
 {
   "company": "deparadigm-media",
   "unit": "translation",
-  "documents": [],
-  "updated": "2026-06-09T18:59:24"
+  "documents": [
+    {
+      "id": "dubbing-pipeline",
+      "title": "dubbing-pipeline",
+      "path": "notes/dubbing-pipeline.md",
+      "tags": [
+        "ingested"
+      ],
+      "source": "dubbing-pipeline.md",
+      "added": "2026-06-10",
+      "bytes": 1232
+    },
+    {
+      "id": "subtitle-localization",
+      "title": "subtitle-localization",
+      "path": "notes/subtitle-localization.md",
+      "tags": [
+        "ingested"
+      ],
+      "source": "subtitle-localization.md",
+      "added": "2026-06-10",
+      "bytes": 971
+    },
+    {
+      "id": "xtts-v2-voice-cloning",
+      "title": "xtts-v2-voice-cloning",
+      "path": "notes/xtts-v2-voice-cloning.md",
+      "tags": [
+        "ingested"
+      ],
+      "source": "xtts-v2-voice-cloning.md",
+      "added": "2026-06-10",
+      "bytes": 1243
+    }
+  ],
+  "updated": "2026-06-10T16:32:41"
 }
