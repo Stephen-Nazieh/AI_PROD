@@ -104,3 +104,8 @@ My ideas/
 
 # Studio backups (local fallback when RAID unmounted)
 .backups/
+client_secrets.json
+client_secret*.json
+token.json
+*-token.json
+trends.yaml

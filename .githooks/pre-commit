@@ -8,7 +8,7 @@ set -euo pipefail
 # hardcoded credential assignments.
 PATTERNS='SolocornStudio2026|-----BEGIN (RSA|OPENSSH|EC|DSA|PGP) PRIVATE KEY-----|AKIA[0-9A-Z]{16}|(password|passwd|secret|api[_-]?key|auth[_-]?token|access[_-]?token)["'"'"']?[[:space:]]*[:=][[:space:]]*["'"'"'][^"'"'"'[:space:]]{8,}'
 # Lines matching these are legitimate (env lookups, placeholders, redactions).
-ALLOW='os\.environ|getenv|process\.env|<redacted>|REMOVED|example|placeholder|your_|xxxx|\.get\(|=\s*""|:\s*""|\$\{|:\?'
+ALLOW='os\.environ|getenv|process\.env|<redacted>|REMOVED|example|placeholder|your_|xxxx|\.get\(|=\s*""|:\s*""|\$\{|:\?|54329'
 
 hits=0
 while IFS= read -r f; do

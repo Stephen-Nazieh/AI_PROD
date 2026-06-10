@@ -95,27 +95,71 @@ def brand_check(co, unit, run) -> int:
     return 0
 
 
+LANG_NAMES = {"es": "Spanish", "zh": "Mandarin Chinese", "fr": "French",
+              "de": "German", "pt": "Portuguese", "ja": "Japanese", "hi": "Hindi"}
+
+
+def _mlx_translate(text, lang_name, timeout=90):
+    import urllib.request
+    body = {"model": "local",
+            "messages": [{"role": "system", "content": f"You are a professional {lang_name} translator. "
+                          f"Translate accurately, preserving meaning and tone. Output only the translation."},
+                         {"role": "user", "content": text[:3000]}],
+            "temperature": 0.2, "max_tokens": 1500}
+    # prefer the faster 7B server (:8002), fall back to :8001/:8000
+    for port in (8002, 8001, 8000):
+        try:
+            req = urllib.request.Request(f"http://127.0.0.1:{port}/v1/chat/completions",
+                                         data=json.dumps(body).encode(),
+                                         headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                txt = json.loads(r.read().decode())["choices"][0]["message"]["content"].strip()
+            if txt:
+                return txt
+        except Exception:
+            continue
+    return None
+
+
 def i18n(co, unit, run, langs) -> int:
     rd = run_dir(co, unit, run)
     if not rd.exists():
         print(f"❌ run not found: {rd}"); return 1
     scripts = list((rd / "01-scripts").glob("*.md"))
+    src_text = scripts[0].read_text(encoding="utf-8", errors="ignore") if scripts else ""
     plan = {"run": run, "source_scripts": [s.name for s in scripts], "languages": {}}
+    print(f"i18n for {co}/{unit}/{run} → {', '.join(langs)}")
     for lang in langs:
-        (rd / "06-audio" / lang).mkdir(parents=True, exist_ok=True)
-        (rd / "08-subtitles" / lang).mkdir(parents=True, exist_ok=True)
-        plan["languages"][lang] = {
-            "subtitles_dir": f"08-subtitles/{lang}/",
-            "audio_dir": f"06-audio/{lang}/",
-            "dub_engine": "XTTS v2 (via bridge /voiceover with company/unit/run routing)",
-            "status": "scaffolded",
-        }
+        lname = LANG_NAMES.get(lang, lang)
+        adir = rd / "06-audio" / lang; sdir = rd / "08-subtitles" / lang
+        adir.mkdir(parents=True, exist_ok=True); sdir.mkdir(parents=True, exist_ok=True)
+        status = {"subtitles_dir": f"08-subtitles/{lang}/", "audio_dir": f"06-audio/{lang}/"}
+        # 1) translate the script → subtitle/script file (real, via MLX)
+        translated = _mlx_translate(src_text, lname) if src_text else None
+        if translated:
+            (sdir / f"{run}.{lang}.txt").write_text(translated, encoding="utf-8")
+            status["subtitle"] = "translated ✅"
+            print(f"  {lang} ({lname}): subtitle translated → 08-subtitles/{lang}/{run}.{lang}.txt")
+        else:
+            status["subtitle"] = "MLX unavailable/slow — retry"
+            print(f"  {lang} ({lname}): ⚠️ translation unavailable (MLX slow/offline)")
+        # 2) dub audio via the local TTS bridge (best-effort)
+        try:
+            sys.path.insert(0, str(ROOT / "01_SKILLS"))
+            import solocorn_media_bridge as smb
+            dub = adir / f"{run}.{lang}.wav"
+            smb.synthesize_voiceover((translated or src_text)[:1500], str(dub))
+            status["dub"] = "generated ✅" if dub.exists() else "TTS returned no file"
+            print(f"  {lang}: dub → 06-audio/{lang}/{run}.{lang}.wav" if dub.exists()
+                  else f"  {lang}: dub not produced (TTS may lack a {lname} voice — XTTS v2 model needed)")
+        except Exception as e:
+            status["dub"] = f"seam: {e}"
+            print(f"  {lang}: dub seam — {str(e)[:60]}")
+        plan["languages"][lang] = status
     out = rd / ".pipeline" / "i18n_plan.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(plan, indent=2))
-    print(f"✅ i18n scaffolded for {', '.join(langs)} — per-language audio/subtitle slots + plan")
-    print(f"   {out.relative_to(ROOT)}")
-    print("   Seam: dispatch each (script, lang) to XTTS dubbing + subtitle gen; outputs land in the slots above.")
+    print(f"  plan → {out.relative_to(ROOT)}")
     return 0
 
 
@@ -143,7 +187,7 @@ def _omlx_titles(topic, n, timeout=25):
         return None  # MLX slow/offline → deterministic fallback titles
 
 
-def ab(co, unit, run, n_titles) -> int:
+def ab(co, unit, run, n_titles, render=False) -> int:
     rd = run_dir(co, unit, run)
     if not rd.exists():
         print(f"❌ run not found: {rd}"); return 1
@@ -153,37 +197,57 @@ def ab(co, unit, run, n_titles) -> int:
         m = re.search(r"^#\s+(.+)$", scripts[0].read_text(encoding="utf-8", errors="ignore"), re.M)
         topic = m.group(1) if m else run
     titles = _omlx_titles(topic, n_titles) or [f"{topic} — variant {i+1}" for i in range(n_titles)]
+    thumb_dir = rd / "09-deliver" / "thumbnails"
+    thumb_dir.mkdir(parents=True, exist_ok=True)
+    thumbs = []
+    for i in range(min(3, n_titles)):
+        rel = f"09-deliver/thumbnails/variant_{i+1}.png"
+        rec = {"id": f"TH{i+1}", "path": rel, "impressions": 0, "ctr": None}
+        if render:
+            try:
+                sys.path.insert(0, str(ROOT / "01_SKILLS"))
+                import comfyui_client as cc
+                cc.render(f"professional video thumbnail, {topic}, bold high-contrast composition, "
+                          f"clean, no text", str(rd / rel), seed=i * 1000)
+                rec["rendered"] = True
+                print(f"   🖼  rendered {rel}")
+            except Exception as e:
+                rec["render_error"] = str(e)[:60]
+                print(f"   ⚠️ thumbnail {i+1} render failed: {str(e)[:60]}")
+        thumbs.append(rec)
     variants = {
         "run": run, "topic": topic,
         "title_variants": [{"id": f"T{i+1}", "title": t, "impressions": 0, "ctr": None}
                            for i, t in enumerate(titles)],
-        "thumbnail_variants": [{"id": f"TH{i+1}", "path": f"09-deliver/thumbnails/variant_{i+1}.png",
-                                "impressions": 0, "ctr": None} for i in range(min(3, n_titles))],
+        "thumbnail_variants": thumbs,
         "note": "Log impressions/ctr after publishing to pick a winner.",
     }
     out = rd / ".pipeline" / "ab_test.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(variants, indent=2))
-    (rd / "09-deliver" / "thumbnails").mkdir(parents=True, exist_ok=True)
-    print(f"✅ A/B harness for '{topic}': {len(titles)} title + {len(variants['thumbnail_variants'])} thumbnail slots")
+    print(f"✅ A/B harness for '{topic}': {len(titles)} titles, {len(thumbs)} thumbnails"
+          f"{' (rendered)' if render else ' (slots — add --render to generate)'}")
     for v in variants["title_variants"]:
         print(f"   {v['id']}: {v['title']}")
     print(f"   tracking → {out.relative_to(ROOT)}")
-    print("   Seam: render thumbnail variants via ComfyUI into 09-deliver/thumbnails/; log CTR to pick a winner.")
     return 0
 
 
 def trends(channel) -> int:
     feed = ROOT / "00_CORE" / "trends.yaml"
-    if not feed.exists():
-        feed.write_text(yaml.safe_dump({
-            "_note": "Populate from platform trend APIs / the China-market skills, or by hand.",
-            "youtube": ["(no signals yet)"],
-            "tiktok": ["(no signals yet)"],
-            "bilibili": ["(no signals yet)"],
-        }, sort_keys=False))
-    data = yaml.safe_load(feed.read_text()) or {}
-    print(f"Trend signals (source: 00_CORE/trends.yaml — integration seam for live feeds)")
+    data = yaml.safe_load(feed.read_text()) if feed.exists() else {}
+    data = data or {}
+    # pull live YouTube trending (wired); other platforms stay as manual/seam
+    if (not channel) or channel == "youtube":
+        try:
+            import youtube_client as yt
+            data["youtube"] = yt.trending(region="US", n=10)
+            data.setdefault("tiktok", ["(seam — needs TikTok API)"])
+            data.setdefault("bilibili", ["(seam — needs Bilibili API / China-market skills)"])
+            feed.write_text(yaml.safe_dump(data, sort_keys=False, allow_unicode=True))
+        except Exception as e:
+            data.setdefault("youtube", [f"(live fetch failed: {e})"])
+    print("Trend signals  (YouTube: live via Data API; others: integration seam)")
     for plat, items in data.items():
         if plat.startswith("_") or (channel and plat != channel):
             continue
@@ -202,6 +266,7 @@ def main(argv=None) -> int:
             p.add_argument("--langs", default="es,zh")
         if c == "ab":
             p.add_argument("--titles", type=int, default=5)
+            p.add_argument("--render", action="store_true", help="render thumbnails via ComfyUI")
     pt = sub.add_parser("trends"); pt.add_argument("--channel")
     a = ap.parse_args(argv)
     if a.cmd == "brand-check":
@@ -209,7 +274,7 @@ def main(argv=None) -> int:
     if a.cmd == "i18n":
         return i18n(a.company, a.unit, a.run, [l.strip() for l in a.langs.split(",") if l.strip()])
     if a.cmd == "ab":
-        return ab(a.company, a.unit, a.run, a.titles)
+        return ab(a.company, a.unit, a.run, a.titles, a.render)
     if a.cmd == "trends":
         return trends(a.channel)
     return 0

@@ -65,10 +65,26 @@ def publish(co, unit, run, platform, apply) -> int:
         print("   ⛔ not ready — produce a master in 09-deliver/masters/ first")
         return 1
     if apply:
-        print(f"   🔌 SEAM: upload to {platform} requires API credentials. Wire your "
-              f"{platform} client here (manifest has title/video/thumbnail/desc/tags).")
+        if platform != "youtube":
+            print(f"   🔌 {platform} client not wired yet (only youtube). Manifest is ready.")
+            return 0
+        try:
+            import youtube_client as yt
+            vid = yt.upload(str(ROOT / manifest["video"]), manifest["title"],
+                            manifest["description"], manifest["tags"], privacy="private")
+            manifest["youtube_id"] = vid
+            manifest["url"] = f"https://youtu.be/{vid}"
+            manifest["published_privacy"] = "private"
+            out.write_text(json.dumps(manifest, indent=2))
+            print(f"   ✅ uploaded to YouTube as PRIVATE: {manifest['url']}")
+            print("      (review it, then flip to public in YouTube Studio when ready)")
+            if manifest["thumbnail"]:
+                print(f"      thumbnail to set: {manifest['thumbnail']}")
+        except Exception as e:
+            print(f"   ❌ upload failed: {e}")
+            return 1
     else:
-        print("   (staged only — pass --apply once a platform client is wired)")
+        print("   (staged only — pass --apply to upload to YouTube as private)")
     return 0
 
 
@@ -184,6 +200,22 @@ def experiments(action, args) -> int:
     return 0
 
 
+def analytics() -> int:
+    try:
+        import youtube_client as yt
+        s = yt.channel_stats()
+    except Exception as e:
+        print(f"  ⚠️ YouTube analytics unavailable: {e}")
+        return 1
+    print(f"  YouTube channel: {s.get('channel','?')}")
+    print(f"    {s.get('subscribers',0):,} subscribers")
+    print(f"    {s.get('views',0):,} total views")
+    print(f"    {s.get('videos',0)} videos published")
+    print("  Note: revenue ($) auto-fill needs the yt-analytics-monetary scope (re-consent) + AdSense;")
+    print("        until then, log income via:  studio business revenue --set \"channel=amount\"")
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="business")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -192,6 +224,7 @@ def main(argv=None) -> int:
     pp.add_argument("--platform", default="youtube"); pp.add_argument("--apply", action="store_true")
     pd = sub.add_parser("dedup"); pd.add_argument("--company"); pd.add_argument("--apply", action="store_true")
     pr = sub.add_parser("revenue"); pr.add_argument("--set"); pr.add_argument("--target", type=float, default=6000)
+    sub.add_parser("analytics")
     pe = sub.add_parser("experiments"); pe.add_argument("action", choices=["add", "list", "result"])
     pe.add_argument("--hypothesis"); pe.add_argument("--channel"); pe.add_argument("--id"); pe.add_argument("--lift"); pe.add_argument("--result")
     a = ap.parse_args(argv)
@@ -199,6 +232,8 @@ def main(argv=None) -> int:
         return publish(a.company, a.unit, a.run, a.platform, a.apply)
     if a.cmd == "dedup":
         return dedup(a.company, a.apply)
+    if a.cmd == "analytics":
+        return analytics()
     if a.cmd == "revenue":
         return revenue(a.set, a.target)
     if a.cmd == "experiments":

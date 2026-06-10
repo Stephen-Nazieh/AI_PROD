@@ -138,6 +138,10 @@ def cmd_business(args) -> int:
     return subprocess.call([PY, str(SKILLS / "business.py"), *args.rest])
 
 
+def cmd_youtube(args) -> int:
+    return subprocess.call([PY, str(SKILLS / "youtube_client.py"), *args.rest])
+
+
 def cmd_backup(args) -> int:
     return subprocess.call([PY, str(SKILLS / "backup.py")])
 
@@ -199,9 +203,13 @@ def main(argv=None) -> int:
     p_cr.add_argument("rest", nargs=argparse.REMAINDER)
     p_cr.set_defaults(fn=cmd_creative)
 
-    p_bz = sub.add_parser("business", help="publish/dedup/revenue/experiments")
+    p_bz = sub.add_parser("business", help="publish/dedup/revenue/experiments/analytics")
     p_bz.add_argument("rest", nargs=argparse.REMAINDER)
     p_bz.set_defaults(fn=cmd_business)
+
+    p_yt = sub.add_parser("youtube", help="YouTube (check/trending/upload)")
+    p_yt.add_argument("rest", nargs=argparse.REMAINDER)
+    p_yt.set_defaults(fn=cmd_youtube)
 
     sub.add_parser("backup", help="snapshot DBs + registry + KBs + personas").set_defaults(fn=cmd_backup)
 
