@@ -8,6 +8,10 @@
 
 set -e
 
+# Always use the project venv's interpreter (where mlx_lm is installed) — never a
+# bare `python3`, which may be a different interpreter without mlx_lm.
+PY="/Users/nazeera/Documents/AI_PRODUCER/env/bin/python3"
+
 echo "🚀 Starting DeParadigm Media Local LLM Servers"
 echo ""
 
@@ -22,7 +26,7 @@ sleep 1
 # with the cached Qwen-Coder-7B (sub-second). IMPORTANT: clients must send this
 # exact model name — mlx_lm.server loads whatever model the request asks for.
 echo "Starting Qwen2.5-Coder-7B on :8000..."
-nohup python3 -m mlx_lm.server \
+nohup "$PY" -m mlx_lm.server \
     --model mlx-community/Qwen2.5-Coder-7B-Instruct-4bit \
     --port 8000 > "$(dirname "$0")/../../logs/mlx_coder7b.log" 2>&1 &
 echo $! > /tmp/mlx_coder7b.pid
@@ -32,7 +36,7 @@ curl -s http://localhost:8000/v1/models > /dev/null 2>&1 && echo "  ✅ Coder7B 
 # Standard: Qwen2.5-32B (port 8001)
 if [ -d "/Users/nazeera/.cache/huggingface/hub/Qwen2.5-32B-Instruct-4bit" ]; then
     echo "Starting Qwen2.5-32B on :8001..."
-    nohup python3 -m mlx_lm.server \
+    nohup "$PY" -m mlx_lm.server \
         --model /Users/nazeera/.cache/huggingface/hub/Qwen2.5-32B-Instruct-4bit \
         --port 8001 > /tmp/mlx_qwen32b.log 2>&1 &
     echo $! > /tmp/mlx_qwen32b.pid
@@ -44,7 +48,7 @@ fi
 
 # Fast: Qwen2.5-Coder-7B (port 8002)
 echo "Starting Qwen2.5-Coder-7B on :8002..."
-nohup python3 -m mlx_lm.server \
+nohup "$PY" -m mlx_lm.server \
     --model mlx-community/Qwen2.5-Coder-7B-Instruct-4bit \
     --port 8002 > /tmp/mlx_qwen7b.log 2>&1 &
 echo $! > /tmp/mlx_qwen7b.pid
@@ -53,7 +57,7 @@ curl -s http://localhost:8002/v1/models > /dev/null 2>&1 && echo "  ✅ Qwen7B r
 
 # Anthropic↔OpenAI Proxy (port 8003)
 echo "Starting Anthropic↔OpenAI Proxy on :8003..."
-nohup /Users/nazeera/Documents/AI_PRODUCER/env/bin/python3 \
+nohup "$PY" \
     /Users/nazeera/Documents/AI_PRODUCER/runtime/proxy/anthropic_openai_proxy.py \
     --port 8003 > /tmp/proxy_anthropic.log 2>&1 &
 echo $! > /tmp/proxy_anthropic.pid
