@@ -134,6 +134,10 @@ def cmd_creative(args) -> int:
     return subprocess.call([PY, str(SKILLS / "creative.py"), *args.rest])
 
 
+def cmd_business(args) -> int:
+    return subprocess.call([PY, str(SKILLS / "business.py"), *args.rest])
+
+
 def cmd_backup(args) -> int:
     return subprocess.call([PY, str(SKILLS / "backup.py")])
 
@@ -194,6 +198,10 @@ def main(argv=None) -> int:
     p_cr = sub.add_parser("creative", help="creative tools (brand-check/i18n/ab/trends)")
     p_cr.add_argument("rest", nargs=argparse.REMAINDER)
     p_cr.set_defaults(fn=cmd_creative)
+
+    p_bz = sub.add_parser("business", help="publish/dedup/revenue/experiments")
+    p_bz.add_argument("rest", nargs=argparse.REMAINDER)
+    p_bz.set_defaults(fn=cmd_business)
 
     sub.add_parser("backup", help="snapshot DBs + registry + KBs + personas").set_defaults(fn=cmd_backup)
 
