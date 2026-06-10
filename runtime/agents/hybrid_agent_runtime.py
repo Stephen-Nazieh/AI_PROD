@@ -389,24 +389,41 @@ def _resolve_path(path: str) -> Path:
 # instead of dumping into the repo root. Reads/cwd still resolve against WORKSPACE_ROOT.
 _OUTPUT_BASE: Path | None = None
 
+_STAGE_DIRS = {"01-scripts", "02-storyboards", "03-layout", "04-raw_renders",
+               "05-assets", "06-audio", "07-editing", "08-subtitles", "09-deliver"}
+
 
 def _resolve_write_path(path: str) -> Path:
     """Route an agent's file write into the per-run output base.
 
-    Relative paths and stray root-level absolute paths are re-rooted under the
-    channel's production folder; deliberate targets (an existing unit tree, the
-    RAID, or /tmp scratch) are respected as-is.
+    Anything not already inside the run base is re-rooted under it, preserving a
+    canonical stage tail when present — so 'scripts/x.md', '01-scripts/x.md', and a
+    full '.../production/01-scripts/x.md' (run slug omitted) all land in
+    <run>/01-scripts/x.md. Only deliberate external scratch (RAID / /tmp) escapes.
     """
-    base = _OUTPUT_BASE or WORKSPACE_ROOT
+    base = (_OUTPUT_BASE or WORKSPACE_ROOT).resolve()
     p = Path(path)
+    raw = str(p)
     if p.is_absolute():
-        raw = str(p)                       # before resolve (macOS /tmp → /private/tmp)
         s = str(p.resolve())
-        if ("/business_units/" in s or s.startswith("/Volumes/")
-                or raw.startswith("/tmp/") or s.startswith("/private/tmp/")):
-            return p.resolve()
-        return (base / p.name).resolve()   # e.g. /repo-root/scripts/x.md → base/x.md
-    return (base / p).resolve()
+        if raw.startswith("/tmp/") or s.startswith("/private/tmp/") or s.startswith("/Volumes/"):
+            return p.resolve()  # respect explicit external scratch / RAID
+
+    # If the path names a canonical stage, file it under the run at that stage — this
+    # takes priority so a full '.../production/01-scripts/x.md' (run slug omitted, abs
+    # or relative) collapses to <run>/01-scripts/x.md instead of nesting.
+    parts = p.parts
+    for i, seg in enumerate(parts):
+        if seg in _STAGE_DIRS:
+            return (base / Path(*parts[i:])).resolve()
+
+    # No stage hint: keep if already inside the run base, else re-root by basename.
+    rp = (p if p.is_absolute() else base / p).resolve()
+    try:
+        rp.relative_to(base)
+        return rp
+    except ValueError:
+        return (base / p.name).resolve()
 
 
 def execute_action(action: dict) -> dict:

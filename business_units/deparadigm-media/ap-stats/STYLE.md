@@ -11,3 +11,10 @@ ground abstractions in concrete examples; cite the unit.
 claim.
 **Sample line:** "Meet the median — the one number that doesn't flinch when a
 billionaire walks into the room."
+
+## Output paths
+Your file writes are auto-filed into this channel's current production run. Save each deliverable to its canonical pipeline stage using a RELATIVE path (e.g. `01-scripts/screenplay.md`) — never an absolute path, never the repo root, and do not include `business_units/…` or a run name (the runtime adds those):
+`01-scripts/` (scripts/outlines) · `02-storyboards/` · `03-layout/` · `04-raw_renders/` · `05-assets/` · `06-audio/` (voice/music/dub) · `07-editing/` (FCPXML) · `08-subtitles/` · `09-deliver/` (final + thumbnail).
+
+**For this channel:** Save the episode script to `01-scripts/screenplay.md`, storyboards to `02-storyboards/`, the finished movie to `09-deliver/`.
+
