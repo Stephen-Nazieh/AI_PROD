@@ -100,6 +100,10 @@ def cmd_kb(args) -> int:
     return subprocess.call([PY, str(SKILLS / "knowledge_base.py"), *args.rest])
 
 
+def cmd_pipeline(args) -> int:
+    return subprocess.call([PY, str(SKILLS / "pipeline.py"), *args.rest])
+
+
 def cmd_backup(args) -> int:
     return subprocess.call([PY, str(SKILLS / "backup.py")])
 
@@ -135,6 +139,10 @@ def main(argv=None) -> int:
     p_kb = sub.add_parser("kb", help="knowledge base (delegates to knowledge_base.py)")
     p_kb.add_argument("rest", nargs=argparse.REMAINDER)
     p_kb.set_defaults(fn=cmd_kb)
+
+    p_pl = sub.add_parser("pipeline", help="production pipeline (status/advance/run/snapshot <co> <unit> <run>)")
+    p_pl.add_argument("rest", nargs=argparse.REMAINDER)
+    p_pl.set_defaults(fn=cmd_pipeline)
 
     sub.add_parser("backup", help="snapshot DBs + registry + KBs + personas").set_defaults(fn=cmd_backup)
     sub.add_parser("doctor", help="run smoke tests / health checks").set_defaults(fn=cmd_doctor)
