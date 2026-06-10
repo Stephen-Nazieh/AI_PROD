@@ -573,6 +573,34 @@ def load_agent_persona(name: str) -> str | None:
     return None
 
 
+def load_channel_style(project_id: str | None) -> str | None:
+    """Resolve a channel's voice/goals (STYLE.md) from the issue's Paperclip project.
+
+    Lets one shared role agent (script writer, director, …) adopt the right tone per
+    channel: the runtime injects the channel's STYLE based on which unit the task
+    belongs to (matched via paperclip_project_id in the registry).
+    """
+    if not project_id:
+        return None
+    try:
+        import yaml
+        reg = yaml.safe_load((WORKSPACE_ROOT / "00_CORE" / "business_units.yaml").read_text())
+    except Exception:
+        return None
+    for cslug, cdata in (reg.get("companies") or {}).items():
+        for uslug, urec in (cdata.get("units") or {}).items():
+            if urec.get("paperclip_project_id") == project_id:
+                folder = urec.get("folder", f"business_units/{cslug}/{uslug}")
+                style_f = WORKSPACE_ROOT / folder / "STYLE.md"
+                if style_f.is_file():
+                    return (f"## Channel context — you are producing for the "
+                            f"\"{urec.get('name', uslug)}\" channel.\n"
+                            f"Write your OUTPUT in the voice described below. Apply it; do NOT "
+                            f"restate, summarize, or quote these guidelines back.\n\n"
+                            + style_f.read_text(encoding="utf-8").strip())
+    return None
+
+
 def run_hybrid(agent_id: str, issue_id: str, issue_title: str, issue_description: str,
                client: PaperclipClient) -> dict:
     """Run the hybrid THINK → PARSE → EXECUTE loop."""
@@ -584,6 +612,16 @@ def run_hybrid(agent_id: str, issue_id: str, issue_title: str, issue_description
         persona = load_agent_persona(agent.get("name") or agent.get("title") or "")
         print(f"  🎭 Persona: {'loaded for ' + str(agent.get('name')) if persona else 'none (generic)'}",
               file=sys.stderr)
+
+    # Inject the CHANNEL's voice/goals so the same role agent adapts per-channel.
+    try:
+        iss = client.get_issue(issue_id) or {}
+        style = load_channel_style(iss.get("projectId"))
+        if style:
+            persona = (persona or "") + "\n\n" + style
+            print(f"  🎨 Channel voice injected", file=sys.stderr)
+    except Exception:
+        pass
 
     claude = ClaudeClient(persona=persona)
     task = f"{issue_title}\n\n{issue_description}".strip()
