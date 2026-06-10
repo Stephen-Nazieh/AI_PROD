@@ -150,6 +150,11 @@ def cmd_costs(args) -> int:
     return subprocess.call([PY, str(SKILLS / "cost_ledger.py")])
 
 
+def cmd_publish(args) -> int:
+    sub = "apply" if args.apply else "prep"
+    return subprocess.call([PY, str(SKILLS / "publish.py"), sub, args.company, args.unit, args.run])
+
+
 def cmd_heal(args) -> int:
     return subprocess.call([PY, str(SKILLS / "observability.py"), "heal", *(["--apply"] if args.apply else [])])
 
@@ -220,6 +225,11 @@ def main(argv=None) -> int:
     p_bk.set_defaults(fn=cmd_backup)
 
     sub.add_parser("costs", help="inference cost ledger ($/channel/model)").set_defaults(fn=cmd_costs)
+
+    p_pub = sub.add_parser("publish", help="stage (prep) or upload (--apply) a delivered run to YouTube")
+    p_pub.add_argument("company"); p_pub.add_argument("unit"); p_pub.add_argument("run")
+    p_pub.add_argument("--apply", action="store_true", help="actually upload as PRIVATE (your approval)")
+    p_pub.set_defaults(fn=cmd_publish)
 
     p_heal = sub.add_parser("heal", help="probe services + auto-recover the down ones")
     p_heal.add_argument("--apply", action="store_true", help="actually restart (default: dry run)")

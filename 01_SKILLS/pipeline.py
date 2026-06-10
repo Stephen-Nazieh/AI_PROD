@@ -319,7 +319,14 @@ def main(argv=None) -> int:
         for _ in range(len(S.PRODUCTION_DIRS) + 1):
             r = advance(a.company, a.unit, a.run)
             if r.get("done"):
-                print("  " + r["msg"]); break
+                print("  " + r["msg"])
+                # Stage publish for human approval (does NOT upload).
+                try:
+                    import publish
+                    publish.prep(a.company, a.unit, a.run)
+                except Exception as e:
+                    print(f"  ⚠️ publish prep skipped: {e}")
+                break
             qa = f"  ⟂ QA: {r['qa']}" if r.get("qa") else ""
             print(f"  {'✓' if r['passed'] else '○'} {r['stage']}: {r['detail']}{qa}")
             if not r["passed"]:
