@@ -175,11 +175,14 @@ def cmd_logs(args) -> int:
 
 
 def cmd_doctor(args) -> int:
-    smoke = WORKSPACE_ROOT / "tests" / "smoke_test.py"
-    if smoke.exists():
-        return subprocess.call([PY, str(smoke)])
-    print("  (no smoke tests installed yet)")
-    return cmd_status(args)
+    suites = sorted((WORKSPACE_ROOT / "tests").glob("*_test.py"))
+    if not suites:
+        print("  (no test suites installed yet)")
+        return cmd_status(args)
+    rc = 0
+    for suite in suites:
+        rc |= subprocess.call([PY, str(suite)])
+    return rc
 
 
 def main(argv=None) -> int:
