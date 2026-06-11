@@ -143,6 +143,38 @@ def get_character(project_dir: Path, character_name: str, pose: str = "standing"
     return img
 
 
+def _audio_envelope(wav_path: Path, total_frames: int, fps: int = FPS) -> list[float] | None:
+    """Per-frame loudness (0..1) from a dialogue WAV, for audio-driven lip-sync.
+
+    RMS of the audio window under each frame, gained so speech clearly opens the
+    mouth and silence closes it. Returns None if the WAV is missing/unreadable so
+    the caller falls back to a generic flap.
+    """
+    if not wav_path.exists():
+        return None
+    try:
+        import wave
+        with wave.open(str(wav_path), "rb") as w:
+            sr, ch, sw = w.getframerate(), w.getnchannels(), w.getsampwidth()
+            raw = w.readframes(w.getnframes())
+        dtype = {1: np.int8, 2: np.int16, 4: np.int32}.get(sw, np.int16)
+        a = np.frombuffer(raw, dtype=dtype).astype(np.float32)
+        if ch > 1:
+            a = a.reshape(-1, ch).mean(axis=1)
+        if a.size == 0:
+            return None
+        a /= (np.abs(a).max() + 1e-9)
+        env = []
+        for f in range(total_frames):
+            i0, i1 = int(f / fps * sr), int((f + 1) / fps * sr)
+            seg = a[i0:i1] if i1 > i0 else a[i0:i0 + 1]
+            rms = float(np.sqrt(np.mean(seg ** 2))) if seg.size else 0.0
+            env.append(min(1.0, rms * 3.2))
+        return env
+    except Exception:
+        return None
+
+
 def composite_shot(project_slug: str, shot_id: str, duration_sec: float = 3.0,
                    width: int = 1920, height: int = 1080) -> dict:
     """Composite a single shot into frame sequence."""
@@ -195,30 +227,42 @@ def composite_shot(project_slug: str, shot_id: str, duration_sec: float = 3.0,
     # Generate frames
     total_frames = int(duration_sec * FPS)
     generated = []
-    
+
+    # Audio-driven lip-sync envelope (per-frame loudness), if dialogue audio exists.
+    env = _audio_envelope(project_dir / "06-audio" / "dialogue" / f"{shot_id}.wav",
+                          total_frames) if shot.get("dialogue") else None
+
+    # Ken Burns camera move on the background — the WHOLE frame drifts/zooms, and a
+    # steady character in front of a moving background reads as parallax depth.
+    ZOOM_A, ZOOM_B = 1.06, 1.13  # slow zoom-in across the shot
+    denom = max(1, total_frames - 1)
+
     for frame in range(total_frames):
-        # Start with background
-        composite = bg.copy()
-        
-        # Simple animation: subtle breathing/sway
-        sway_x = int(math.sin(frame * 0.1) * 3)
-        sway_y = int(math.sin(frame * 0.15) * 2)
-        
-        # Paste character
-        char_pos = (char_x + sway_x, char_y + sway_y)
+        p = frame / denom  # 0..1 progress
+
+        # --- background camera move (zoom + eased diagonal pan, no black edges) ---
+        z = ZOOM_A + (ZOOM_B - ZOOM_A) * p
+        bw, bh = int(width * z), int(height * z)
+        big = bg.resize((bw, bh), Image.Resampling.LANCZOS)
+        cam_dx = int((bw - width) * (0.12 + 0.76 * p))
+        cam_dy = int((bh - height) * (0.5 + 0.4 * math.sin(p * math.pi)))
+        composite = big.crop((cam_dx, cam_dy, cam_dx + width, cam_dy + height)).copy()
+
+        # --- character idle: breathing bob + sway (steady in frame → parallax) ---
+        sway = int(math.sin(frame * 0.11) * 9)
+        bob = int(math.sin(frame * 0.18) * 7)
+        char_pos = (char_x + sway, char_y + bob)
         composite.paste(char, char_pos, char)
-        
-        # Add subtle mouth animation if dialogue
+
+        # --- audio-driven mouth (opens with speech loudness; generic flap if no wav) ---
         if shot.get("dialogue"):
-            # Simple mouth open/close cycle
-            mouth_open = int((math.sin(frame * 0.3) + 1) * 5)
+            openness = env[frame] if env else (math.sin(frame * 0.5) + 1) / 2
+            mh = int(2 + openness * 17)
             draw = ImageDraw.Draw(composite)
-            mouth_x = char_pos[0] + char_w // 2 - 10
-            mouth_y = char_pos[1] + int(char_h * 0.22)
-            draw.ellipse([mouth_x, mouth_y, mouth_x + 20, mouth_y + 5 + mouth_open],
-                        fill=(60, 30, 30, 200))
-        
-        # Save frame
+            mx = char_pos[0] + char_w // 2 - 12
+            my = char_pos[1] + int(char_h * 0.20)
+            draw.ellipse([mx, my, mx + 24, my + mh], fill=(70, 35, 35))
+
         frame_path = frames_dir / f"frame_{frame:04d}.png"
         composite.convert("RGB").save(frame_path)
         generated.append(str(frame_path))
