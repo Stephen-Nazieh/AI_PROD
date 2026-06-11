@@ -121,3 +121,6 @@ auth_test.js
 
 # Agent file-write scratch area (non-channel tasks)
 .agent_output/
+
+# Content-addressed render cache (regenerable build artifacts — see render_cache.py)
+.cache/

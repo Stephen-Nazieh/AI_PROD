@@ -157,6 +157,10 @@ def cmd_forecast(args) -> int:
     return subprocess.call(cmd)
 
 
+def cmd_cache(args) -> int:
+    return subprocess.call([PY, str(SKILLS / "render_cache.py"), *args.rest])
+
+
 def cmd_dispatch(args) -> int:
     return subprocess.call([PY, str(SKILLS / "dispatch_status.py"),
                             *(["--json"] if args.json else [])])
@@ -261,6 +265,10 @@ def main(argv=None) -> int:
     p_fc.add_argument("--window", type=int, default=14, help="trailing window in days (default 14)")
     p_fc.add_argument("--pool", type=float, default=None, help="runway pool USD (default $15,000 / env RUNWAY_POOL_USD)")
     p_fc.set_defaults(fn=cmd_forecast)
+
+    p_ca = sub.add_parser("cache", help="content-addressed render cache (stats|clear)")
+    p_ca.add_argument("rest", nargs=argparse.REMAINDER)
+    p_ca.set_defaults(fn=cmd_cache)
 
     p_disp = sub.add_parser("dispatch", help="dispatch observability (agents/cooldowns, render slots, budget)")
     p_disp.add_argument("--json", action="store_true", help="machine-readable snapshot")

@@ -28,6 +28,11 @@ import wave
 from pathlib import Path
 
 WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(WORKSPACE_ROOT / "01_SKILLS"))
+try:
+    from render_cache import RenderCache  # content-addressed skip-rerender
+except Exception:  # cache is optional — never block dubbing if it can't import
+    RenderCache = None
 BLENDER_BINARY = "/Applications/Blender.app/Contents/MacOS/Blender"
 KOKORO_SCRIPT = WORKSPACE_ROOT / "01_SKILLS" / "kokoro_tts.py"
 OPENVoice_SCRIPT = WORKSPACE_ROOT / "01_SKILLS" / "openvoice_cloner.py"
@@ -135,10 +140,15 @@ def find_character_voice(text: str, character_manifest: dict) -> tuple[str, str]
 
 
 class AutoDubbingPipeline:
-    def __init__(self, project_slug: str, engine: str = "auto", voice: str = "af_sarah"):
+    def __init__(self, project_slug: str, engine: str = "auto", voice: str = "af_sarah",
+                 use_cache: bool = True):
         self.project_slug = project_slug
         self.engine = engine
         self.voice = voice
+        # Skip re-synthesizing a shot whose (text, engine, voice) is unchanged.
+        # Disable with use_cache=False or env DISABLE_RENDER_CACHE=1.
+        self.cache = (RenderCache() if use_cache and RenderCache
+                      and not os.environ.get("DISABLE_RENDER_CACHE") else None)
         self.project_dir = WORKSPACE_ROOT / "05_PROJECTS" / project_slug
         self.layout_path = self.project_dir / "03-layout" / "layout.blend"
         self.shot_list = _load_json(self.project_dir / "01-scripts" / "shot-list.json")
@@ -170,7 +180,24 @@ class AutoDubbingPipeline:
             wav_path = self.audio_dir / f"{sid}.wav"
             print(f"🎙️  {sid}: '{dialogue[:50]}...' → {voice_engine} ({voice_id})")
 
-            if voice_engine == "openvoice":
+            def _synth(out: Path) -> dict:
+                if voice_engine == "openvoice":
+                    return generate_openvoice_audio(dialogue, out, voice_id)
+                return generate_kokoro_audio(dialogue, out, self.voice)
+
+            if self.cache is not None:
+                held = {}
+                cache_inputs = {"text": dialogue, "engine": voice_engine,
+                                "voice_id": voice_id, "kokoro_voice": self.voice}
+                cres = self.cache.materialize(
+                    "dub", cache_inputs, wav_path,
+                    lambda out: held.update(r=_synth(out)))
+                if cres["hit"]:
+                    print(f"   ⚡ cache hit — restored {sid}.wav (no TTS)")
+                    gen_result = {"status": "ok", "path": str(wav_path), "cached": True}
+                else:
+                    gen_result = held.get("r", {"status": "error", "error": "producer did not run"})
+            elif voice_engine == "openvoice":
                 gen_result = generate_openvoice_audio(dialogue, wav_path, voice_id)
             else:
                 gen_result = generate_kokoro_audio(dialogue, wav_path, self.voice)
@@ -197,6 +224,7 @@ class AutoDubbingPipeline:
                 "audio_path": str(wav_path),
                 "duration_sec": round(duration, 2),
                 "phonemes": len(phonemes),
+                "cached": gen_result.get("cached", False),
             })
 
         return {
