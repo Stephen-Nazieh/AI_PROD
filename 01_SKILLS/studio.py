@@ -150,6 +150,13 @@ def cmd_costs(args) -> int:
     return subprocess.call([PY, str(SKILLS / "cost_ledger.py")])
 
 
+def cmd_forecast(args) -> int:
+    cmd = [PY, str(SKILLS / "cost_forecast.py"), "--window", str(args.window)]
+    if args.pool is not None:
+        cmd += ["--pool", str(args.pool)]
+    return subprocess.call(cmd)
+
+
 def cmd_dispatch(args) -> int:
     return subprocess.call([PY, str(SKILLS / "dispatch_status.py"),
                             *(["--json"] if args.json else [])])
@@ -249,6 +256,11 @@ def main(argv=None) -> int:
     p_bk.set_defaults(fn=cmd_backup)
 
     sub.add_parser("costs", help="inference cost ledger ($/channel/model)").set_defaults(fn=cmd_costs)
+
+    p_fc = sub.add_parser("forecast", help="burn-rate + runway projection from the cost ledger")
+    p_fc.add_argument("--window", type=int, default=14, help="trailing window in days (default 14)")
+    p_fc.add_argument("--pool", type=float, default=None, help="runway pool USD (default $15,000 / env RUNWAY_POOL_USD)")
+    p_fc.set_defaults(fn=cmd_forecast)
 
     p_disp = sub.add_parser("dispatch", help="dispatch observability (agents/cooldowns, render slots, budget)")
     p_disp.add_argument("--json", action="store_true", help="machine-readable snapshot")
