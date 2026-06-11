@@ -4,6 +4,34 @@ import requests
 import re
 from pathlib import Path
 
+
+def sanitize_generated_code(raw_response: str) -> str:
+    """Strip an LLM code response down to appendable, syntactically-safer Python.
+
+    Pure function (no I/O) so it can be unit-tested directly — AGENTS.md requires
+    the sanitizer be validated against ≥3 generated scene classes. Behavior:
+      • drops markdown code-fence lines (```), incl. ```python
+      • drops loose single-word lines that aren't a call/`self.` (LLM stray tokens)
+      • re-indents known nested kwargs (x_range=…, color=…) to 12 spaces
+      • seals one dangling '(' per line when the model leaves it unbalanced
+    """
+    clean_code = ""
+    for line in raw_response.splitlines():
+        if line.strip().startswith("```"):
+            continue
+        # Filter out loose single words that break syntax
+        if len(line.strip().split()) == 1 and not line.strip().endswith(")") and not line.strip().startswith("self."):
+            continue
+        # 🛡️ DYNAMIC INDENTATION PASS: align standalone nested args to 12 spaces
+        if re.match(r'^\s*(x_range|y_range|axis_config|color|h_buff|v_buff)=', line):
+            line = "            " + line.strip()
+        # Automatically seal an open parenthesis the model left dangling
+        if line.count("(") > line.count(")"):
+            line += ")"
+        clean_code += line + "\n"
+    return clean_code
+
+
 class ClaudeCodeAutomationBridge:
     """
     Advanced Code Generation Engine with an integrated, aggressive 
@@ -49,25 +77,8 @@ y_label = axes.get_y_axis_label(MathTex("y"))
             response = requests.post(f"{self.api_base}/chat/completions", json=payload, timeout=45)
             response.raise_for_status()
             raw_response = response.json()['choices'][0]['message']['content']
-            
-            clean_code = ""
-            for line in raw_response.splitlines():
-                if line.strip().startswith("```"):
-                    continue
-                    
-                # Filter out loose single words that break syntax
-                if len(line.strip().split()) == 1 and not line.strip().endswith(")") and not line.strip().startswith("self."):
-                    continue
 
-                # 🛡️ DYNAMIC INDENTATION PASS: Catch standalone nested args like 'x_range=' and align them cleanly to 12 spaces
-                if re.match(r'^\s*(x_range|y_range|axis_config|color|h_buff|v_buff)=', line):
-                    line = "            " + line.strip()
-                
-                # Automatically seal open parenthesis on a line if the model left it dangling
-                if line.count("(") > line.count(")"):
-                    line += ")"
-                    
-                clean_code += line + "\n"
+            clean_code = sanitize_generated_code(raw_response)
 
             if self.target_file.exists():
                 current_content = self.target_file.read_text(encoding="utf-8")

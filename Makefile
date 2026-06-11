@@ -26,10 +26,12 @@ help: ## Show this menu
 setup: ## One-time: create venv + install deps (01_SKILLS/setup_env.sh)
 	bash $(SKILLS)/setup_env.sh
 
-test: doctor ## Alias for `doctor` (fast control-plane smoke tests)
+test: doctor ## Alias for `doctor` (fast offline test suites)
 
-doctor: ## Fast smoke tests / health checks (studio doctor)
-	$(PYBIN) tests/smoke_test.py
+doctor: ## Run every offline test suite (tests/*_test.py); stop on first failure
+	@rc=0; for t in tests/*_test.py; do \
+	  echo "▶ $$t"; $(PYBIN) "$$t" || rc=1; \
+	done; exit $$rc
 
 test-suite: ## Full syntax/import/functional suite over all modules
 	$(PYBIN) $(SKILLS)/test_suite.py run
