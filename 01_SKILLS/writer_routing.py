@@ -16,8 +16,11 @@ Prereq for --api: a valid `sk-ant-api03-…` key in .env, OR a logged-in `claude
 from __future__ import annotations
 import json, sys, urllib.request, urllib.error
 
+sys.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parent))
+import studio_lib as S  # noqa: E402
+
 API = "http://127.0.0.1:3100"
-COMPANY = "15041ee2-b1c5-43ac-b488-04934bfa1806"
+COMPANY = S.company_id()
 # A writer = name contains one of these (lowercased).
 WRITER_MATCH = ("writer", "script agent")
 

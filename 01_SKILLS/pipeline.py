@@ -172,7 +172,7 @@ def create_stage_issue(company: str, unit: str, run: str, stage: str, spec: dict
     try:
         data = json.dumps(payload).encode()
         req = urllib.request.Request(
-            f"http://127.0.0.1:3100/api/companies/15041ee2-b1c5-43ac-b488-04934bfa1806/issues",
+            f"http://127.0.0.1:3100/api/companies/{S.company_id()}/issues",
             data=data, method="POST")
         req.add_header("Content-Type", "application/json")
         with urllib.request.urlopen(req, timeout=10) as r:

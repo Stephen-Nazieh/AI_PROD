@@ -82,8 +82,8 @@ def t_name_slug_consistency():
     import urllib.request
     try:
         projs = {p["id"]: p["name"] for p in json.load(
-            urllib.request.urlopen("http://127.0.0.1:3100/api/companies/"
-                                   "15041ee2-b1c5-43ac-b488-04934bfa1806/projects", timeout=6))}
+            urllib.request.urlopen(f"http://127.0.0.1:3100/api/companies/"
+                                   f"{S.company_id()}/projects", timeout=6))}
     except Exception:
         raise AssertionError("Paperclip not reachable (skip)")
     bad = []

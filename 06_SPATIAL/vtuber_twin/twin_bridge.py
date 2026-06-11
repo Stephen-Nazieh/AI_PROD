@@ -3,7 +3,7 @@ import json
 import socket
 import time
 
-class DeParadigm MediaSpatialBridge:
+class DeParadigmMediaSpatialBridge:
     """
     Coordinates simultaneous state vector updates between the physical workspace engine, 
     the 3D VTuber avatar layout nodes, and the organization's browser twin viewports.
@@ -36,7 +36,7 @@ class DeParadigm MediaSpatialBridge:
 
 if __name__ == "__main__":
     print("📡 [Spatial Bridge] Initializing real-time coordinate streaming channels...")
-    bridge = DeParadigm MediaSpatialBridge()
+    bridge = DeParadigmMediaSpatialBridge()
     # Quick standalone loop verification sweep
     bridge.synchronize_twin_state("digital_twin_Stephen", 0.0, 1.75, -0.5, {"mouthOpen": 0.5})
     print("✅ [Spatial Bridge] Verification packet sent successfully.")

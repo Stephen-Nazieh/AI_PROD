@@ -10,6 +10,7 @@ the 01..09 pipeline stages (provision_business_unit.PRODUCTION_DIRS).
 from __future__ import annotations
 
 import json
+import os
 import pathlib
 import sys
 import urllib.request
@@ -41,6 +42,20 @@ def registry() -> dict:
 
 def companies() -> dict:
     return registry().get("companies", {})
+
+
+def company_id(slug: str = "deparadigm-media") -> str:
+    """Resolve a company's Paperclip UUID — env override → registry → empty.
+
+    Source of truth is ``00_CORE/business_units.yaml``; the ``PAPERCLIP_COMPANY_ID``
+    env var wins so a re-imported package (which mints a fresh company) can be
+    pointed at without editing code. Replaces the UUID literal that was copied
+    across the dispatcher / showrunner / pipeline / publish modules.
+    """
+    env = os.environ.get("PAPERCLIP_COMPANY_ID")
+    if env:
+        return env
+    return (companies().get(slug, {}) or {}).get("id", "")
 
 
 def units(company: str) -> dict:

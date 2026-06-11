@@ -69,7 +69,7 @@ def cmd_status(args) -> int:
     try:
         import urllib.request
         agents = len(_json.loads(urllib.request.urlopen(
-            "http://127.0.0.1:3100/api/companies/15041ee2-b1c5-43ac-b488-04934bfa1806/agents",
+            f"http://127.0.0.1:3100/api/companies/{S.company_id()}/agents",
             timeout=6).read()))
     except Exception:
         pass

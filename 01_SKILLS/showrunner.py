@@ -20,7 +20,7 @@ import urllib.request
 sys.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parent))
 import studio_lib as S  # noqa: E402
 
-COMPANY_ID = "15041ee2-b1c5-43ac-b488-04934bfa1806"
+COMPANY_ID = S.company_id()
 API = "http://127.0.0.1:3100"
 
 

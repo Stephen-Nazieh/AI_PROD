@@ -19,7 +19,7 @@ from understand_anything.parser_core import UnderstandAnythingParser
 from graphify.knowledge_graph import GraphifyEngine
 from paperclip.governance_core import PaperclipEnterpriseGovernor
 from understand_anything.claude_interface import ClaudeCodeAutomationBridge
-from vtuber_twin.twin_bridge import DeParadigm MediaSpatialBridge
+from vtuber_twin.twin_bridge import DeParadigmMediaSpatialBridge
 
 print("🪐 [Orchestrator V9.1] Sovereign Multi-Part Curriculum Engine Online.")
 print("🎙️ [Neural Transformer Voice Active] 📚 [Syllabus Splitter Engaged]")
@@ -83,7 +83,7 @@ def process_incoming_vault_stream():
     graph_engine = GraphifyEngine()
     governor = PaperclipEnterpriseGovernor()
     claude_bridge = ClaudeCodeAutomationBridge()
-    spatial_bridge = DeParadigm MediaSpatialBridge()
+    spatial_bridge = DeParadigmMediaSpatialBridge()
     manim_path = shutil.which("manim")
     ffmpeg_path = shutil.which("ffmpeg")
     

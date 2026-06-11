@@ -96,7 +96,7 @@ def _file_approval_issue(co: str, unit: str, run: str, title: str) -> None:
         body["projectId"] = pid
     try:
         r = urllib.request.Request(
-            "http://127.0.0.1:3100/api/companies/15041ee2-b1c5-43ac-b488-04934bfa1806/issues",
+            f"http://127.0.0.1:3100/api/companies/{S.company_id()}/issues",
             data=json.dumps(body).encode(), method="POST")
         r.add_header("Content-Type", "application/json")
         urllib.request.urlopen(r, timeout=10)

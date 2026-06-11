@@ -20,8 +20,11 @@ import time
 from pathlib import Path
 
 WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(WORKSPACE_ROOT / "01_SKILLS"))
+import studio_lib as S  # noqa: E402
+
 PAPERCLIP_URL = "http://localhost:3100"
-COMPANY_ID = "15041ee2-b1c5-43ac-b488-04934bfa1806"
+COMPANY_ID = S.company_id()
 BLENDER_BINARY = "/Applications/Blender.app/Contents/MacOS/Blender"
 
 
