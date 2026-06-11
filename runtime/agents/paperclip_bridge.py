@@ -1246,6 +1246,26 @@ def project_scaffold_poller(interval: int = SCAFFOLD_POLL_INTERVAL) -> None:
 AGENT_DISPATCH_INTERVAL = int(os.environ.get("AGENT_DISPATCH_POLL_SECONDS", "45"))
 AGENT_WAKE_COOLDOWN = int(os.environ.get("AGENT_WAKE_COOLDOWN", "90"))
 _LAST_WOKEN: dict[str, float] = {}
+# Agents stuck in these states are auto-recovered to idle so they can be re-dispatched
+# (a run that errors otherwise parks the agent forever — the dispatcher only wakes idle).
+RECOVERABLE_STATES = {"error", "terminated", "failed", "crashed"}
+
+
+def _reset_agent_idle(agent_id: str) -> bool:
+    try:
+        import psycopg2
+        c = psycopg2.connect(host="/tmp", port=54329, user="paperclip", password="paperclip",
+                             dbname="paperclip", connect_timeout=5)
+        cur = c.cursor()
+        cur.execute("update agents set status='idle', updated_at=now() "
+                    "where id=%s and status<>'idle'", (agent_id,))
+        n = cur.rowcount
+        c.commit()
+        c.close()
+        return n > 0
+    except Exception as e:
+        print(f"⚠️  agent reset failed: {e}", file=sys.stderr)
+        return False
 
 
 def agent_dispatch_once() -> dict:
@@ -1268,8 +1288,15 @@ def agent_dispatch_once() -> dict:
         if now - _LAST_WOKEN.get(agent_id, 0) < AGENT_WAKE_COOLDOWN:
             continue
         agent = _api_request("GET", f"/api/agents/{agent_id}")
-        if not isinstance(agent, dict) or agent.get("status") != "idle" or agent.get("pausedAt"):
-            continue  # busy / paused / unknown → leave it
+        if not isinstance(agent, dict) or agent.get("pausedAt"):
+            continue  # unknown / deliberately paused → leave it
+        st = agent.get("status")
+        if st in RECOVERABLE_STATES and _reset_agent_idle(agent_id):
+            print(f"♻️  auto-recovered {agent.get('name', agent_id)} from '{st}' → idle",
+                  file=sys.stderr)
+            st = "idle"
+        if st != "idle":
+            continue  # actively running / unknown busy state → leave it
         # triggerDetail must be one of: manual | ping | callback | system
         resp = _api_request("POST", f"/api/agents/{agent_id}/wakeup",
                             {"source": "on_demand", "triggerDetail": "system",
