@@ -36,6 +36,9 @@ if [[ "${CLAUDE_USE_API:-0}" == "1" ]]; then
     export ANTHROPIC_AUTH_TOKEN="$_kimi"   # Kimi authenticates via the bearer token
     export ANTHROPIC_API_KEY=""            # not x-api-key
     export ANTHROPIC_MODEL="${ANTHROPIC_MODEL:-kimi-for-coding}"
+    # Raise the output cap so longer scripts finish instead of truncating (the QA
+    # gate was correctly rejecting cut-off scripts).
+    export CLAUDE_CODE_MAX_OUTPUT_TOKENS="${CLAUDE_CODE_MAX_OUTPUT_TOKENS:-8000}"
     exec "$CLAUDE_BIN" "$@"
 fi
 
