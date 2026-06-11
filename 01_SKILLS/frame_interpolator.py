@@ -2,30 +2,38 @@
 """
 frame_interpolator.py — Smooth 2D Animation via Frame Interpolation
 
-Interpolates between keyframes using optical flow blending to create
-smooth motion. Takes sparse keyframes (e.g., 8fps) and outputs smooth
-24fps animation.
+Interpolates between keyframes to create smooth motion. Takes sparse keyframes
+(e.g. 8fps) and outputs smooth 24fps+ animation.
 
 Usage:
     python frame_interpolator.py interpolate <input_dir> --output <output_dir> --factor 3
     python frame_interpolator.py smooth <project_slug> --shot SC001_SH001 --factor 3
 
 Interpolation methods:
-    blend    — Simple alpha blend between frames (fast, good for slow motion)
-    optical  — Optical flow warping (better for fast motion)
-    dup      — Duplicate frames (fallback)
+    minterpolate — ffmpeg motion-compensated interpolation (DEFAULT; true smooth
+                   motion via bidirectional motion estimation — no ghosting)
+    blend        — alpha crossfade between frames (fast, but ghosts on motion)
+    dup          — duplicate frames (fallback, no new motion)
+
+`minterpolate` synthesizes genuinely new in-between frames from estimated motion
+vectors; `blend` just cross-dissolves, which double-images anything that moves.
 """
 
 import argparse
 import json
 import math
+import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 
 import numpy as np
 from PIL import Image
 
 WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
+FFMPEG = shutil.which("ffmpeg") or "/opt/homebrew/bin/ffmpeg"
+# Nominal input rate; only the in:out ratio (= factor) matters for frame count.
+BASE_FPS = 24
 
 
 def blend_frames(img1: Image.Image, img2: Image.Image, alpha: float) -> Image.Image:
@@ -36,59 +44,90 @@ def blend_frames(img1: Image.Image, img2: Image.Image, alpha: float) -> Image.Im
     return Image.fromarray(np.clip(blended, 0, 255).astype(np.uint8))
 
 
-def interpolate_directory(input_dir: Path, output_dir: Path, factor: int = 3,
-                          method: str = "blend") -> dict:
-    """Interpolate frames in a directory."""
-    frames = sorted(input_dir.glob("frame_*.png"))
-    if len(frames) < 2:
-        return {"status": "error", "message": "Need at least 2 frames"}
-    
-    output_dir.mkdir(parents=True, exist_ok=True)
-    
-    out_frame = 0
-    generated = 0
-    
+def _minterpolate_directory(frames: list[Path], output_dir: Path, factor: int) -> dict:
+    """Motion-compensated interpolation via ffmpeg minterpolate.
+
+    Frames are staged as a zero-padded sequence (robust to arbitrary input
+    numbering), interpolated from BASE_FPS to BASE_FPS*factor with bidirectional
+    motion estimation + adaptive overlapped block motion compensation, then
+    written back out as frame_%04d.png. Raises CalledProcessError on ffmpeg
+    failure so the caller can fall back to blend.
+    """
+    with tempfile.TemporaryDirectory() as td:
+        stage = Path(td)
+        for i, f in enumerate(frames):
+            # symlink avoids copying potentially-large PNGs
+            (stage / f"in_{i:06d}.png").symlink_to(f.resolve())
+        vf = (f"minterpolate=fps={BASE_FPS * factor}:mi_mode=mci:"
+              f"mc_mode=aobmc:me_mode=bidir:vsbmc=1")
+        cmd = [
+            FFMPEG, "-y", "-hide_banner", "-loglevel", "error",
+            "-framerate", str(BASE_FPS), "-i", str(stage / "in_%06d.png"),
+            "-vf", vf, "-start_number", "0", str(output_dir / "frame_%04d.png"),
+        ]
+        subprocess.run(cmd, check=True, capture_output=True, text=True)
+    return {"generated": len(list(output_dir.glob("frame_*.png")))}
+
+
+def _blend_directory(frames: list[Path], output_dir: Path, factor: int,
+                     method: str) -> int:
+    """Legacy PIL alpha-crossfade / duplicate interpolation. Returns frame count."""
+    out_frame = generated = 0
     for i in range(len(frames) - 1):
         img1 = Image.open(frames[i]).convert("RGB")
         img2 = Image.open(frames[i + 1]).convert("RGB")
-        
-        # Write original frame
         img1.save(output_dir / f"frame_{out_frame:04d}.png")
-        out_frame += 1
-        generated += 1
-        
-        # Generate interpolated frames
+        out_frame += 1; generated += 1
         for j in range(1, factor):
             alpha = j / factor
-            
-            if method == "blend":
-                interp = blend_frames(img1, img2, alpha)
-            elif method == "dup":
-                interp = img1.copy()
-            else:
-                interp = blend_frames(img1, img2, alpha)
-            
+            interp = img1.copy() if method == "dup" else blend_frames(img1, img2, alpha)
             interp.save(output_dir / f"frame_{out_frame:04d}.png")
-            out_frame += 1
-            generated += 1
-    
-    # Write last frame
-    last = Image.open(frames[-1]).convert("RGB")
-    last.save(output_dir / f"frame_{out_frame:04d}.png")
-    generated += 1
-    
+            out_frame += 1; generated += 1
+    Image.open(frames[-1]).convert("RGB").save(output_dir / f"frame_{out_frame:04d}.png")
+    return generated + 1
+
+
+def interpolate_directory(input_dir: Path, output_dir: Path, factor: int = 3,
+                          method: str = "minterpolate") -> dict:
+    """Interpolate frames in a directory. Defaults to motion-compensated ffmpeg.
+
+    `optical`/`mci` are aliases for `minterpolate`. If ffmpeg interpolation fails,
+    transparently falls back to alpha-blend so the stage never hard-blocks a run.
+    """
+    frames = sorted(input_dir.glob("frame_*.png"))
+    if len(frames) < 2:
+        return {"status": "error", "message": "Need at least 2 frames"}
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    for stale in output_dir.glob("frame_*.png"):  # avoid mixing old/new counts
+        stale.unlink()
+
+    used = method
+    if method in ("minterpolate", "optical", "mci"):
+        try:
+            r = _minterpolate_directory(frames, output_dir, factor)
+            generated, used = r["generated"], "minterpolate"
+        except (subprocess.CalledProcessError, OSError) as e:
+            for stale in output_dir.glob("frame_*.png"):
+                stale.unlink()
+            generated = _blend_directory(frames, output_dir, factor, "blend")
+            used = "blend (minterpolate failed: "\
+                   f"{getattr(e, 'stderr', str(e))[:120].strip()})"
+    else:
+        generated = _blend_directory(frames, output_dir, factor, method)
+
     return {
         "status": "ok",
         "input_frames": len(frames),
         "output_frames": generated,
         "factor": factor,
-        "method": method,
+        "method": used,
         "output_dir": str(output_dir),
     }
 
 
 def smooth_shot(project_slug: str, shot_id: str, factor: int = 3,
-                method: str = "blend") -> dict:
+                method: str = "minterpolate") -> dict:
     """Smooth a shot's frames."""
     project_dir = WORKSPACE_ROOT / "05_PROJECTS" / project_slug
     shot_dir = project_dir / "04-raw_renders" / shot_id
@@ -115,14 +154,16 @@ def main():
     p_interp.add_argument("input_dir", type=Path)
     p_interp.add_argument("--output", required=True, type=Path)
     p_interp.add_argument("--factor", type=int, default=3)
-    p_interp.add_argument("--method", default="blend", choices=["blend", "optical", "dup"])
+    p_interp.add_argument("--method", default="minterpolate",
+                          choices=["minterpolate", "optical", "mci", "blend", "dup"])
 
     p_smooth = sub.add_parser("smooth", help="Smooth a shot's frames")
     p_smooth.add_argument("project_slug")
     p_smooth.add_argument("--shot", default="")
     p_smooth.add_argument("--all-shots", action="store_true")
     p_smooth.add_argument("--factor", type=int, default=3)
-    p_smooth.add_argument("--method", default="blend")
+    p_smooth.add_argument("--method", default="minterpolate",
+                          choices=["minterpolate", "optical", "mci", "blend", "dup"])
 
     args = parser.parse_args()
 
