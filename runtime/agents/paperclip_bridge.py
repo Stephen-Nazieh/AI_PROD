@@ -642,6 +642,8 @@ class BridgeHandler(BaseHTTPRequestHandler):
             self._handle_sync_projects()
         elif path == "/dispatch-agents":
             self._handle_dispatch_agents()
+        elif path == "/dispatch-status":
+            self._handle_dispatch_status()
         else:
             self._send_json(404, {"error": f"Unknown endpoint: {path}"})
 
@@ -695,6 +697,14 @@ class BridgeHandler(BaseHTTPRequestHandler):
     def _handle_dispatch_agents(self) -> None:
         """Manually trigger agent auto-dispatch (wake agents with backlog work)."""
         result = agent_dispatch_once()
+        self._send_json(200 if result.get("status") == "ok" else 500, result)
+
+    def _handle_dispatch_status(self) -> None:
+        """Read-only dispatch snapshot (agents, states, cooldowns) — wakes nothing."""
+        try:
+            result = dispatch_status()
+        except Exception as e:
+            result = {"status": "error", "error": str(e), "agents": []}
         self._send_json(200 if result.get("status") == "ok" else 500, result)
 
     # ── POST /ingest ───────────────────────────────────────────────────────
@@ -1307,6 +1317,47 @@ def agent_dispatch_once() -> dict:
     return {"status": "ok", "pending_agents": len(pending), "woken": woken}
 
 
+def dispatch_status() -> dict:
+    """Read-only snapshot of the dispatch loop for `studio dispatch` observability.
+
+    Mirrors agent_dispatch_once()'s data sources (backlog issues → assignee, live
+    agent status, the in-process cooldown map) but wakes nothing. The cooldown map
+    lives only in this process's memory, so this is the one view a separate CLI
+    can't reconstruct on its own — hence the endpoint.
+    """
+    issues = _api_request("GET", f"/api/companies/{PAPERCLIP_COMPANY_ID}/issues")
+    if isinstance(issues, dict):
+        issues = issues.get("data", [])
+    pending: dict[str, int] = {}
+    if isinstance(issues, list):
+        for i in issues:
+            if i.get("status") == "backlog" and i.get("assigneeAgentId"):
+                pending[i["assigneeAgentId"]] = pending.get(i["assigneeAgentId"], 0) + 1
+    now = time.time()
+    rows = []
+    for aid in set(pending) | set(_LAST_WOKEN):  # agents with work or recently woken
+        agent = _api_request("GET", f"/api/agents/{aid}")
+        agent = agent if isinstance(agent, dict) else {}
+        cd = AGENT_WAKE_COOLDOWN - (now - _LAST_WOKEN.get(aid, 0))
+        rows.append({
+            "id": aid,
+            "name": agent.get("name") or aid,
+            "status": agent.get("status", "unknown"),
+            "paused": bool(agent.get("pausedAt")),
+            "pending": pending.get(aid, 0),
+            "cooldown_remaining": max(0, round(cd)),
+        })
+    rows.sort(key=lambda r: (-r["pending"], r["name"]))
+    return {
+        "status": "ok",
+        "dispatch_enabled": os.environ.get("AGENT_DISPATCH_DISABLED") != "1",
+        "poll_interval": AGENT_DISPATCH_INTERVAL,
+        "cooldown_seconds": AGENT_WAKE_COOLDOWN,
+        "recoverable_states": sorted(RECOVERABLE_STATES),
+        "agents": rows,
+    }
+
+
 def agent_dispatch_poller(interval: int = AGENT_DISPATCH_INTERVAL) -> None:
     print(f"🤖 Agent auto-dispatch poller started (every {interval}s → wakes agents with backlog work)")
     while True:
@@ -1346,7 +1397,8 @@ def main() -> int:
     print(f"🌉 DeParadigm Media Paperclip Bridge running at http://{host}:{port}")
     print(f"   Endpoints: /health, /ingest, /compile-lesson, /run-curriculum,")
     print(f"              /process-manifest, /generate-timeline, /voiceover,")
-    print(f"              /process-script, /vault/search, /vault/create, /sync-projects")
+    print(f"              /process-script, /vault/search, /vault/create, /sync-projects,")
+    print(f"              /dispatch-agents, /dispatch-status")
     print(f"   Bidirectional sync: ENABLED (reports to Paperclip on {PAPERCLIP_API_BASE})")
 
     # Background poller: scaffold business_units/<co>/<unit>/ for new Paperclip projects.

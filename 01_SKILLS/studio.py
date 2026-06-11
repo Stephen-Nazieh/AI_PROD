@@ -150,6 +150,11 @@ def cmd_costs(args) -> int:
     return subprocess.call([PY, str(SKILLS / "cost_ledger.py")])
 
 
+def cmd_dispatch(args) -> int:
+    return subprocess.call([PY, str(SKILLS / "dispatch_status.py"),
+                            *(["--json"] if args.json else [])])
+
+
 def cmd_publish(args) -> int:
     sub = "apply" if args.apply else "prep"
     return subprocess.call([PY, str(SKILLS / "publish.py"), sub, args.company, args.unit, args.run])
@@ -234,6 +239,10 @@ def main(argv=None) -> int:
     p_bk.set_defaults(fn=cmd_backup)
 
     sub.add_parser("costs", help="inference cost ledger ($/channel/model)").set_defaults(fn=cmd_costs)
+
+    p_disp = sub.add_parser("dispatch", help="dispatch observability (agents/cooldowns, render slots, budget)")
+    p_disp.add_argument("--json", action="store_true", help="machine-readable snapshot")
+    p_disp.set_defaults(fn=cmd_dispatch)
 
     p_pub = sub.add_parser("publish", help="stage (prep) or upload (--apply) a delivered run to YouTube")
     p_pub.add_argument("company"); p_pub.add_argument("unit"); p_pub.add_argument("run")
