@@ -4,7 +4,7 @@ services:
     container_name: openclaw_core_watcher
     restart: unless-stopped
     ports:
-      - "18789:18789"
+      - "127.0.0.1:18789:18789"
     environment:
       - WORKSPACE_DIR=/app/vault
       - INFERENCE_ROUTER=http://host.docker.internal:8000/v1
@@ -20,7 +20,7 @@ services:
     container_name: scouter_browser_sandbox
     restart: unless-stopped
     ports:
-      - "30005:30005"
+      - "127.0.0.1:30005:30005"
     environment:
       - SANDBOX_PROFILE_IDENTITY=isolated_studio_scout_mode
     volumes:
@@ -31,7 +31,7 @@ services:
     image: ghcr.io/open-webui/open-webui:main
     container_name: open_webui_cockpit
     ports:
-      - "3000:8080"
+      - "127.0.0.1:3000:8080"
     environment:
       - WEBUI_AUTH=false
       - OLLAMA_BASE_URL=http://host.docker.internal:11434
@@ -63,7 +63,7 @@ services:
     image: postgres:15-alpine
     container_name: paperclip_studio_database
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
     environment:
       - POSTGRES_USER=${PAPERCLIP_DB_USER:?set PAPERCLIP_DB_USER in .docker/.env}
       - POSTGRES_PASSWORD=${PAPERCLIP_DB_PASSWORD:?set PAPERCLIP_DB_PASSWORD in .docker/.env}
