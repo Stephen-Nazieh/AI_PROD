@@ -183,12 +183,18 @@ def cmd_logs(args) -> int:
     return subprocess.call([PY, str(SKILLS / "observability.py"), "logs", "--lines", str(args.lines), *extra])
 
 
+def cmd_health(args) -> int:
+    return subprocess.call([PY, str(SKILLS / "health_check.py"),
+                            *(["--json"] if args.json else [])])
+
+
 def cmd_doctor(args) -> int:
+    # Live infrastructure health (services/DBs/binaries/models) ...
+    rc = subprocess.call([PY, str(SKILLS / "health_check.py")])
+    # ... then the offline test suites (control-plane invariants + state machines).
     suites = sorted((WORKSPACE_ROOT / "tests").glob("*_test.py"))
     if not suites:
         print("  (no test suites installed yet)")
-        return cmd_status(args)
-    rc = 0
     for suite in suites:
         rc |= subprocess.call([PY, str(suite)])
     return rc
@@ -271,7 +277,11 @@ def main(argv=None) -> int:
     p_logs.add_argument("--errors", action="store_true")
     p_logs.set_defaults(fn=cmd_logs)
 
-    sub.add_parser("doctor", help="run smoke tests / health checks").set_defaults(fn=cmd_doctor)
+    p_hl = sub.add_parser("health", help="live infra health (MLX/ComfyUI/Postgres×3/control-plane/binaries/models)")
+    p_hl.add_argument("--json", action="store_true", help="machine-readable health report")
+    p_hl.set_defaults(fn=cmd_health)
+
+    sub.add_parser("doctor", help="full check: live health + offline test suites").set_defaults(fn=cmd_doctor)
 
     args = ap.parse_args(argv)
     if not getattr(args, "cmd", None):

@@ -72,22 +72,33 @@ def check_binary(name: str, args = None) -> dict:
     return {"status": "error", "message": "not installed or version check failed"}
 
 
+# The three Postgres instances the studio depends on, with their connection params.
+# Creds come from .env (repo root); defaults match the running stack.
+PG_INSTANCES = {
+    5432: ("production-tracking", "PRODUCTION_DB", "localhost", "postgres", "postgres", "postgres"),
+    5433: ("governance", "PAPERCLIP_DB", "localhost", "paperclip_admin", "", "paperclip_governance"),
+    # Paperclip's embedded PG — listens on a unix socket in /tmp, not TCP localhost.
+    54329: ("paperclip-embedded", "PAPERCLIP_EMBEDDED_DB", "/tmp", "paperclip", "paperclip", "paperclip"),
+}
+
+
+def pg_label(port: int) -> str:
+    return PG_INSTANCES.get(port, ("?",))[0]
+
+
 def check_postgres(port: int) -> dict:
-    # Port-specific credentials, sourced from environment (.env at repo root)
-    if port == 5433:
-        user = os.environ.get("PAPERCLIP_DB_USER", "paperclip_admin")
-        password = os.environ.get("PAPERCLIP_DB_PASSWORD", "")
-        dbname = os.environ.get("PAPERCLIP_DB_NAME", "paperclip_governance")
-    else:
-        user = os.environ.get("PRODUCTION_DB_USER", "postgres")
-        password = os.environ.get("PRODUCTION_DB_PASSWORD", "postgres")
-        dbname = os.environ.get("PRODUCTION_DB_NAME", "postgres")
+    label, prefix, dhost, duser, dpass, ddb = PG_INSTANCES.get(
+        port, (f"port {port}", "PRODUCTION_DB", "localhost", "postgres", "postgres", "postgres"))
+    host = os.environ.get(f"{prefix}_HOST", dhost)
+    user = os.environ.get(f"{prefix}_USER", duser)
+    password = os.environ.get(f"{prefix}_PASSWORD", dpass)
+    dbname = os.environ.get(f"{prefix}_NAME", ddb)
 
     # Try psycopg2 first (available in venv), fall back to psql CLI
     try:
         import psycopg2
         conn = psycopg2.connect(
-            host="localhost", port=port, user=user, password=password, dbname=dbname,
+            host=host, port=port, user=user, password=password, dbname=dbname,
             connect_timeout=3,
         )
         cur = conn.cursor()
@@ -95,25 +106,36 @@ def check_postgres(port: int) -> dict:
         cur.fetchone()
         cur.close()
         conn.close()
-        return {"status": "ok", "port": port}
+        return {"status": "ok", "port": port, "label": label}
     except ImportError:
         pass
     except Exception as e:
-        return {"status": "error", "port": port, "message": str(e)[:100]}
+        return {"status": "error", "port": port, "label": label, "message": str(e)[:100]}
 
     try:
         result = subprocess.run(
-            ["psql", "-h", "localhost", "-p", str(port), "-U", user, "-d", dbname, "-c", "SELECT 1;"],
+            ["psql", "-h", host, "-p", str(port), "-U", user, "-d", dbname, "-c", "SELECT 1;"],
             capture_output=True, text=True, timeout=5,
             env={**dict(subprocess.os.environ), "PGPASSWORD": password},
         )
         if result.returncode == 0:
-            return {"status": "ok", "port": port}
-        return {"status": "error", "port": port, "message": result.stderr[:100]}
+            return {"status": "ok", "port": port, "label": label}
+        return {"status": "error", "port": port, "label": label, "message": result.stderr[:100]}
     except FileNotFoundError:
-        return {"status": "error", "port": port, "message": "psql not installed"}
+        return {"status": "error", "port": port, "label": label, "message": "psql not installed"}
     except Exception as e:
-        return {"status": "error", "port": port, "message": str(e)[:100]}
+        return {"status": "error", "port": port, "label": label, "message": str(e)[:100]}
+
+
+def check_control_plane() -> list[dict]:
+    """Probe the orchestration HTTP services the pipeline routes through."""
+    out = []
+    for name, url in (("Paperclip :3100", "http://127.0.0.1:3100/api/health"),
+                      ("Bridge :3101", "http://127.0.0.1:3101/health")):
+        r = check_http(url, timeout=5.0)
+        out.append({"name": name, "status": r["status"],
+                    **({"message": r["message"]} if r["status"] != "ok" else {})})
+    return out
 
 
 def check_model_file(path: Path, label: str) -> dict:
@@ -142,6 +164,7 @@ def run_all_checks() -> dict:
             check_mlx_server(8002, "Qwen 7B"),
         ],
         "comfyui": check_comfyui(),
+        "control_plane": check_control_plane(),
         "binaries": {
             "ffmpeg": check_binary("ffmpeg"),
             "blender": check_binary("blender", "--version"),
@@ -150,6 +173,7 @@ def run_all_checks() -> dict:
         "postgresql": [
             check_postgres(5432),
             check_postgres(5433),
+            check_postgres(54329),
         ],
         "venv": check_venv(),
         "models": [
@@ -167,6 +191,9 @@ def run_all_checks() -> dict:
             all_ok = False
     if results["comfyui"]["status"] != "ok":
         all_ok = False
+    for cp in results["control_plane"]:
+        if cp["status"] != "ok":
+            all_ok = False
     for b in results["binaries"].values():
         if b["status"] != "ok":
             all_ok = False
@@ -202,6 +229,13 @@ def print_report(results: dict):
     if c["status"] != "ok":
         print(f"     → {c.get('message', '')}")
 
+    print("\n🛰️  Control Plane")
+    for cp in results["control_plane"]:
+        icon = "✅" if cp["status"] == "ok" else "❌"
+        print(f"  {icon} {cp['name']}")
+        if cp["status"] != "ok":
+            print(f"     → {cp.get('message', '')}")
+
     print("\n🔧 Binaries")
     for name, b in results["binaries"].items():
         icon = "✅" if b["status"] == "ok" else "❌"
@@ -213,7 +247,7 @@ def print_report(results: dict):
     print("\n🐘 PostgreSQL")
     for p in results["postgresql"]:
         icon = "✅" if p["status"] == "ok" else "❌"
-        print(f"  {icon} Port {p['port']}")
+        print(f"  {icon} Port {p['port']:<6} {p.get('label', '')}")
         if p["status"] != "ok":
             print(f"     → {p.get('message', '')}")
 
