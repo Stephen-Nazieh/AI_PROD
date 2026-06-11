@@ -124,10 +124,12 @@ def plan(co: str, unit: str, n: int = 3) -> int:
     signals = _performance_signals(co, unit)
     msg = [
         {"role": "system", "content":
-         f"You are the showrunner for the '{rec.get('name', unit)}' channel. Using the channel "
-         f"context below, propose {n} FRESH, specific, on-brand episode ideas. Lean into what's "
-         f"working and ride relevant trends; avoid anything similar to the recent titles. For "
-         f"each: a punchy title and a 2-3 sentence brief (topic, angle, key beats). Reply with "
+         f"You are the showrunner for the '{rec.get('name', unit)}' channel. Each episode is a "
+         f"SHORT-FORM video (~60-90 seconds) — keep every idea's scope TIGHT (one focused angle, "
+         f"not a comprehensive deep-dive). Using the channel context below, propose {n} FRESH, "
+         f"specific, on-brand episode ideas. Lean into what's working and ride relevant trends; "
+         f"avoid anything similar to the recent titles. For each: a punchy title and a 2-3 "
+         f"sentence brief (topic, angle, key beats). Reply with "
          f"ONLY a JSON array: [{{\"title\":\"...\",\"brief\":\"...\"}}].\n\n"
          f"CHANNEL CONTEXT:\n{ctx}\n\nPERFORMANCE & TRENDS:\n{signals}\n\n"
          f"RECENT TITLES (avoid): {recent}"},
@@ -150,7 +152,9 @@ def plan(co: str, unit: str, n: int = 3) -> int:
         title = re.sub(r"^\s*EP:\s*", "", str(idea["title"]), flags=re.I)[:90]
         brief = str(idea.get("brief", ""))
         body = {"title": f"EP: {title}",
-                "description": f"{brief}\n\nWrite the script in the channel voice and save it to "
+                "description": f"{brief}\n\nKeep the script TIGHT — ~60-90 seconds (≈150-220 "
+                               f"words), a single complete segment (no multi-act), finishing with "
+                               f"a clean closing line. Write it in the channel voice and save it to "
                                f"01-scripts/screenplay.md.",
                 "status": "backlog", "assigneeAgentId": writer["id"]}
         if pid:

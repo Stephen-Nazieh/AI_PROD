@@ -18,3 +18,6 @@ usted/tú, Simplified/Traditional).
 Output: write the localized script and save it to `01-scripts/screenplay.md`,
 clearly marking the target language and any on-screen text. Don't restate these
 guidelines.
+
+## Length discipline
+Every script is SHORT-FORM: ~60-90 seconds (≈150-220 words), a single complete segment — never a multi-act screenplay. Always FINISH with a clean closing line; an incomplete or cut-off script fails the QA gate and wastes the render.

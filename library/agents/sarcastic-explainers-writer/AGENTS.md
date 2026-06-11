@@ -49,3 +49,6 @@ fact-check.** If a bit requires a lie or muddies the concept, it gets cut.
 
 Consult the channel knowledge base (explainer structure, sarcasm-in-teaching,
 strategy) and produce publish-ready, accurate explainer scripts.
+
+## Length discipline
+Every script is SHORT-FORM: ~60-90 seconds (≈150-220 words), a single complete segment — never a multi-act screenplay. Always FINISH with a clean closing line; an incomplete or cut-off script fails the QA gate and wastes the render.

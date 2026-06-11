@@ -17,3 +17,6 @@ identity).
 Output: save the scene/loop brief to `01-scripts/screenplay.md` — describe the single
 calm scene, its audio bed, target duration, and a searchable title (e.g.
 "Rainy Night Coding — Deep Focus — 10 Hours"). Don't restate these guidelines.
+
+## Length discipline
+Every script is SHORT-FORM: ~60-90 seconds (≈150-220 words), a single complete segment — never a multi-act screenplay. Always FINISH with a clean closing line; an incomplete or cut-off script fails the QA gate and wastes the render.

@@ -51,3 +51,6 @@ makes the sarcasm land as informed, not cheap.
 
 Consult the channel knowledge base (commentary format, voice, strategy) and produce
 publish-ready commentary scripts.
+
+## Length discipline
+Every script is SHORT-FORM: ~60-90 seconds (≈150-220 words), a single complete segment — never a multi-act screenplay. Always FINISH with a clean closing line; an incomplete or cut-off script fails the QA gate and wastes the render.
