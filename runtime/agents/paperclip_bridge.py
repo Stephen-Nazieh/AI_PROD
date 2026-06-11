@@ -75,6 +75,7 @@ curriculum_runner = _import_or_none("curriculum_runner")
 solocorn_media_bridge = _import_or_none("solocorn_media_bridge")
 script_processor = _import_or_none("script_processor")
 skills = _import_or_none("skills")
+bridge_pause = _import_or_none("bridge_pause")  # poller quiesce for safe registry edits
 
 _import_noise = sys.stdout.getvalue()
 sys.stdout = _original_stdout
@@ -1203,6 +1204,23 @@ def worker_mode() -> int:
 SCAFFOLD_POLL_INTERVAL = int(os.environ.get("PROJECT_SCAFFOLD_POLL_SECONDS", "30"))
 
 
+# ── Maintenance pause (registry-edit safety) ─────────────────────────────────
+# Both background pollers route their skip + sleep through bridge_pause so a
+# migration can park them (`studio bridge pause` / `with bridge_paused()`) instead
+# of pkill-ing the bridge. Degrades to a plain sleep if the module didn't import.
+
+def _poller_parked(name: str) -> bool:
+    """True (and this cycle should be skipped) when a maintenance pause is in effect."""
+    return bool(bridge_pause and bridge_pause.checkpoint(name))
+
+
+def _poller_nap(seconds: float, name: str) -> None:
+    if bridge_pause:
+        bridge_pause.nap(seconds, name)
+    else:
+        time.sleep(seconds)
+
+
 def scaffold_projects_once(reporter: "PaperclipReporter") -> dict:
     """
     For every registered company, provision a business_units/<company>/<unit>/ home
@@ -1238,11 +1256,14 @@ def project_scaffold_poller(interval: int = SCAFFOLD_POLL_INTERVAL) -> None:
     reporter = PaperclipReporter()
     print(f"🛰️  Business-unit auto-provision poller started (every {interval}s → business_units/)")
     while True:
+        if _poller_parked("scaffold"):   # maintenance pause → don't touch the registry
+            time.sleep(1)
+            continue
         try:
             scaffold_projects_once(reporter)
         except Exception as e:  # never let the poller kill the thread
             print(f"⚠️  business-unit poll error: {e}", file=sys.stderr)
-        time.sleep(interval)
+        _poller_nap(interval, "scaffold")
 
 
 # ── Agent auto-dispatch ──────────────────────────────────────────────────────
@@ -1361,13 +1382,16 @@ def dispatch_status() -> dict:
 def agent_dispatch_poller(interval: int = AGENT_DISPATCH_INTERVAL) -> None:
     print(f"🤖 Agent auto-dispatch poller started (every {interval}s → wakes agents with backlog work)")
     while True:
+        if _poller_parked("dispatch"):   # maintenance pause → stop waking agents
+            time.sleep(1)
+            continue
         try:
             r = agent_dispatch_once()
             if r.get("woken"):
                 print(f"⏰ dispatched {len(r['woken'])} agent(s): {', '.join(r['woken'][:5])}")
         except Exception as e:
             print(f"⚠️  agent-dispatch poll error: {e}", file=sys.stderr)
-        time.sleep(interval)
+        _poller_nap(interval, "dispatch")
 
 
 # ── Server bootstrap ────────────────────────────────────────────────────────
@@ -1403,10 +1427,14 @@ def main() -> int:
 
     # Background poller: scaffold business_units/<co>/<unit>/ for new Paperclip projects.
     if os.environ.get("PROJECT_SCAFFOLD_DISABLED") != "1":
+        if bridge_pause:
+            bridge_pause.register("scaffold")  # so `studio bridge pause` waits for it
         threading.Thread(target=project_scaffold_poller, daemon=True).start()
     # Background poller: wake agents that have backlog issues assigned (so assigning
     # work in the Paperclip UI actually triggers the agent). Disable with AGENT_DISPATCH_DISABLED=1.
     if os.environ.get("AGENT_DISPATCH_DISABLED") != "1":
+        if bridge_pause:
+            bridge_pause.register("dispatch")
         threading.Thread(target=agent_dispatch_poller, daemon=True).start()
     print(f"   CLI mode: --execute '<json_task>'")
     print(f"   Press Ctrl+C to stop.")
@@ -1415,6 +1443,9 @@ def main() -> int:
         server.serve_forever()
     except KeyboardInterrupt:
         print("\n🛑 Bridge server stopped.")
+        if bridge_pause:  # drop poller registrations so a later pause doesn't wait on a dead bridge
+            bridge_pause.unregister("scaffold")
+            bridge_pause.unregister("dispatch")
         server.shutdown()
 
     return 0
