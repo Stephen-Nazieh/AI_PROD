@@ -118,24 +118,44 @@ class AdvancedColorGrader:
         if not all_shots and not shot_id:
             return {"status": "error", "message": "Specify --shot or --all-shots"}
         
+        import tempfile
+        filter_str = STYLE_FILTERS.get(style, STYLE_FILTERS["cinematic"])
         results = []
         for shot in shots:
             sid = shot["shot_id"]
-            shot_render_dir = self.renders_dir / sid
-            if not shot_render_dir.exists():
+            # Grade the full sequence (composite writes to <sid>/2d_frames[_smooth];
+            # the old code globbed <sid>/frame_*.png directly and found nothing).
+            src = None
+            for sub in ("2d_frames_smooth", "2d_frames"):
+                d = self.renders_dir / sid / sub
+                if d.exists() and any(d.glob("*.png")):
+                    src = d
+                    break
+            if src is None:
+                d = self.renders_dir / sid
+                if d.exists() and list(d.glob("frame_[0-9]*.png")):
+                    src = d
+            if src is None:
                 continue
-            pngs = sorted(shot_render_dir.glob("frame_[0-9]*.png"))
-            if not pngs:
-                continue
-            
-            out_dir = self.graded_dir / sid
+            frames = sorted(src.glob("*.png"))
+
+            out_dir = self.graded_dir / sid / "2d_frames_smooth"
             out_dir.mkdir(parents=True, exist_ok=True)
-            out_path = out_dir / pngs[0].name
-            
-            print(f"  🎨 Grading {sid} with {style}...")
-            result = grade_image(pngs[0], out_path, style)
-            result["shot_id"] = sid
-            results.append(result)
+            print(f"  🎨 Grading {sid} ({len(frames)} frames) with {style}...")
+            with tempfile.TemporaryDirectory() as td:
+                st = Path(td)
+                for i, f in enumerate(frames):
+                    (st / f"f_{i:06d}.png").symlink_to(f.resolve())
+                try:
+                    subprocess.run([
+                        FFMPEG, "-y", "-hide_banner", "-loglevel", "error",
+                        "-i", str(st / "f_%06d.png"), "-vf", filter_str,
+                        str(out_dir / "frame_%06d.png"),
+                    ], check=True, capture_output=True)
+                    results.append({"shot_id": sid, "status": "ok", "frames": len(frames)})
+                except subprocess.CalledProcessError as e:
+                    results.append({"shot_id": sid, "status": "error",
+                                    "error": e.stderr.decode()[:200]})
         
         return {
             "status": "ok",

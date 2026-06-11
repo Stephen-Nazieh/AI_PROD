@@ -244,63 +244,97 @@ def assemble_episode(project_slug: str, episode_id: str, fps: float = 24.0) -> d
     shots = manifest.get("shots", [])
     
     graded_dir = project_dir / "04-raw_renders_graded_advanced"
+    audio_dir = project_dir / "06-audio"
 
-    # Build ffmpeg concat list
-    concat_lines = []
-    for shot_id in shots:
-        pngs = []
+    def _shot_frames(shot_id: str) -> list[Path]:
+        """Best available frame SEQUENCE for a shot (graded > smooth > raw)."""
+        # episode-specific renders first
+        d = renders_dir / shot_id
+        if d.exists() and (p := sorted(d.glob("*.png"))):
+            return p
+        # color-graded full sequence (preferred when present)
+        for sub in (graded_dir / shot_id / "2d_frames_smooth",
+                    graded_dir / shot_id / "2d_frames", graded_dir / shot_id):
+            if sub.exists() and (p := sorted(sub.glob("frame_*.png"))):
+                return p
+        # 2D composite/interpolated frames
+        for sub in ("2d_frames_smooth", "2d_frames"):
+            d = project_renders_dir / shot_id / sub
+            if d.exists() and (p := sorted(d.glob("*.png"))):
+                return p
+        # 3D flat renders
+        d = project_renders_dir / shot_id
+        if d.exists() and (p := sorted(d.glob("frame_[0-9]*.png"))):
+            return p
+        return []
 
-        # Episode-specific renders take priority
-        shot_dir = renders_dir / shot_id
-        if shot_dir.exists():
-            pngs = sorted(shot_dir.glob("*.png"))
+    def _shot_audio(shot_id: str) -> Path | None:
+        w = audio_dir / "dialogue" / f"{shot_id}.wav"
+        return w if w.exists() else None
 
-        # 3D-pipeline shots render frame_XXXX.png directly into the project's
-        # render directory (color-graded copies live in 04-raw_renders_graded_advanced).
-        # Prefer the graded frame, then the raw render, over any stale 2D-pipeline data.
-        if not pngs:
-            g_dir = graded_dir / shot_id
-            if g_dir.exists():
-                pngs = sorted(g_dir.glob("frame_[0-9]*.png"))
-        if not pngs:
-            d_dir = project_renders_dir / shot_id
-            if d_dir.exists():
-                pngs = sorted(d_dir.glob("frame_[0-9]*.png"))
-
-        # 2D-pipeline shots composite frames into a 2d_frames(_smooth) subdirectory
-        if not pngs:
-            for sub in ("2d_frames_smooth", "2d_frames"):
-                d = project_renders_dir / shot_id / sub
-                if d.exists():
-                    pngs = sorted(d.glob("*.png"))
-                    if pngs:
-                        break
-
-        if pngs:
-            # Use the first/mid frame as still, or sequence if animated
-            concat_lines.append(f"file '{pngs[0]}'")
-            concat_lines.append(f"duration {manifest.get('duration_seconds', 3) / len(shots)}")
-    
-    if not concat_lines:
-        return {"status": "error", "message": "No renders found"}
-    
-    concat_path = output_dir / "concat_list.txt"
-    concat_path.write_text("\n".join(concat_lines), encoding="utf-8")
-    
+    import tempfile
     output_path = output_dir / f"{episode_id}_master.mp4"
-    
-    subprocess.run([
-        "ffmpeg", "-y", "-f", "concat", "-safe", "0",
-        "-i", str(concat_path), "-vf", f"fps={fps},format=yuv420p",
-        "-c:v", "libx264", "-preset", "medium", "-crf", "18",
-        str(output_path),
-    ], capture_output=True, check=True)
-    
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        segments = []
+        for idx, shot_id in enumerate(shots):
+            frames = _shot_frames(shot_id)
+            if not frames:
+                continue
+            # stage frames as a gap-free sequence so -i frame_%06d.png is safe
+            seqdir = tmp / f"seq_{idx:03d}"; seqdir.mkdir()
+            for i, f in enumerate(frames):
+                (seqdir / f"f_{i:06d}.png").symlink_to(f.resolve())
+            wav = _shot_audio(shot_id)
+            seg = tmp / f"seg_{idx:03d}.mp4"
+            cmd = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+                   "-framerate", str(fps), "-i", str(seqdir / "f_%06d.png")]
+            if wav:
+                cmd += ["-i", str(wav)]
+            else:
+                cmd += ["-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=44100"]
+            # video length is the reference; pad/trim audio to it (-shortest)
+            cmd += ["-vf", "format=yuv420p", "-c:v", "libx264", "-preset", "medium",
+                    "-crf", "18", "-c:a", "aac", "-b:a", "192k", "-ar", "44100",
+                    "-shortest", str(seg)]
+            try:
+                subprocess.run(cmd, capture_output=True, check=True)
+                segments.append(seg)
+            except subprocess.CalledProcessError:
+                continue
+
+        if not segments:
+            return {"status": "error", "message": "No renders found to assemble"}
+
+        # concat the uniformly-encoded segments
+        concat_path = output_dir / "concat_list.txt"
+        concat_path.write_text("\n".join(f"file '{s}'" for s in segments), encoding="utf-8")
+        joined = tmp / "joined.mp4"
+        subprocess.run(["ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+                        "-f", "concat", "-safe", "0", "-i", str(concat_path),
+                        "-c", "copy", str(joined)], capture_output=True, check=True)
+
+        # mix a music bed under the dialogue if one exists (ducked, low gain)
+        music = sorted((audio_dir / "music").glob("*_music.wav")) if (audio_dir / "music").exists() else []
+        if music:
+            subprocess.run([
+                "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+                "-i", str(joined), "-i", str(music[0]),
+                "-filter_complex",
+                "[1:a]volume=0.18[m];[0:a][m]amix=inputs=2:duration=first:dropout_transition=2[a]",
+                "-map", "0:v", "-map", "[a]", "-c:v", "copy",
+                "-c:a", "aac", "-b:a", "192k", "-shortest", str(output_path),
+            ], capture_output=True, check=True)
+        else:
+            shutil.copy(str(joined), str(output_path))
+
     return {
         "status": "ok",
         "episode_id": episode_id,
         "output": str(output_path),
         "shots": len(shots),
+        "segments": len(segments),
+        "music_bed": bool(music),
     }
 
 

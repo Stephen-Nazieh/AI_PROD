@@ -50,6 +50,21 @@ def format_video(input_path: Path, output_path: Path, platform: str) -> dict:
         return {"status": "error", "platform": platform, "error": e.stderr.decode()[:200] if e.stderr else str(e)}
 
 
+def batch_episodes(project_slug: str, platform: str) -> dict:
+    """Format every assembled episode (episodes/<EP>/09-deliver/<EP>_master.mp4)
+    for the requested platform(s). Previously a no-op stub."""
+    project_dir = WORKSPACE_ROOT / "05_PROJECTS" / project_slug
+    episodes_dir = project_dir / "episodes"
+    episode_ids = sorted(
+        d.name for d in episodes_dir.glob("*")
+        if d.is_dir() and (d / "09-deliver" / f"{d.name}_master.mp4").exists()
+    ) if episodes_dir.exists() else []
+    if not episode_ids:
+        return {"status": "error", "message": "No assembled episode masters found"}
+    results = [format_episode(project_slug, ep, platform) for ep in episode_ids]
+    return {"status": "ok", "episodes": len(episode_ids), "results": results}
+
+
 def format_episode(project_slug: str, episode_id: str, platform: str) -> dict:
     project_dir = WORKSPACE_ROOT / "05_PROJECTS" / project_slug
     source = None
@@ -88,7 +103,7 @@ def main():
     if args.command == "format":
         print(json.dumps(format_episode(args.project_slug, args.episode, args.platform), indent=2))
     elif args.command == "batch":
-        print(json.dumps({"status": "ok"}, indent=2))
+        print(json.dumps(batch_episodes(args.project_slug, args.platform), indent=2))
 
 if __name__ == "__main__":
     main()
