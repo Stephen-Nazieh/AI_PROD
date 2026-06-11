@@ -52,6 +52,27 @@ STYLE_FILTERS = {
     "bleach": "curves=r='0/0 0.5/0.6 1/1':g='0/0 0.5/0.55 1/1':b='0/0 0.5/0.55 1/1',eq=contrast=1.3:saturation=0.4:brightness=0.05",
 }
 
+# Film-grade 3D LUTs shipped under 06_SHARED_ASSETS/color-luts/ — auto-registered
+# as `lut_<name>` styles applied via ffmpeg's lut3d (true tetrahedral interpolation),
+# alongside the procedural curve/eq styles above.
+LUT_DIR = WORKSPACE_ROOT / "06_SHARED_ASSETS" / "color-luts"
+
+
+def _discover_lut_styles() -> dict:
+    if not LUT_DIR.is_dir():
+        return {}
+    out = {}
+    for cube in sorted(LUT_DIR.glob("*.cube")):
+        # escape ':' and '\' for the ffmpeg filtergraph; macOS paths have neither,
+        # but be safe in case the repo lives somewhere exotic.
+        safe = str(cube).replace("\\", "\\\\").replace(":", "\\:")
+        out[f"lut_{cube.stem}"] = f"lut3d=file='{safe}'"
+    return out
+
+
+# Procedural styles + on-disk LUTs, unified. grade_image / CLI resolve against this.
+STYLE_FILTERS.update(_discover_lut_styles())
+
 
 def apply_vignette(width: int, height: int, intensity: float = 0.3) -> str:
     """Generate a vignette overlay using geq filter."""
