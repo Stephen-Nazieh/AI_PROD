@@ -1,19 +1,23 @@
 services:
-  openclaw_daemon:
-    image: ghcr.io/openclaw/openclaw:latest
-    container_name: openclaw_core_watcher
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:18789:18789"
-    environment:
-      - WORKSPACE_DIR=/app/vault
-      - INFERENCE_ROUTER=http://host.docker.internal:8000/v1
-      - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
-    volumes:
-      - ~/Documents/AI_PRODUCER:/app/vault
-    command: ["openclaw", "gateway", "run", "--allow-unconfigured"] # 🛡️ FIX: Bypass setup checks
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+  # OpenClaw runs as a SEPARATE, manually-managed system (not part of the content engine).
+  # Disabled here so `docker compose up` won't start a second OpenClaw. To run it independently
+  # see content_engine/SERVICES.md / the npm daemon (launchctl ai.openclaw.gateway). To re-enable
+  # the containerized one, uncomment below (token comes from gitignored .docker/.env).
+  # openclaw_daemon:
+  #   image: ghcr.io/openclaw/openclaw:latest
+  #   container_name: openclaw_core_watcher
+  #   restart: unless-stopped
+  #   ports:
+  #     - "127.0.0.1:18789:18789"
+  #   environment:
+  #     - WORKSPACE_DIR=/app/vault
+  #     - INFERENCE_ROUTER=http://host.docker.internal:8000/v1
+  #     - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
+  #   volumes:
+  #     - ~/Documents/AI_PRODUCER:/app/vault
+  #   command: ["openclaw", "gateway", "run", "--allow-unconfigured"]
+  #   extra_hosts:
+  #     - "host.docker.internal:host-gateway"
 
   browser_scouter:
     image: mcr.microsoft.com/playwright:v1.44.0-focal  # Verified stable build tag
