@@ -1,0 +1,5 @@
+# Daily Curiosities — idea queue (one per line). Run:
+#   env/bin/python3 content_engine/engine.py batch --channel daily-curiosities --file content_engine/channels/daily-curiosities/ideas.txt --format social --length "45 sec"
+The lighthouse keeper who kept a light burning for a ship that sank fifty years ago.
+A town where the church bell rings by itself every night at 3:07 — and why.
+The librarian who found a book checked out in 1931 and never returned, with a note inside.

@@ -60,6 +60,150 @@ companies:
         team: sarcastic-explainers
         folder: business_units/deparadigm-media/sarcastic-explainers
         paperclip_project_id: 9f439f1f-d0a5-4195-98f6-609e9a14e50d
+      daily-curiosities:
+        name: Daily Curiosities
+        domain: Content Engine channel · 60s curiosity shorts
+        team: daily-curiosities
+        folder: business_units/deparadigm-media/daily-curiosities
+        paperclip_project_id: 9a0e70c4-9753-4e1c-a1fc-40f4590ce265
+      midnight-tales:
+        name: Midnight Tales
+        domain: 'Content Engine channel · latest run: demo1 — produced → demo1.mp4'
+        team: midnight-tales
+        folder: business_units/deparadigm-media/midnight-tales
+        paperclip_project_id: e30aa0ce-0a6b-4ffa-b107-64195c5d7c6b
+      daily-curiosities-2:
+        name: daily-curiosities 2
+        domain: 'Content Engine channel · latest run: dc-starter — produced → dc-starter.mp4'
+        team: daily-curiosities-2
+        folder: business_units/deparadigm-media/daily-curiosities-2
+        paperclip_project_id: 072ffb2c-c25b-49b8-9004-4374112a2d7f
+      daily-curiosities-3:
+        name: daily-curiosities 3
+        domain: 'Content Engine channel · latest run: fresh-social-test — produced
+          → fresh-social-test_social.mp4'
+        team: daily-curiosities-3
+        folder: business_units/deparadigm-media/daily-curiosities-3
+        paperclip_project_id: 3483e7c3-ff00-4d6b-80f9-6ef04e75441c
+      daily-curiosities-4:
+        name: daily-curiosities 4
+        domain: 'Content Engine channel · latest run: daily-curiosities-01-honey-never-spoils-arc
+          — no-output'
+        team: daily-curiosities-4
+        folder: business_units/deparadigm-media/daily-curiosities-4
+        paperclip_project_id: 8d332812-e598-4bd1-b84d-25dcb8aad6d0
+      daily-curiosities-5:
+        name: daily-curiosities 5
+        domain: 'Content Engine channel · latest run: daily-curiosities-02-a-day-on-venus-is-longer
+          — no-output'
+        team: daily-curiosities-5
+        folder: business_units/deparadigm-media/daily-curiosities-5
+        paperclip_project_id: 84954219-6eca-435d-9083-17066fc23d9c
+      daily-curiosities-6:
+        name: daily-curiosities 6
+        domain: 'Content Engine channel · latest run: daily-curiosities-01-honey-never-spoils-arc
+          — produced → daily-curiosities-01-honey-never-spoils-arc_social.mp4'
+        team: daily-curiosities-6
+        folder: business_units/deparadigm-media/daily-curiosities-6
+        paperclip_project_id: f8abeaef-56fb-41bb-afd1-322fdebb56a2
+      daily-curiosities-7:
+        name: daily-curiosities 7
+        domain: 'Content Engine channel · latest run: daily-curiosities-02-a-day-on-venus-is-longer
+          — produced → daily-curiosities-02-a-day-on-venus-is-longer_social.mp4'
+        team: daily-curiosities-7
+        folder: business_units/deparadigm-media/daily-curiosities-7
+        paperclip_project_id: 2b4383ee-d5b1-49c8-9f88-c7ce852af866
+      daily-curiosities-8:
+        name: daily-curiosities 8
+        domain: 'Content Engine channel · latest run: daily-curiosities-03-your-stomach-gets-a-bran
+          — produced → daily-curiosities-03-your-stomach-gets-a-bran_social.mp4'
+        team: daily-curiosities-8
+        folder: business_units/deparadigm-media/daily-curiosities-8
+        paperclip_project_id: 6502dba9-a109-40e8-bfd2-fe6e4cb81cf3
+      daily-curiosities-9:
+        name: daily-curiosities 9
+        domain: 'Content Engine channel · latest run: daily-curiosities-04-bananas-are-radioactive
+          — produced → daily-curiosities-04-bananas-are-radioactive_social.mp4'
+        team: daily-curiosities-9
+        folder: business_units/deparadigm-media/daily-curiosities-9
+        paperclip_project_id: b6c0d05d-b868-4de2-8dc3-cb403b33898c
+      daily-curiosities-10:
+        name: daily-curiosities 10
+        domain: 'Content Engine channel · latest run: daily-curiosities-05-there-are-more-stars-in
+          — produced → daily-curiosities-05-there-are-more-stars-in_social.mp4'
+        team: daily-curiosities-10
+        folder: business_units/deparadigm-media/daily-curiosities-10
+        paperclip_project_id: b7ca3d61-c842-4c2a-9fcf-7c504061f7de
+      daily-curiosities-11:
+        name: daily-curiosities 11
+        domain: 'Content Engine channel · latest run: daily-curiosities-06-octopuses-can-taste-with
+          — produced → daily-curiosities-06-octopuses-can-taste-with_social.mp4'
+        team: daily-curiosities-11
+        folder: business_units/deparadigm-media/daily-curiosities-11
+        paperclip_project_id: fc5ee10c-c7c6-48f9-ab5e-11ee5ade7ae7
+      daily-curiosities-12:
+        name: daily-curiosities 12
+        domain: 'Content Engine channel · latest run: daily-curiosities-07-the-eiffel-tower-grows-t
+          — produced → daily-curiosities-07-the-eiffel-tower-grows-t_social.mp4'
+        team: daily-curiosities-12
+        folder: business_units/deparadigm-media/daily-curiosities-12
+        paperclip_project_id: fe02a4ff-9e6e-4c78-ba53-b54fe041a7f3
+      daily-curiosities-13:
+        name: daily-curiosities 13
+        domain: 'Content Engine channel · latest run: daily-curiosities-08-sharks-existed-before-tr
+          — produced → daily-curiosities-08-sharks-existed-before-tr_social.mp4'
+        team: daily-curiosities-13
+        folder: business_units/deparadigm-media/daily-curiosities-13
+        paperclip_project_id: bbeae100-ad36-41e0-8ec6-1fa42bfcce00
+      daily-curiosities-14:
+        name: daily-curiosities 14
+        domain: 'Content Engine channel · latest run: daily-curiosities-09-hot-water-can-freeze-fas
+          — produced → daily-curiosities-09-hot-water-can-freeze-fas_social.mp4'
+        team: daily-curiosities-14
+        folder: business_units/deparadigm-media/daily-curiosities-14
+        paperclip_project_id: 31d1cb79-6ad5-412e-90af-a248f4389cf8
+      daily-curiosities-15:
+        name: daily-curiosities 15
+        domain: 'Content Engine channel · latest run: daily-curiosities-10-your-body-has-more-bacte
+          — produced → daily-curiosities-10-your-body-has-more-bacte_social.mp4'
+        team: daily-curiosities-15
+        folder: business_units/deparadigm-media/daily-curiosities-15
+        paperclip_project_id: 81d04727-3c44-4078-b225-e661227a5c5d
+      daily-curiosities-16:
+        name: daily-curiosities 16
+        domain: 'Content Engine channel · latest run: daily-curiosities-06-octopuses-can-taste-with
+          — ready-to-publish → daily-curiosities-06-octopuses-can-taste-with_social.mp4'
+        team: daily-curiosities-16
+        folder: business_units/deparadigm-media/daily-curiosities-16
+        paperclip_project_id: 30a14ab7-02a0-4081-972e-2cb28a8897f7
+      daily-curiosities-17:
+        name: daily-curiosities 17
+        domain: 'Content Engine channel · latest run: daily-curiosities-01-honey-never-spoils-arc
+          — ready-to-publish → daily-curiosities-01-honey-never-spoils-arc_social.mp4'
+        team: daily-curiosities-17
+        folder: business_units/deparadigm-media/daily-curiosities-17
+        paperclip_project_id: 14ab7b3d-8a10-4dbc-9027-48fd5a3871b2
+      daily-curiosities-18:
+        name: daily-curiosities 18
+        domain: 'Content Engine channel · latest run: daily-curiosities-02-a-day-on-venus-is-longer
+          — ready-to-publish → daily-curiosities-02-a-day-on-venus-is-longer_social.mp4'
+        team: daily-curiosities-18
+        folder: business_units/deparadigm-media/daily-curiosities-18
+        paperclip_project_id: 2b3f88b4-84f8-4873-af86-627be6e87228
+      buried-history:
+        name: Buried History
+        domain: Content Engine channel · bizarre, dark, and forgotten true history
+          facts told in 30s vertical shorts — strong hooks, sound-off captions
+        team: buried-history
+        folder: business_units/deparadigm-media/buried-history
+        paperclip_project_id: f3495bc8-f6a8-4075-ae33-c0e67bb12920
+      weird-history:
+        name: weird-history
+        domain: 'Content Engine channel · latest run: weird-history-01-the-1518-dancing-plague
+          — ready-to-publish → weird-history-01-the-1518-dancing-plague_social.mp4'
+        team: weird-history
+        folder: business_units/deparadigm-media/weird-history
+        paperclip_project_id: 2ef76fcd-87ec-49a6-96a7-460a6941f2aa
     slug: deparadigm-media
   nazeera-multimedia:
     id: 0337cde4-55de-4b6c-8925-f605a733714e

@@ -132,124 +132,31 @@ PIPELINE_2D = {
 #   init → storyboard → {sets, characters} → layout → import_characters
 #   → {keyframes, geo_animation, facial_animation} + {dubbing, music, sound_design}
 #   → render → {interpolate, color_grade, subtitles, thumbnails} → assemble → distribute
+# 3D mode = the integrated Blender script→video pipeline (02-pipeline/). One generic engine
+# + set registry + show bible produce the whole episode; this DAG wraps it for the platform
+# (one command surface, dry-run, resume, logging, ledger). Requires --company/--unit; the run
+# slug ({project}) maps to business_units/<company>/<unit>/production/<project>/.
 PIPELINE_3D = {
     "init": {
         "script": "init_project.py",
-        "args": "create {project} --title '{title}'",
-        "deps": [],
-        "skippable": True,
+        "args": "create {project} --company {company} --unit {unit} --title '{title}'",
+        "deps": [], "skippable": True,
     },
-    "storyboard": {
-        "script": "storyboard_generator.py",
-        "args": "generate {project}",
-        "deps": ["init"],
-        "skippable": True,
-        "comfyui": True,
+    "produce": {                       # parse → VO → render → assemble → stitch → captions
+        "script": "../02-pipeline/produce.py",
+        "args": "--company {company} --unit {unit} --run {project} --episode {project}",
+        "deps": ["init"], "skippable": False, "timeout": 7200,
     },
-    "sets": {
-        "script": "blender_set_designer.py",
-        "args": "design {project} --all-scenes",
-        "deps": ["init"],
-        "skippable": True,
-    },
-    "layout": {
-        "script": "blender_layout.py",
-        "args": "layout {project} --engine eevee --animate",
-        "deps": ["storyboard"],
-        "skippable": True,
-    },
-    "characters": {
-        "script": "vroid_automation.py",
-        "args": "auto-import {project} --character protagonist",
-        "deps": ["init"],
-        "skippable": True,
-    },
-    "import_characters": {
-        "script": "blender_character_importer.py",
-        "args": "import {project}",
-        "deps": ["layout", "characters"],
-        "skippable": True,
-    },
-    "keyframes": {
-        "script": "blender_ai_keyframer.py",
-        "args": "generate {project} --all-shots",
-        "deps": ["import_characters"],
-        "skippable": True,
-    },
-    "geo_animation": {
-        "script": "blender_geometry_nodes_animator.py",
-        "args": "apply {project} --all-shots",
-        "deps": ["layout"],
-        "skippable": True,
-    },
-    "facial_animation": {
-        "script": "vroid_facial_animator.py",
-        "args": "animate {project} --all-shots",
-        "deps": ["import_characters"],
-        "skippable": True,
-    },
-    "dubbing": {
-        "script": "auto_dubbing_pipeline.py",
-        "args": "dub {project} --all-shots --engine kokoro",
-        "deps": ["init"],
-        "skippable": True,
-    },
-    "music": {
-        "script": "logic_pro_scorer.py",
-        "args": "score {project} --all-scenes",
-        "deps": ["init"],
-        "skippable": True,
-    },
-    "sound_design": {
-        "script": "sound_designer.py",
-        "args": "design {project} --all-scenes",
-        "deps": ["init"],
-        "skippable": True,
-    },
-    "render": {
-        "script": "blender_render_dispatcher.py",
-        "args": "render {project} --engine eevee",
-        "deps": ["sets", "keyframes", "geo_animation", "facial_animation", "dubbing"],
-        "skippable": False,
-    },
-    "interpolate": {
-        "script": "frame_interpolator.py",
-        "args": "smooth {project} --all-shots --factor 2",
-        "deps": ["render"],
-        "skippable": True,
-    },
-    "color_grade": {
-        "script": "advanced_color_grader.py",
-        "args": "grade {project} --all-shots --style cinematic",
-        "deps": ["render"],
-        "skippable": True,
-    },
-    "subtitles": {
-        "script": "subtitle_generator.py",
-        "args": "generate {project} --format srt",
-        "deps": ["dubbing"],
-        "skippable": True,
-    },
-    "thumbnails": {
-        "script": "thumbnail_generator.py",
-        "args": "generate {project} --text 'Episode 1'",
-        "deps": ["render"],
-        "skippable": True,
-    },
-    "assemble": {
-        "script": "episode_manager.py",
-        "args": "assemble {project} --episode EP01",
-        "deps": ["render", "color_grade", "subtitles"],
-        "skippable": False,
-    },
-    "distribute": {
-        "script": "distribution_formatter.py",
-        "args": "batch {project} --platform all",
-        "deps": ["assemble"],
-        "skippable": False,
+    "distribute": {                    # 9:16 vertical + thumbnail + burned captions
+        "script": "../02-pipeline/distribute.py",
+        "args": "--company {company} --unit {unit} --run {project} --title '{title}'",
+        "deps": ["produce"], "skippable": False, "timeout": 1800,
     },
 }
 
+
+RUN_COMPANY = ""   # set by run_pipeline; consumed by run_step's arg templating (3D mode)
+RUN_UNIT = ""
 
 def _pipeline_for(mode: str) -> dict:
     return PIPELINE_3D if mode == "3d" else PIPELINE_2D
@@ -266,9 +173,10 @@ def run_step(step_name: str, project_slug: str, title: str, dry_run: bool = Fals
              log_file: Path = None, comfyui_lock: threading.Lock = None, mode: str = "2d") -> dict:
     """Execute a single pipeline step."""
     cfg = _pipeline_for(mode)[step_name]
-    script_path = WORKSPACE_ROOT / "01_SKILLS" / cfg["script"]
-    args = cfg["args"].format(project=project_slug, title=title)
+    script_path = (WORKSPACE_ROOT / "01_SKILLS" / cfg["script"]).resolve()
+    args = cfg["args"].format(project=project_slug, title=title, company=RUN_COMPANY, unit=RUN_UNIT)
     cmd = f"{PYTHON} {script_path} {args}"
+    step_timeout = cfg.get("timeout", 600)   # per-step override (3D renders exceed 10 min)
     
     if dry_run:
         result = {"status": "dry_run", "step": step_name, "command": cmd}
@@ -284,7 +192,7 @@ def run_step(step_name: str, project_slug: str, title: str, dry_run: bool = Fals
     try:
         proc_result = subprocess.run(
             cmd, shell=True, capture_output=True, text=True,
-            timeout=600, cwd=WORKSPACE_ROOT,
+            timeout=step_timeout, cwd=WORKSPACE_ROOT,
         )
         elapsed = time.time() - start
         
@@ -306,7 +214,7 @@ def run_step(step_name: str, project_slug: str, title: str, dry_run: bool = Fals
             "stderr": proc_result.stderr[:200] if proc_result.stderr else "",
         }
     except subprocess.TimeoutExpired:
-        result = {"status": "timeout", "step": step_name, "time_sec": 600}
+        result = {"status": "timeout", "step": step_name, "time_sec": step_timeout}
     except Exception as e:
         result = {"status": "error", "step": step_name, "error": str(e)[:200]}
     
@@ -376,8 +284,13 @@ def _topological_layers(pipeline: dict) -> list[list[str]]:
 
 def run_pipeline(project_slug: str, mode: str = "2d", from_step: str = None,
                  dry_run: bool = False, title: str = "", parallel: bool = False,
-                 jobs: int = 4) -> dict:
+                 jobs: int = 4, company: str = "", unit: str = "") -> dict:
     """Run the full pipeline."""
+    global RUN_COMPANY, RUN_UNIT
+    RUN_COMPANY, RUN_UNIT = company, unit
+    if mode == "3d" and not (company and unit):
+        return {"status": "error", "project": project_slug, "mode": mode,
+                "error": "3D mode requires --company and --unit (maps to business_units/<company>/<unit>/production/<slug>/)"}
     pipeline = _pipeline_for(mode)
     steps = list(pipeline.keys())
 
@@ -547,11 +460,14 @@ def main():
     p_run.add_argument("--title", default="")
     p_run.add_argument("--parallel", action="store_true", help="Run independent steps in parallel")
     p_run.add_argument("--jobs", type=int, default=4, help="Max parallel workers (default: 4)")
-    
+    p_run.add_argument("--company", default="", help="Company slug (3D mode: business_units/<company>/...)")
+    p_run.add_argument("--unit", default="", help="Business-unit slug (3D mode)")
+
     p_dry = sub.add_parser("dry-run", help="Show what would run")
     p_dry.add_argument("project_slug")
     p_dry.add_argument("--mode", default="2d", choices=["2d", "3d"])
     p_dry.add_argument("--title", default="")
+    p_dry.add_argument("--company", default=""); p_dry.add_argument("--unit", default="")
 
     p_list = sub.add_parser("list", help="List pipeline steps")
     p_list.add_argument("--mode", default="2d", choices=["2d", "3d"])
@@ -566,7 +482,8 @@ def main():
         is_dry_run = args.cmd == "dry-run" or getattr(args, 'dry_run', False)
         result = run_pipeline(args.project_slug, args.mode, getattr(args, 'resume_from', None),
                              is_dry_run, args.title,
-                             getattr(args, 'parallel', False), getattr(args, 'jobs', 4))
+                             getattr(args, 'parallel', False), getattr(args, 'jobs', 4),
+                             getattr(args, 'company', ''), getattr(args, 'unit', ''))
         if not is_dry_run:
             print(json.dumps({k: v for k, v in result.items() if k != "results"}, indent=2))
 

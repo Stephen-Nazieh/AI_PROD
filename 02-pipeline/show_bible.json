@@ -1,0 +1,38 @@
+{
+  "show": "Significant",
+  "tagline": "a series about the numbers that lie",
+  "resolution": [1920, 1080],
+  "fps": 24,
+  "characters": {
+    "MAYA":        {"vrm": "06_SHARED_ASSETS/external-assets/characters/1954612987776852107.vrm.glb", "voice": "af_heart",  "gesture": 1.0},
+    "NINA":        {"vrm": "06_SHARED_ASSETS/external-assets/characters/8292392264913500438.vrm.glb", "voice": "af_bella",  "gesture": 0.9},
+    "OKAFOR":      {"vrm": "06_SHARED_ASSETS/external-assets/characters/8329890252317737768.vrm.glb", "voice": "bm_george", "gesture": 0.5},
+    "PROF. OKAFOR":{"alias": "OKAFOR"},
+    "INVESTOR":    {"vrm": "06_SHARED_ASSETS/external-assets/characters/3361246599912172955.vrm.glb", "voice": "am_onyx",   "gesture": 0.4}
+  },
+  "locations": {
+    "HARBOR ANALYTICS — OPEN-PLAN OFFICE|NIGHT":  {"set": "office_night", "props": {"slide": ["AVG USER INCOME", "$92,000"]}, "music": "cold_music_bed"},
+    "HARBOR ANALYTICS — KITCHENETTE|MORNING":     {"set": "kitchenette",   "music": "kit_music_bed"},
+    "HARBOR ANALYTICS — MAYA'S DESK|CONTINUOUS":  {"set": "office_night",  "music": "kit_music_bed"},
+    "RIVERSIDE — DRYDOCK CAFÉ|DAY":               {"set": "cafe_day",      "music": "cafe_music_bed"},
+    "PIER 9 VENTURES — CONFERENCE ROOM|DAY":      {"set": "conference_day", "props": {"slide": ["TYPICAL USER", "$38,000", "the number you can trust"]}, "music": "kit_music_bed"},
+    "HARBOR ANALYTICS — WHITEBOARD|LATER":        {"set": "whiteboard", "props": {"board": ["MEAN =", "sensitive to", "outliers"]}, "music": "kit_music_bed"},
+    "HARBOR ANALYTICS|NIGHT":                     {"set": "office_night", "props": {"slide": ["TYPICAL USER  $38,000", "the number you can trust"]}, "music": "cold_music_bed"},
+    "NINA'S APARTMENT|SAME TIME (SEASON SEED)":   {"graphic": {"image": "business_units/deparadigm-media/ap-stats/production/S01E01/07-render/seed_corkboard.png", "dur": 5.2, "kenburns": true}, "music": "cold_music_bed"},
+    "DRYDOCK CAFÉ|LATER":                         {"graphic": {"image": "business_units/deparadigm-media/ap-stats/production/S01E01/07-render/tag_phone.png", "dur": 7.4, "fade_out": true, "vo_from_beat": true}, "music": "cafe_music_bed"}
+  },
+  "blocking": {
+    "2": [{"pos": [-0.7, 0.05, 0.0], "rot": -65}, {"pos": [0.7, 0.05, 0.0], "rot": 65}],
+    "1": [{"pos": [0.3, -0.2, 0.0], "rot": 0}]
+  },
+  "coverage": {
+    "establish2": {"tgt": "two", "off": [0.0, 2.95, 0.30], "lens": 34, "fstop": 4.0, "push": 0.28, "look_dz": -0.05},
+    "single2":    {"off": [0.85, 1.95, 0.10], "lens": 72, "fstop": 2.2, "push": 0.18, "look": 0.82},
+    "single1":    {"off": [0.12, 2.0, 0.04], "lens": 55, "fstop": 2.0, "push": 0.30, "look": 0.78}
+  },
+  "brolls": {
+    "1": {"file": "01-scripts/manim_ep1_broll1.py", "scene": "BRoll1", "trim": 9.0},
+    "2": {"file": "01-scripts/manim_ep1_broll2.py", "scene": "BRoll2", "trim": 10.2},
+    "3": {"file": "01-scripts/manim_ep1_broll3.py", "scene": "BRoll3", "trim": 9.0}
+  }
+}

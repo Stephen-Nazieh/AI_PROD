@@ -1,0 +1,14 @@
+# Buried History — hand-verified TRUE historical facts (scheduler uses these before the LLM).
+# One per line. Add more anytime; used ones tracked in topics_used.txt.
+the Great Emu War of 1932, when the Australian army deployed machine guns against emus and lost
+Oxford University was already teaching students before the Aztec Empire existed
+the London Beer Flood of 1814 killed eight people when a giant brewery vat burst
+tug of war was an official Olympic sport from 1900 to 1920
+Ada Lovelace wrote the first computer algorithm in the 1840s, a century before computers existed
+Albert Einstein was offered the presidency of Israel in 1952 and politely declined
+the Pony Express, an icon of the American West, operated for only about 18 months
+Roman emperor Caligula reportedly planned to make his horse a consul
+the Leaning Tower of Pisa began tilting during its construction in the 12th century
+Victorian families took post-mortem photographs posed with their deceased relatives
+ancient civilizations pressed moldy bread onto wounds as a primitive antibiotic
+in 1919 a wave of molasses flooded a Boston neighborhood, killing 21 people

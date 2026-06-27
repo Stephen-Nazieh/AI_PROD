@@ -1,0 +1,42 @@
+{
+  "_comment": "The studio's available assets. The Director casts characters/locations from this. Add avatars/sets/voices here as the library grows.",
+  "avatars": {
+    "1954612987776852107": "young woman, purple ponytail, casual tee — expressive, everyday lead",
+    "8292392264913500438": "young person, brown hair, red hoodie — grounded, approachable, casual",
+    "3361246599912172955": "blue hair, glasses, collared shirt — clean, professional, sharp (androgynous)",
+    "8329890252317737768": "black hair, dark jacket — cool, composed, mature presence (reads male)",
+    "8590256991748008892": "brown bob, cardigan — warm, teacherly, friendly",
+    "24386148582032405": "blonde, elegant blue dress — poised, formal",
+    "1201808779995565093": "silver/white hair, ornate outfit — fantasy/striking, stylized",
+    "6258096374260045189": "pink hair, edgy streetwear — bold, youthful, rebellious",
+    "6493143135142452442": "purple hair, school uniform — student, youthful",
+    "7441299522613423042": "long black hair, striped dress — quiet, reserved",
+    "481828024975048142": "black hair with cat-ears, white shirt — playful, anime-stylized",
+    "643975792502425986": "black hair, gothic-lolita, cat-ears — dramatic, gothic",
+    "3955039427104616066": "brown hair, yellow coat — soft, gentle",
+    "7205551123528310137": "neutral stylized avatar — flexible casting"
+  },
+  "voices": {
+    "af_heart": "American female, warm + clear (versatile lead)",
+    "af_bella": "American female, expressive + a little edgy",
+    "af_nova": "American female, bright + energetic",
+    "af_sarah": "American female, calm + grounded",
+    "af_aoede": "American female, soft + lyrical",
+    "af_nicole": "American female, intimate + close",
+    "bf_emma": "British female, poised",
+    "am_onyx": "American male, deep + authoritative",
+    "am_michael": "American male, clear + professional",
+    "am_adam": "American male, plain + everyday",
+    "am_echo": "American male, smooth + measured",
+    "bm_george": "British male, calm + unhurried (an anchor)",
+    "bm_lewis": "British male, warm + steady"
+  },
+  "sets": {
+    "office_night": "dark open-plan office at night — a glowing presentation slide, desk lamp, dark windows; moody",
+    "kitchenette": "bright morning office kitchenette — counter, cabinets, coffee machine, window light",
+    "cafe_day": "warm daytime cafe — a high table with laptop + tea, riverside window light",
+    "conference_day": "polished corporate conference room — big table, a back-wall presentation slide, cool daylight",
+    "whiteboard": "bright office nook with a whiteboard on the wall",
+    "studio": "neutral dark studio backdrop — the fallback for any location with no dedicated set"
+  }
+}

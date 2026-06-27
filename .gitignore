@@ -124,3 +124,13 @@ auth_test.js
 
 # Content-addressed render cache (regenerable build artifacts — see render_cache.py)
 .cache/
+content_engine/config/credentials.json
+
+# Content engine — generated/transient (never commit)
+content_engine/runs/
+content_engine/logs/
+content_engine/memory/scheduler_state.json
+content_engine/channels/*/topics_used.txt
+content_engine/config/credentials.json
+# Local Paperclip team state (incl. historical duplicates)
+07_PAPERCLIP/companies/*/teams/
