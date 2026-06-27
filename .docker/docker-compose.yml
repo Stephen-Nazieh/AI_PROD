@@ -8,7 +8,7 @@ services:
     environment:
       - WORKSPACE_DIR=/app/vault
       - INFERENCE_ROUTER=http://host.docker.internal:8000/v1
-      - OPENCLAW_GATEWAY_TOKEN=***REMOVED-ROTATED-SEE-.docker/.env***
+      - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
     volumes:
       - ~/Documents/AI_PRODUCER:/app/vault
     command: ["openclaw", "gateway", "run", "--allow-unconfigured"] # 🛡️ FIX: Bypass setup checks
@@ -55,7 +55,7 @@ services:
   #   docker run -d --name solocorn_db --restart unless-stopped \
   #     -p 127.0.0.1:5432:5432 \
   #     -e POSTGRES_USER=postgres -e POSTGRES_DB=postgres \
-  #     -e POSTGRES_PASSWORD="$PRODUCTION_DB_PASSWORD" \
+  #     -e POSTGRES_PASSWORD=<from PRODUCTION_DB_PASSWORD in .docker/.env, never a default> \
   #     -v "$PWD/.docker/postgres_staging_data":/var/lib/postgresql/data postgres:15-alpine
 
   # Persistent Relational Storage Memory Layer for Graphify & Paperclip Corporate Logs

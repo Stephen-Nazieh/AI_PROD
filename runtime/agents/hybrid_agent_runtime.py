@@ -53,7 +53,7 @@ CLAUDE_BIN = os.environ.get("CLAUDE_LOCAL_BIN", "/Users/nazeera/Documents/AI_PRO
 MACOS_TOOLS_ENABLED = os.environ.get("ENABLE_MACOS_TOOLS", "0") == "1" and MACOS_TOOLS_AVAILABLE
 DELEGATION_TOOLS_ENABLED = os.environ.get("ENABLE_DELEGATION_TOOLS", "0") == "1"
 OPENCLAW_URL = os.environ.get("OPENCLAW_URL", "ws://127.0.0.1:18789")
-OPENCLAW_TOKEN = os.environ.get("OPENCLAW_TOKEN", "***REMOVED-ROTATED-SEE-.docker/.env***")
+OPENCLAW_TOKEN = os.environ.get("OPENCLAW_TOKEN", "")
 
 MAX_TURNS = 10  # Max Claude → Execute → Verify loops
 

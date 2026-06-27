@@ -483,7 +483,7 @@ PRODUCTION_DB_PORT=5432
 ### API Keys
 
 - `OPENAI_API_KEY=local_omlx_key_override` is a dummy string used only to satisfy OpenAI-compatible client libraries talking to the local `mlx-lm` server. It has no cloud value.
-- `OPENCLAW_GATEWAY_TOKEN=***REMOVED-ROTATED-SEE-.docker/.env***` is a local Docker environment variable.
+- `OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}  (set in .docker/.env)` is a local Docker environment variable.
 
 ### Network Exposure
 

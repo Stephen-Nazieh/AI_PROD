@@ -60,3 +60,18 @@ compile: ## Byte-compile every module (cheap syntax gate)
 
 clean-pyc: ## Remove __pycache__ / *.pyc
 	find . -path ./node_modules -prune -o -name '__pycache__' -type d -print -exec rm -rf {} + 2>/dev/null; true
+
+# ── Content engine (idea→short studio) ──────────────────────────────────────
+.PHONY: ce-status ce-test stack install-services
+
+ce-status: ## Content engine: stack health + per-channel queue + seed runway
+	$(PYBIN) content_engine/engine.py status
+
+ce-test: ## Content engine: fast regression smoke test
+	$(PYBIN) tests/content_engine_test.py
+
+stack: ## Ensure the local stack (mlx + ComfyUI) is up (kickstarts any down service)
+	zsh content_engine/ensure_stack.sh && echo "stack ensured"
+
+install-services: ## (Re)install the launchd agents so the stack auto-starts at login
+	zsh content_engine/install_services.sh

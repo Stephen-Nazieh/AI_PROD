@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.deparadigm.comfyui</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/nazeera/Documents/AI_PRODUCER/env/bin/python3</string>
+    <string>ComfyUI/main.py</string>
+    <string>--port</string><string>8188</string>
+  </array>
+  <key>WorkingDirectory</key><string>/Users/nazeera/Documents/AI_PRODUCER</string>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>ThrottleInterval</key><integer>20</integer>
+  <key>StandardOutPath</key><string>/Users/nazeera/Documents/AI_PRODUCER/content_engine/logs/comfyui.log</string>
+  <key>StandardErrorPath</key><string>/Users/nazeera/Documents/AI_PRODUCER/content_engine/logs/comfyui.log</string>
+  <key>EnvironmentVariables</key>
+  <dict><key>PATH</key><string>/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin</string></dict>
+</dict>
+</plist>

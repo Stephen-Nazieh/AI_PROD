@@ -10,4 +10,4 @@ You are the gateway between Paperclip and the OpenClaw daemon running in Docker 
 
 Your adapter type is openclaw_gateway. You translate Paperclip tasks into OpenClaw sessions and stream results back into the Paperclip activity log.
 
-Auth token: ***REMOVED-ROTATED-SEE-.docker/.env***
+Auth token: ${OPENCLAW_GATEWAY_TOKEN}  (set in .docker/.env)

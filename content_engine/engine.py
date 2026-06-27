@@ -115,6 +115,55 @@ def step_produce(run, channel, distribute=True):
     print(f"\n✅ run '{run}' done → {ep or out}")
     return ep
 
+def _port_up(url):
+    import urllib.request
+    try:
+        urllib.request.urlopen(url, timeout=3).read(); return True
+    except Exception:
+        return False
+
+def step_status():
+    """At-a-glance operations view: stack health, per-channel queue depth + seed runway, scheduler."""
+    import glob
+    print("BRAIN");  h = {}
+    try: h = llm.health()
+    except Exception: pass
+    # known tier→model (mlx /v1/models returns the whole catalog, so don't trust h[t] for the name)
+    KNOWN = {"smart": "Qwen2.5-32B :8000", "fast": "Qwen2.5-7B :8002", "code": "Coder-7B :8001"}
+    for t in ("smart", "fast", "code"):
+        print(f"  {t:5s} {KNOWN[t]:18s} {'· up' if t in h else '✗ down'}")
+    print("TOOLS")
+    print(f"  ComfyUI  {'· up' if _port_up('http://127.0.0.1:8188/system_stats') else '✗ down'}")
+    print(f"  Paperclip{'· up' if _port_up('http://127.0.0.1:3100/api/companies') else '✗ down'}")
+    print("CHANNELS")
+    chan_dir = os.path.join(ENGINE, "channels")
+    for slug in sorted(os.listdir(chan_dir)) if os.path.isdir(chan_dir) else []:
+        cdir = os.path.join(chan_dir, slug)
+        if not os.path.isfile(os.path.join(cdir, "channel.json")): continue
+        ready = 0
+        for pj in glob.glob(os.path.join(ENGINE, "runs", slug + "*", "out", "publish.json")):
+            try: ready += 1 if json.load(open(pj)).get("status") in ("ready", "previewed") else 0
+            except Exception: pass
+        seeds_f = os.path.join(cdir, "idea_seeds.txt"); used_f = os.path.join(cdir, "topics_used.txt")
+        seeds = len([l for l in open(seeds_f) if l.strip() and not l.startswith("#")]) if os.path.exists(seeds_f) else 0
+        used = len([l for l in open(used_f) if l.strip()]) if os.path.exists(used_f) else 0
+        left = max(0, seeds - used)
+        print(f"  {slug:22s} queue={ready:<3d} seeds_left={left:<3d} (~{left//2}d @2/day)")
+    print("SCHEDULER")
+    logs = sorted(glob.glob(os.path.join(ENGINE, "logs", "scheduler-*.log")))
+    if logs:
+        last = [l for l in open(logs[-1]) if "CYCLE DONE" in l or "SKIP" in l]
+        print("  last: " + (last[-1].strip() if last else "(no completed cycle yet)"))
+    else:
+        print("  (no scheduler runs yet)")
+    st = os.path.join(ENGINE, "memory", "scheduler_state.json")
+    if os.path.exists(st):
+        try:
+            chans = [d for d in sorted(os.listdir(chan_dir)) if os.path.isfile(os.path.join(chan_dir, d, "channel.json"))]
+            nxt = chans[(json.load(open(st)).get("last_index", -1) + 1) % len(chans)] if chans else "?"
+            print(f"  next channel: {nxt}")
+        except Exception: pass
+
 def main():
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -134,6 +183,7 @@ def main():
     b.add_argument("--channel", required=True); b.add_argument("--file", required=True)
     b.add_argument("--format", default="movie"); b.add_argument("--length", default="1 min")
     sub.add_parser("health")
+    sub.add_parser("status", help="ops view: stack health, per-channel queue + seed runway, scheduler")
     a = ap.parse_args()
 
     if a.cmd == "batch":
@@ -159,6 +209,8 @@ def main():
             print(f"TOOL {t}:", subprocess.run(["which", t], capture_output=True, text=True).stdout.strip() or "—")
         print("TOOL blender:", "/Applications/Blender.app (use .app path)")
         return
+    if a.cmd == "status":
+        step_status(); return
     if a.cmd == "write":
         s = step_write(a.run, a.idea, a.format, a.platform, a.channel, a.length, a.notes)
         print(f"\n★ VET GATE — review/edit:  {s}\n   then:  engine.py produce --run {a.run}")
